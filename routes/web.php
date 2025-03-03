@@ -29,12 +29,14 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/profile_image', [ProfileController::class, 'uploadImage'])->name('profile.image.upload');
 
+    Route::post('/teams', [TeamController::class, 'index'])->name('teams.index');
+    Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
+    Route::post('/api/goals', [GoalController::class, 'store']);
+    Route::get('goals', [GoalController::class, 'index']);
+    Route::delete('/api/goals/{id}', [GoalController::class, 'destroy'])->name('goals.destroy');
+
+
 });
-
-Route::post('/teams', [TeamController::class, 'index'])->name('teams.index');
-Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
-
-Route::post('/api/goals', [GoalController::class, 'store']);
-Route::get('goals', [GoalController::class, 'index']);
-Route::delete('/api/goals/{id}', [GoalController::class, 'destroy']);
-require __DIR__.'/auth.php';
+Route::post('/api/goals/{id}', [GoalController::class, 'store']);
+Route::post('/api/goals/{id}', [GoalController::class, 'update']);
+ require __DIR__.'/auth.php';

@@ -70,6 +70,14 @@ public function update(Request $request, $id)
 
         return response()->json($goal);
     }
+    public function delete($id)
+    {
+        // You can just return a success response here without deleting anything
+        return response()->json([
+            'message' => 'Goal deletion requested, but no action performed.',
+            'id' => $id,
+        ]);
+    }
     
 
   

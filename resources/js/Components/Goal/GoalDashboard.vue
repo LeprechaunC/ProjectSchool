@@ -84,25 +84,28 @@ updateCalendarEvents() {
      
     },
     handleDateClick(info) {
- 
     const clickedDate = new Date(info.dateStr);
-    clickedDate.setHours(0, 0, 0, 0); // Set to 00:00:00
+    clickedDate.setHours(0, 0, 0, 0); // Set to 00:00:00 in local time
 
-    this.newGoal.start_time = clickedDate.toISOString().slice(0, 16);
-    this.newGoal.end_time = clickedDate.toISOString().slice(0, 16);
+    // Adjust to the correct date string in the local time zone
+    const localDateStr = clickedDate.toLocaleString('en-CA').slice(0, 10); // 'en-CA' gives you the YYYY-MM-DD format
 
-    this.selectedDate = clickedDate.toISOString().slice(0, 10);
+    this.newGoal.start_time = localDateStr + "T00:00"; // Add time manually in local time
+    this.newGoal.end_time = localDateStr + "T23:59"; // Set end time to the end of the same day
+
+    this.selectedDate = localDateStr; // Correctly set the selected date
     this.showModal = true;
 },
-handleEventClick(info) {
-  const goalId = info.event.extendedProps.goalId;
-  const clickedGoal = this.goals.find(goal => goal.id === goalId);
 
-  if (clickedGoal) {
-    this.selectedGoal = clickedGoal; // Set the selectedGoal correctly
-    this.fullscreenModalVisible = true; // Show the fullscreen modal
-    console.log("goal: " + clickedGoal);
-  }
+handleEventClick(info) {
+    const goalId = info.event.extendedProps.goalId;
+    const clickedGoal = this.goals.find(goal => goal.id === goalId);
+
+    if (clickedGoal) {
+        this.selectedGoal = clickedGoal; // Set the selectedGoal correctly
+        this.fullscreenModalVisible = true; // Show the fullscreen modal
+        console.log("goal: " + clickedGoal);
+    }
 },
 
 
@@ -259,8 +262,7 @@ submitGoal() {
   <FullscreenGoalModal
       :isVisible="fullscreenModalVisible"
       :selectedGoal="selectedGoal"
-       
-      @closeModal="closeFullscreenModal"        
+       @closeModal="closeFullscreenModal"        
     />
 </template>
 
