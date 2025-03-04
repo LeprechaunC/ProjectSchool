@@ -1,11 +1,11 @@
 <template>
+  
   <div v-if="isVisible" class="fullscreen-modal-overlay" @click.self="closeModal">
     <div class="fullscreen-modal">
       <button @click="closeModal" class="close-button">&times;</button>
       
       <h2 class="text-xl font-semibold mb-4">{{ goal.title }}</h2>
       
-      <!-- Editable Goal Fields for Editing Mode -->
       <div v-if="isEditing">
         <input v-model="goal.title" class="border p-2 mb-2 w-full" placeholder="Goal Title" />
         <textarea v-model="goal.description" class="border p-2 mb-2 w-full" placeholder="Goal Description"></textarea>
@@ -18,7 +18,6 @@
         </div>
       </div>
       
-      <!-- Non-editable Goal Details -->
       <div v-else>
         <p><strong>Description:</strong> {{ goal.description }}</p>
         <p><strong>Start Time:</strong> {{ formatDate(goal.start_time) }}</p>
@@ -37,7 +36,9 @@
 <script>
 import { defineComponent, ref, watch, onMounted } from "vue";
 import axios from "axios";
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+axios.defaults.headers.common['X-XSRF-TOKEN'] = token; // Set CSRF token globally
 export default defineComponent({
   props: {
     isVisible: Boolean,
@@ -66,28 +67,28 @@ export default defineComponent({
     };
 
     const saveGoal = async () => {
-      try {
-        await axios.post(`http://localhost:8000/api/goals/${goal.value.id}`, goal.value);
-        isEditing.value = false;
-        alert("Goal updated successfully!");
-        emit("updateGoal", goal.value);
-      } catch (error) {
-        console.error("Error updating goal:", error);
-      }
-    };
+  try {
+ 
+    await axios.patch(`http://localhost:8000/api/goals/${goal.value.id}`, goal.value);
+    isEditing.value = false;
+    alert("Goal updated successfully!");
+    emit("updateGoal", goal.value);
+  } catch (error) {
+    console.error("Error updating goal:", error);
+  }
+};
 
     const deleteGoal = async () => {
   if (confirm("Are you sure you want to delete this goal?")) {
     try {
       await axios.delete(`http://localhost:8000/api/goals/${goal.value.id}`, {
         withCredentials: true,
-        headers: {
-          'X-Requested-With': 'XMLHttpRequest'
-        }
+       
       });
       alert("Goal deleted successfully!");
       emit("delete", goal.value.id);
       closeModal();
+      
     } catch (error) {
       console.error("Error deleting goal:", error);
     }

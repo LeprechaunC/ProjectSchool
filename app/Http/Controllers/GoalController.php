@@ -20,7 +20,7 @@ class GoalController extends Controller
         // Validate incoming request
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'start_time' => 'required|date',
             'end_time' => 'required|date',
             'team_id' => 'required|exists:teams,id',
@@ -55,7 +55,7 @@ public function update(Request $request, $id)
         // Validate the incoming request
         $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            'description' => 'nullable|string',
             'start_time' => 'required|date',
             'end_time' => 'required|date',
         ]);
@@ -72,12 +72,26 @@ public function update(Request $request, $id)
     }
     public function delete($id)
     {
-        // You can just return a success response here without deleting anything
+        // Find the goal by ID
+        $goal = Goal::find($id);
+    
+        // Check if the goal exists
+        if (!$goal) {
+            return response()->json([
+                'message' => 'Goal not found.',
+            ], 404); // Return 404 if not found
+        }
+    
+        // Delete the goal
+        $goal->delete();
+    
+        // Return a success response
         return response()->json([
-            'message' => 'Goal deletion requested, but no action performed.',
+            'message' => 'Goal successfully deleted.',
             'id' => $id,
         ]);
     }
+    
     
 
   

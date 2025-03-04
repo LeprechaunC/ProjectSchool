@@ -1,185 +1,8 @@
-<script>
-import axios from "axios";
-import FullCalendar from "@fullcalendar/vue3";
-import dayGridPlugin from "@fullcalendar/daygrid";
-import interactionPlugin from "@fullcalendar/interaction";
-import FullscreenGoalModal from "../Goal/FullScreenGoal.vue"; // Import the new component
-
-export default {
-  components: {
-    FullCalendar,
-    FullscreenGoalModal, // Register the new component
-  },
-  data() {
-    return {
-      teams: [],
-      selectedTeam: null,
-      goals: [],
-      calendarOptions: {
-      plugins: [dayGridPlugin, interactionPlugin],
-      initialView: "dayGridMonth",
-      editable: true, // Set editable inside calendarOptions
-       selectable: true, // Enable selecting dates
-      dateClick: this.handleDateClick,
-      eventClick: this.handleEventClick, // Add eventClick handler
-      events: [],
-      },
-      showModal: false, // Control visibility of the modal for creating goals
-      fullscreenModalVisible: false, // Control visibility of the fullscreen modal
-      selectedGoal: null, // Store the clicked goal for fullscreen view
-      newGoal: {
-        title: '',
-        description: '',
-        start_time: '',
-        end_time: '',
-      },
-      selectedDate: null, // Store the selected date for the new goal
-    };
-  },
-  mounted() {
-    this.fetchTeams();
-    if (this.selectedTeam) {
-    this.fetchGoals();
-  }
-  },
-  methods: {
-    fetchTeams() {
-      axios
-        .post("/teams")
-        .then((response) => {
-          this.teams = response.data;
-        })
-        .catch((error) => {
-          console.error("Error fetching teams:", error);
-        });
-    },
-    
-    fetchGoals() {
-  if (this.selectedTeam) {
-    axios
-      .get(`/api/goals/${this.selectedTeam.id}`)
-      .then((response) => {
-        this.goals = response.data; // Replace goals array with fetched goals
-        this.updateCalendarEvents(); // Update calendar events based on the fetched goals
-      })
-      .catch((error) => {
-        console.error("Error fetching goals:", error);
-      });
-  }
-},
-
-    
-updateCalendarEvents() {
-  this.calendarOptions.events = this.goals.map((goal) => ({
-    id: goal.id,  
-    title: goal.title,
-    description: goal.description,
-    start: goal.start_time,  
-    goalId: goal.id,  
-  }));
-
-
-
-
-     
-    },
-    handleDateClick(info) {
-    const clickedDate = new Date(info.dateStr);
-    clickedDate.setHours(0, 0, 0, 0); // Set to 00:00:00 in local time
-
-    // Adjust to the correct date string in the local time zone
-    const localDateStr = clickedDate.toLocaleString('en-CA').slice(0, 10); // 'en-CA' gives you the YYYY-MM-DD format
-
-    this.newGoal.start_time = localDateStr + "T00:00"; // Add time manually in local time
-    this.newGoal.end_time = localDateStr + "T23:59"; // Set end time to the end of the same day
-
-    this.selectedDate = localDateStr; // Correctly set the selected date
-    this.showModal = true;
-},
-
-handleEventClick(info) {
-    const goalId = info.event.extendedProps.goalId;
-    const clickedGoal = this.goals.find(goal => goal.id === goalId);
-
-    if (clickedGoal) {
-        this.selectedGoal = clickedGoal; // Set the selectedGoal correctly
-        this.fullscreenModalVisible = true; // Show the fullscreen modal
-        console.log("goal: " + clickedGoal);
-    }
-},
-
-
-
-
-
- 
-submitGoal() {
-  if (!this.selectedTeam || !this.newGoal.title || !this.newGoal.start_time || !this.newGoal.end_time) {
-    alert("Please fill in all fields.");
-    return;
-  }
-
-  // Prepare goal data
-  const goalData = {
-    title: this.newGoal.title,
-    description: this.newGoal.description,
-    start_time: this.newGoal.start_time,
-    end_time: this.newGoal.end_time,
-    team_id: this.selectedTeam.id,
-  };
-
-  // Send POST request to create the new goal
-  axios
-    .post("/api/goals", goalData)
-    .then((response) => {
-      // Add the new goal to the goals list
-      this.goals.push(response.data);
-      
-      // Update calendar events with the new goal without removing old ones
-      this.updateCalendarEvents();
-
-      // Reset form and close modal
-      this.resetGoalForm();
-      this.showModal = false;
-    })
-    .catch((error) => {
-      console.error("Error submitting goal:", error);
-    });
-},
-
-
-    resetGoalForm() {
-      this.newGoal = {
-        title: '',
-        description: '',
-        start_time: '',
-        end_time: '',
-      };
-      this.selectedDate = null;
-    },
-
-    closeFullscreenModal() {
-      this.fullscreenModalVisible = false; // Close the fullscreen modal
-    },
-
-    
- 
-  },
-  watch: {
-    selectedTeam(newTeam, oldTeam) {
-      if (newTeam !== oldTeam) {
-        this.fetchGoals();
-      }
-    },
-  },
-};
-</script>
 
 <template>
   <div class="goal-dashboard">
     <h3 class="text-lg font-semibold mb-4">Goal Calendar</h3>
 
-    <!-- Team Selection Dropdown -->
     <div class="mb-4">
       <label for="team-select" class="block text-sm font-medium text-gray-700">Select Team</label>
       <select
@@ -265,7 +88,176 @@ submitGoal() {
        @closeModal="closeFullscreenModal"        
     />
 </template>
+<script>
+import axios from "axios";
+import FullCalendar from "@fullcalendar/vue3";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import FullscreenGoalModal from "../Goal/FullScreenGoal.vue"; // Import the new component
 
+export default {
+  components: {
+    FullCalendar,
+    FullscreenGoalModal,  
+  },
+  data() {
+    return {
+      teams: [],
+      selectedTeam: null,
+      goals: [],
+      calendarOptions: {
+      plugins: [dayGridPlugin, interactionPlugin],
+      initialView: "dayGridMonth",
+      editable: true,  
+       selectable: true,  
+      dateClick: this.handleDateClick,
+      eventClick: this.handleEventClick,  
+      events: [],
+      },
+      showModal: false,  
+      fullscreenModalVisible: false,  
+      selectedGoal: null,  
+      newGoal: {
+        title: '',
+        description: '',
+        start_time: '',
+        end_time: '',
+      },
+      selectedDate: null,  
+    };
+  },
+  mounted() {
+    this.fetchTeams();
+    if (this.selectedTeam) {
+    this.fetchGoals();
+  }
+  },
+  methods: {
+    fetchTeams() {
+      axios
+        .post("/teams")
+        .then((response) => {
+          this.teams = response.data;
+        })
+        .catch((error) => {
+          console.error("Error fetching teams:", error);
+        });
+    },
+    
+    fetchGoals() {
+  if (this.selectedTeam) {
+    axios
+      .get(`/api/goals/${this.selectedTeam.id}`)
+      .then((response) => {
+        this.goals = response.data;  
+        this.updateCalendarEvents();  
+      })
+      .catch((error) => {
+        console.error("Error fetching goals:", error);
+      });
+  }
+},
+
+    
+updateCalendarEvents() {
+  this.calendarOptions.events = this.goals.map((goal) => ({
+    id: goal.id,  
+    title: goal.title,
+    description: goal.description,
+    start: goal.start_time,  
+    goalId: goal.id,  
+  }));
+
+
+
+
+     
+    },
+    handleDateClick(info) {
+    const clickedDate = new Date(info.dateStr);
+    clickedDate.setHours(0, 0, 0, 0); 
+
+     const localDateStr = clickedDate.toLocaleString('en-CA').slice(0, 10); 
+
+    this.newGoal.start_time = localDateStr + "T00:00";  
+    this.newGoal.end_time = localDateStr + "T23:59"; 
+
+    this.selectedDate = localDateStr;  
+    this.showModal = true;
+},
+
+handleEventClick(info) {
+    const goalId = info.event.extendedProps.goalId;
+    const clickedGoal = this.goals.find(goal => goal.id === goalId);
+
+    if (clickedGoal) {
+        this.selectedGoal = clickedGoal;  
+        this.fullscreenModalVisible = true;  
+        console.log("goal: " + clickedGoal);
+    }
+},
+
+
+
+
+
+ 
+submitGoal() {
+  if (!this.selectedTeam || !this.newGoal.title || !this.newGoal.start_time || !this.newGoal.end_time) {
+    alert("Please fill in all fields.");
+    return;
+  }
+
+  // Prepare goal data
+  const goalData = {
+    title: this.newGoal.title,
+    description: this.newGoal.description,
+    start_time: this.newGoal.start_time,
+    end_time: this.newGoal.end_time,
+    team_id: this.selectedTeam.id,
+  };
+
+  // Send POST request to create the new goal
+  axios
+    .post("/api/goals", goalData)
+    .then((response) => {
+      this.goals.push(response.data);
+            this.updateCalendarEvents();
+      this.resetGoalForm();
+      this.showModal = false;
+    })
+    .catch((error) => {
+      console.error("Error submitting goal:", error);
+    });
+},
+
+
+    resetGoalForm() {
+      this.newGoal = {
+        title: '',
+        description: '',
+        start_time: '',
+        end_time: '',
+      };
+      this.selectedDate = null;
+    },
+
+    closeFullscreenModal() {
+      this.fullscreenModalVisible = false; // Close the fullscreen modal
+    },
+
+    
+ 
+  },
+  watch: {
+    selectedTeam(newTeam, oldTeam) {
+      if (newTeam !== oldTeam) {
+        this.fetchGoals();
+      }
+    },
+  },
+};
+</script>
 <style scoped>
 .goal-dashboard {
   padding: 20px;

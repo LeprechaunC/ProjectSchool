@@ -24,7 +24,7 @@ import GoalDashboard from '@/Components/Goal/GoalDashboard.vue';
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     <div class="p-6 text-gray-900">
-                        You're logged in!
+                        Welcome!
                     </div>
 
                     <!-- Use the GoalDashboard component here -->
