@@ -103,7 +103,7 @@ export default {
   data() {
     return {
       teams: [],
-      selectedTeam: null,
+      selectedTeam: JSON.parse(localStorage.getItem("selectedTeam")) || null, 
       goals: [],
       calendarOptions: {
       plugins: [dayGridPlugin, interactionPlugin],
