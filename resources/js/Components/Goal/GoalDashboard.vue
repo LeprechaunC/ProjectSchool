@@ -105,15 +105,22 @@ export default {
       teams: [],
       selectedTeam: JSON.parse(localStorage.getItem("selectedTeam")) || null, 
       goals: [],
+      duration: { days: 4 },  
       calendarOptions: {
       plugins: [dayGridPlugin, interactionPlugin],
       initialView: "dayGridMonth",
       editable: true,  
-       selectable: true,  
+      selectable: true,  
       dateClick: this.handleDateClick,
       eventClick: this.handleEventClick,  
+      
       events: [],
       },
+      timelineHours: {
+      type: 'timeline',
+      duration: { hours: 8 },
+      buttonText: 'hours'
+    },
       showModal: false,  
       fullscreenModalVisible: false,  
       selectedGoal: null,  
@@ -166,6 +173,7 @@ updateCalendarEvents() {
     description: goal.description,
     start: goal.start_time,  
     goalId: goal.id,  
+    
   }));
 
 
@@ -249,14 +257,16 @@ submitGoal() {
     
  
   },
-  watch: {
-    selectedTeam(newTeam, oldTeam) {
-      if (newTeam !== oldTeam) {
-        this.fetchGoals();
-      }
-    },
+watch: {
+  selectedTeam(newTeam) {
+    if (newTeam) {
+      localStorage.setItem("selectedTeam", JSON.stringify(newTeam));
+      this.fetchGoals();  
+    }
   },
-};
+}
+}
+
 </script>
 <style scoped>
 .goal-dashboard {

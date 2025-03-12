@@ -17,16 +17,21 @@
         ]);
     });
 
-    // Dashboard route
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->middleware(['auth', 'verified'])->name('dashboard');
 
-    
     Route::get('/teams', function () {
-        return Inertia::render('Teams');
+        return Inertia::render('Teams', [
+            'currentUser' => auth()->user() // Pass the logged-in user to the Vue component
+        ]);
     })->middleware(['auth', 'verified'])->name('teams');
+    
+    
 
+    Route::get('/goals', function () {
+        return Inertia::render('goals');
+    })->middleware(['auth', 'verified'])->name('goals');
     
     // Profile routes
     Route::middleware('auth')->group(function () {
@@ -38,17 +43,32 @@
         Route::post('/teams', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
         Route::post('/api/goals', [GoalController::class, 'store']);
-        Route::get('goals', [GoalController::class, 'index']);
+    
         Route::delete('/api/goals/{id}', [GoalController::class, 'destroy'])->name('goals.destroy');
         Route::post('/api/goals', [GoalController::class, 'store']);
             Route::get('/api/teams', [GoalController::class, 'index']);
             Route::get('/api/teams', [TeamController::class, 'index']);    
+
+            Route::get('/goals', function () {
+                $user = auth()->user();
+                // Assuming the user belongs to one team
+                $teamId = $user->teams()->first()->id;  // Make sure the user is in a team
+        
+                return Inertia::render('Goals', [
+                    'team_id' => $teamId
+                ]);
+            })->name('goals');
+
+            Route::post('/api/teams/{teamId}/votekick', [TeamController::class, 'votekick']);
     });
 
     
+    Route::delete('/teams/{team}/users/{user}', [TeamController::class, 'removeMember']);
 
     Route::delete('/api/goals/{id}', [GoalController::class, 'delete'])->name('goals.delete');
     
     Route::patch('/api/goals/{id}', [GoalController::class, 'update']);  // Update this route to PATCH
-
+  
+ 
+    Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
     require __DIR__.'/auth.php';

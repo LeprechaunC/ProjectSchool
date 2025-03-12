@@ -48,9 +48,10 @@ class User extends Authenticatable
     }
 
     public function teams()
-    {
-        return $this->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id');
-    }
+{
+    return $this->belongsToMany(Team::class)->withPivot('role'); // Include 'role' in the pivot data
+}
+
 
     // Get the user's team memberships (only the teams they belong to)
     public function getTeamIds()
