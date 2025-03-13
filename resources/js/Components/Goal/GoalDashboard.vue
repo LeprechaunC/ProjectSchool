@@ -188,7 +188,7 @@ updateCalendarEvents() {
      const localDateStr = clickedDate.toLocaleString('en-CA').slice(0, 10); 
 
     this.newGoal.start_time = localDateStr + "T00:00";  
-    this.newGoal.end_time = localDateStr + "T23:59"; 
+    this.newGoal.end_time = localDateStr + "T12:00"; 
 
     this.selectedDate = localDateStr;  
     this.showModal = true;

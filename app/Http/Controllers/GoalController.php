@@ -91,6 +91,13 @@ public function update(Request $request, $id)
             'id' => $id,
         ]);
     }
+    public function getAllGoals(Request $request)
+{
+    // Fetch all goals for all teams
+    $goals = Goal::all(['id', 'title', 'description', 'start_time', 'end_time']);
+    return response()->json($goals);
+}
+
     
     
 
