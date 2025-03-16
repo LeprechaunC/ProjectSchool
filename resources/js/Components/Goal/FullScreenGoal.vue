@@ -107,36 +107,42 @@ export default defineComponent({
 </script>
 
 <style scoped>
+ /* Fullscreen Modal Styles */
 .fullscreen-modal-overlay {
-  position: fixed;
+  position: fixed; /* Fix position to the screen */
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 1000;
+  align-items: center; /* Center content vertically */
+  z-index: 9999; /* Ensure it's on top of other content */
 }
 
 .fullscreen-modal {
-  background-color: white;
+  background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   width: 80%;
-  max-width: 800px;
+  max-width: 600px; /* You can adjust this value to control the width */
   position: relative;
+  overflow-y: auto;
+  z-index: 10000; /* Ensure the modal itself is above the overlay */
 }
 
+
+/* Close Button */
 .close-button {
   position: absolute;
   top: 10px;
   right: 10px;
-  font-size: 24px;
   background: none;
   border: none;
-  color: gray;
+  font-size: 24px;
+  color: #333;
   cursor: pointer;
 }
+
 </style>

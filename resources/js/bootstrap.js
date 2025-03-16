@@ -1,6 +1,4 @@
 import axios from 'axios';
-window.axios = axios;
 
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-axios.defaults.withCredentials = true;
-axios.defaults.withXSRFToken = true;
+// Automatically include the CSRF token in every request
+axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable
 {
+    
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -19,6 +20,7 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        
         'name',
         'email',
         'password',
@@ -34,6 +36,11 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+
+    public function getId()
+{
+  return $this->id;
+}
     /**
      * Get the attributes that should be cast.
      *

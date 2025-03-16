@@ -19,5 +19,7 @@ class Goal extends Model
         'start_time',
         'end_time',
         'team_id',
+        'user_id',  
+        'done',
     ];
 }

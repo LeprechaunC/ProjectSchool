@@ -62,15 +62,23 @@
             Route::post('/api/teams/{teamId}/votekick', [TeamController::class, 'votekick']);
     });
 
+    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+    Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
+    Route::patch('/api/goals/{id}/done', [GoalController::class, 'markAsDone']);
+
     Route::get('/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
 
     Route::delete('/teams/{team}/users/{user}', [TeamController::class, 'removeMember']);
 
     Route::delete('/api/goals/{id}', [GoalController::class, 'delete'])->name('goals.delete');
     
-    Route::patch('/api/goals/{id}', [GoalController::class, 'update']);  // Update this route to PATCH
-  
-    Route::get('/api/goals', [GoalController::class, 'getAllGoals']);
+    Route::patch('/api/goals/{id}', [GoalController::class, 'update']);   
 
-    Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
-    require __DIR__.'/auth.php';
+     Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
+     require __DIR__.'/auth.php';
+
+ 
+ 
+ 

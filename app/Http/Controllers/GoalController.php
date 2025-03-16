@@ -5,47 +5,63 @@ namespace App\Http\Controllers;
 
 use App\Models\Goal;
 use Illuminate\Http\Request;
-
+ 
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 class GoalController extends Controller
 {
-    public function getGoalsByTeam(Request $request, $teamId)
+    public function getGoalsByTeam($teamId)
     {
-        // Fetch the goals for the selected team
-        $goals = Goal::where('team_id', $teamId)->get(['id','title', 'description', 'start_time', 'end_time']);
+        $goals = Goal::where('team_id', $teamId)
+            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done']);
 
         return response()->json($goals);
     }
+    public function getAllUserGoals()
+{
+    // Fetch goals where team_id is null (indicating no team associated)
+    $goals = Goal::whereNull('team_id')
+        ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done']);
+    
+    return response()->json($goals);
+}
+    
+    
+
+    /**
+     * Store a new goal.
+     */
     public function store(Request $request)
     {
-        // Validate incoming request
-        $request->validate([
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return response()->json(['message' => 'User not authenticated'], 401);
+        }
+    
+        // Validate the incoming request
+        $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'start_time' => 'required|date',
-            'end_time' => 'required|date',
-            'team_id' => 'required|exists:teams,id',
+            'end_time' => 'required|date|after_or_equal:start_time', // Ensure end_time is after start_time
+            'team_id' => 'nullable|exists:teams,id',
         ]);
     
-        // Create a new goal
+    
+        // Create a new goal with the validated data and authenticated user's ID
         $goal = Goal::create([
-            'title' => $request->title,
-            'description' => $request->description,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'team_id' => $request->team_id,
+            'title'       => $validated['title'],
+            'description' => $validated['description'] ?? null,
+            'start_time'  => $validated['start_time'],
+            'end_time'    => $validated['end_time'],
+            'team_id'     => $validated['team_id'],
+            'user_id'     => Auth::id(),  // Get the authenticated user's ID
         ]);
     
-        // Return the created goal, including the generated ID
-        return response()->json([
-            'id' => $goal->id,
-            'title' => $goal->title,
-            'description' => $goal->description,
-            'start_time' => $goal->start_time,
-            'end_time' => $goal->end_time,
-            'team_id' => $goal->team_id,
-          ]);
-          
+        // Return the created goal as a response
+        return response()->json($goal, 201);
     }
+    
     
 public function update(Request $request, $id)
     {
@@ -94,15 +110,25 @@ public function update(Request $request, $id)
     public function getAllGoals(Request $request)
 {
     // Fetch all goals for all teams
-    $goals = Goal::all(['id', 'title', 'description', 'start_time', 'end_time']);
+    $goals = Goal::all(['id', 'title', 'description', 'start_time', 'end_time', 'done']);
     return response()->json($goals);
 }
 
-    
-    
+public function markAsDone(Request $request, $id)
+{
+    $goal = Goal::findOrFail($id);
 
-  
-   
+    $goal->update([
+        'done' => $request->input('done', false), // Toggle done status
+    ]);
+
+    return response()->json([
+        'message' => 'Goal status updated successfully.',
+        'goal' => $goal
+    ]);
+}
+
+
  
 
 }
