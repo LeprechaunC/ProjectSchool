@@ -4,6 +4,7 @@ import { Head } from '@inertiajs/vue3';
 
 // Import the GoalDashboard component
 import GoalDashboard from '@/Components/Goal/GoalDashboard.vue';
+import DarkModeToggle from '@/Components/DarkModeToggle.vue'; // Import DarkModeToggle
 </script>
 
 <template>
@@ -11,29 +12,22 @@ import GoalDashboard from '@/Components/Goal/GoalDashboard.vue';
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
+            <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-white">
                 Dashboard
             </h2>
         </template>
 
-        <div class="py-12">
+        <div class="min-h-screen bg-gray-100 dark:bg-gray-900 py-12">
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div
-                    class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                >
-                    <div class="p-6 text-gray-900">
+                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg dark:bg-gray-800 dark:text-white">
+                    <div class="p-6 text-gray-900 dark:text-gray-100">
                         Welcome!
                     </div>
 
                     <!-- Use the GoalDashboard component here -->
                     <GoalDashboard />
-
                 </div>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
-
-   

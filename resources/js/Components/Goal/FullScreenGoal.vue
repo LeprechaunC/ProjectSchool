@@ -1,5 +1,4 @@
 <template>
-  
   <div v-if="isVisible" class="fullscreen-modal-overlay" @click.self="closeModal">
     <div class="fullscreen-modal">
       <button @click="closeModal" class="close-button">&times;</button>
@@ -36,9 +35,10 @@
 <script>
 import { defineComponent, ref, watch, onMounted } from "vue";
 import axios from "axios";
-const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 axios.defaults.headers.common['X-XSRF-TOKEN'] = token; // Set CSRF token globally
+
 export default defineComponent({
   props: {
     isVisible: Boolean,
@@ -48,55 +48,62 @@ export default defineComponent({
     const goal = ref({});
     const isEditing = ref(false);
 
+    // Watch for changes in selectedGoal prop
     watch(() => props.selectedGoal, (newGoal) => {
-      goal.value = { ...newGoal }; 
+      goal.value = { ...newGoal };
     }, { immediate: true });
 
+    // Format the date for display
     const formatDate = (date) => {
       const d = new Date(date);
       return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`;
     };
 
+    // Start editing the goal
     const startEdit = () => {
       isEditing.value = true;
     };
 
+    // Cancel editing and reset changes
     const cancelEdit = () => {
       isEditing.value = false;
       goal.value = { ...props.selectedGoal }; // Reset changes
     };
 
+    // Save the goal (Create or Update)
     const saveGoal = async () => {
-  try {
- 
-    await axios.patch(`http://localhost:8000/api/goals/${goal.value.id}`, goal.value);
-    isEditing.value = false;
-    alert("Goal updated successfully!");
-    emit("updateGoal", goal.value);
-  } catch (error) {
-    console.error("Error updating goal:", error);
-  }
-};
+      try {
+        if (goal.value.id) {
+          // Update existing goal
+          await axios.patch(`/api/goals/${goal.value.id}`, goal.value);
+          alert("Goal updated successfully!");
+        } else {
+          // Create new goal
+          await axios.post("/api/goals", goal.value);
+          alert("Goal created successfully!");
+        }
+        isEditing.value = false;
+        emit("updateGoal", goal.value);
+      } catch (error) {
+        console.error("Error saving goal:", error);
+      }
+    };
 
+    // Delete the goal
     const deleteGoal = async () => {
-  if (confirm("Are you sure you want to delete this goal?")) {
-    try {
-      await axios.delete(`http://localhost:8000/api/goals/${goal.value.id}`, {
-        withCredentials: true,
-       
-      });
-      alert("Goal deleted successfully!");
-      emit("delete", goal.value.id);
-      closeModal();
-      
-    } catch (error) {
-      console.error("Error deleting goal:", error);
-    }
-  }
-};
+      if (confirm("Are you sure you want to delete this goal?")) {
+        try {
+          await axios.delete(`/api/goals/${goal.value.id}`);
+          alert("Goal deleted successfully!");
+          emit("delete", goal.value.id);
+          closeModal();
+        } catch (error) {
+          console.error("Error deleting goal:", error);
+        }
+      }
+    };
 
-
-
+    // Close the modal
     const closeModal = () => {
       emit("closeModal");
     };
@@ -107,9 +114,9 @@ export default defineComponent({
 </script>
 
 <style scoped>
- /* Fullscreen Modal Styles */
+/* Fullscreen Modal Styles */
 .fullscreen-modal-overlay {
-  position: fixed; /* Fix position to the screen */
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -126,12 +133,11 @@ export default defineComponent({
   padding: 20px;
   border-radius: 8px;
   width: 80%;
-  max-width: 600px; /* You can adjust this value to control the width */
+  max-width: 600px;
   position: relative;
   overflow-y: auto;
-  z-index: 10000; /* Ensure the modal itself is above the overlay */
+  z-index: 10000;
 }
-
 
 /* Close Button */
 .close-button {
@@ -144,5 +150,4 @@ export default defineComponent({
   color: #333;
   cursor: pointer;
 }
-
 </style>

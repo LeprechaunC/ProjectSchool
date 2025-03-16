@@ -104,21 +104,15 @@ export default {
       teams: [],
       selectedTeam: JSON.parse(localStorage.getItem("selectedTeam")) || "none",
       goals: [],
-      duration: { days: 4 },
       calendarOptions: {
         plugins: [dayGridPlugin, interactionPlugin],
         initialView: "dayGridMonth",
-        editable: true,
-        selectable: true,
+ 
+  
         dateClick: this.handleDateClick,
         eventClick: this.handleEventClick,
         eventContent: this.renderEventContent, // Custom event rendering
         events: [],
-      },
-      timelineHours: {
-        type: "timeline",
-        duration: { hours: 8 },
-        buttonText: "hours",
       },
       showModal: false,
       fullscreenModalVisible: false,
@@ -172,53 +166,52 @@ export default {
         id: goal.id,
         title: goal.title,
         description: goal.description,
-        start: goal.start_time,
+        start: goal.start_time,  // Ensure this is passed as the event's start time
+        end: goal.end_time,      // Ensure this is passed as the event's end time
         goalId: goal.id,
-        done: goal.done, // Include goal completion status
+        done: goal.done,         // Include goal completion status
       }));
     },
 
     renderEventContent(arg) {
-  const goalId = arg.event.extendedProps.goalId;
-  const isDone = arg.event.extendedProps.done;
+      const goalId = arg.event.extendedProps.goalId;
+      const isDone = arg.event.extendedProps.done;
 
-  // Create button element
-  const button = document.createElement("button");
-  button.innerText = isDone ? "✔" : "✖"; // Show checkmark if done, cross if not
-  button.style.marginLeft = "8px";
-  button.style.padding = "2px 6px";
-  button.style.border = "none";
-  button.style.cursor = "pointer";
-  button.style.marginLeft = "auto"; // Push the button to the right
-  button.style.color = isDone ? "green" : "red";
-  button.onclick = (e) => {
-    e.stopPropagation(); // Prevent the event from propagating
-    this.toggleGoalStatus(goalId, !isDone); // Toggle the completion status
-  };
+      // Create button element
+      const button = document.createElement("button");
+      button.innerText = isDone ? "✔" : "✖"; // Show checkmark if done, cross if not
+      button.style.marginLeft = "8px";
+      button.style.padding = "2px 6px";
+      button.style.border = "none";
+      button.style.cursor = "pointer";
+      button.style.marginLeft = "auto"; // Push the button to the right
+      button.style.color = isDone ? "green" : "red";
+      button.onclick = (e) => {
+        e.stopPropagation(); // Prevent the event from propagating
+        this.toggleGoalStatus(goalId, !isDone); // Toggle the completion status
+      };
 
-  // Create text node for event title
-  const title = document.createElement("span");
-  title.innerText = arg.event.title;
+      // Create text node for event title
+      const title = document.createElement("span");
+      title.innerText = arg.event.title;
 
-  return { domNodes: [title, button] };
-},
+      return { domNodes: [title, button] };
+    },
 
-
-toggleGoalStatus(goalId, newStatus) {
-  axios
-    .patch(`/api/goals/${goalId}/done`, { done: newStatus }) // Send PATCH request to toggle status
-    .then(() => {
-      // Update the local goals array with the new status
-      this.goals = this.goals.map((goal) =>
-        goal.id === goalId ? { ...goal, done: newStatus } : goal
-      );
-      this.updateCalendarEvents(); // Refresh calendar events with updated status
-    })
-    .catch((error) => {
-      console.error("Error updating goal status:", error);
-    });
-},
-
+    toggleGoalStatus(goalId, newStatus) {
+      axios
+        .patch(`/api/goals/${goalId}/done`, { done: newStatus }) // Send PATCH request to toggle status
+        .then(() => {
+          // Update the local goals array with the new status
+          this.goals = this.goals.map((goal) =>
+            goal.id === goalId ? { ...goal, done: newStatus } : goal
+          );
+          this.updateCalendarEvents(); // Refresh calendar events with updated status
+        })
+        .catch((error) => {
+          console.error("Error updating goal status:", error);
+        });
+    },
 
     handleDateClick(info) {
       const clickedDate = new Date(info.dateStr);
@@ -226,7 +219,7 @@ toggleGoalStatus(goalId, newStatus) {
       const localDateStr = clickedDate.toISOString().slice(0, 10);
 
       this.newGoal.start_time = localDateStr + "T00:00";
-      this.newGoal.end_time = localDateStr + "T12:00";
+      this.newGoal.end_time = localDateStr + "T23:59";  // End time is one day after the start time
 
       this.selectedDate = localDateStr;
       this.showModal = true;
@@ -306,7 +299,6 @@ toggleGoalStatus(goalId, newStatus) {
 };
 </script>
 
-
 <style scoped>
 .goal-dashboard {
   padding: 20px;
@@ -348,4 +340,5 @@ select {
   width: 400px;
   position: relative;
 }
+
 </style>

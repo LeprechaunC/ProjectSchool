@@ -75,6 +75,7 @@
     Route::delete('/api/goals/{id}', [GoalController::class, 'delete'])->name('goals.delete');
     
     Route::patch('/api/goals/{id}', [GoalController::class, 'update']);   
+    Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
 
      Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
      require __DIR__.'/auth.php';

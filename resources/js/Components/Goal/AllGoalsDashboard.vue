@@ -1,26 +1,27 @@
 <template>
   <div>
-    <!-- Loading Indicator -->
     <div v-if="loading">
       <p>Loading...</p>
     </div>
 
-    <!-- Team Selection -->
     <div v-else>
       <label for="team-select">Select Team:</label>
       <select v-model="selectedTeam" @change="fetchGoals" id="team-select">
- 
         <option v-for="team in teams" :key="team.id" :value="team.id">
           {{ team.name }}
         </option>
       </select>
     </div>
-
-    <!-- Display Goals -->
-    <div v-if="goals.length > 0">
+    <input
+      v-model="searchQuery"
+      type="text"
+      placeholder="Search goals..."
+      class="border p-2 mb-2 w-full"
+    />
+    <div v-if="filteredGoals.length > 0">
       <h3>Goals for Team: {{ selectedTeamName || 'All Teams' }}</h3>
       <ul>
-        <li v-for="goal in goals" :key="goal.id" @click="openGoalModal(goal)">
+        <li v-for="goal in filteredGoals" :key="goal.id" @click="openGoalModal(goal)">
           <h4>{{ goal.title }}</h4>
           <p>{{ goal.description }}</p>
           <p><strong>Start Time:</strong> {{ goal.start_time }}</p>
@@ -32,7 +33,7 @@
       <p>No goals available for the selected team.</p>
     </div>
 
-    <!-- Fullscreen Goal Modal -->
+
     <div v-if="isModalVisible" class="fullscreen-modal-overlay" @click.self="closeModal">
       <div class="fullscreen-modal">
         <button @click="closeModal" class="close-button">&times;</button>
@@ -80,6 +81,7 @@ export default {
       isModalVisible: false, 
       selectedGoal: null,   
       isEditing: false,     
+      searchQuery: '', 
     };
   },
   created() {
@@ -87,14 +89,25 @@ export default {
     if (savedTeam) {
       this.selectedTeam = JSON.parse(savedTeam);
     } else {
-      // If no saved team, default to ALL (null)
       this.selectedTeam = null;
     }
 
-    // Fetch teams when the component is created
+   
     this.fetchTeams().then(() => {
       this.fetchGoals();
     });
+  },
+  computed: {
+    filteredGoals() {
+      if (!this.searchQuery.trim()) {
+        return this.goals; 
+      }
+      const lowerCaseQuery = this.searchQuery.toLowerCase();
+      return this.goals.filter(goal => 
+        goal.title.toLowerCase().includes(lowerCaseQuery) || 
+        goal.description.toLowerCase().includes(lowerCaseQuery)
+      );
+    }
   },
   methods: {
     async fetchTeams() {
@@ -112,13 +125,11 @@ export default {
       this.loading = true; 
       try {
         if (this.selectedTeam === null) {
-          // If "ALL" is selected, fetch goals for all teams
-          const response = await axios.get('/api/goals'); // Endpoint for all goals
+          const response = await axios.get('/api/goals'); // Fetch all goals
           console.log('Fetched All Goals:', response.data);
           this.goals = response.data;
-          this.selectedTeamName = ''; // Show 'ALL' if no team is selected
+          this.selectedTeamName = ''; 
         } else if (this.selectedTeam) {
-          // Fetch goals for the selected team
           const response = await axios.get(`/api/goals/${this.selectedTeam}`);
           console.log('Fetched Goals for Team:', response.data);
           this.goals = response.data;
@@ -128,7 +139,7 @@ export default {
       } catch (error) {
         console.error('Error fetching goals:', error);
       } finally {
-        this.loading = false; // Stop loading once goals are fetched
+        this.loading = false;
       }
     },
     openGoalModal(goal) {
@@ -174,37 +185,38 @@ export default {
   },
   watch: {
     selectedTeam(newValue) {
-
       localStorage.setItem('selectedTeam', JSON.stringify(newValue));
-      this.fetchGoals(); 
+      this.fetchGoals();
     }
   }
 };
 </script>
 
 
+
 <style scoped>
 .fullscreen-modal-overlay {
-  position: fixed;
+  position: fixed; /* Fix position to the screen */
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); 
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
   display: flex;
   justify-content: center;
-  align-items: center; 
-  z-index: 9999; 
+  align-items: center; /* Center content vertically */
+  z-index: 9999; /* Ensure it's on top of other content */
 }
+
 .fullscreen-modal {
   background-color: #fff;
   padding: 20px;
   border-radius: 8px;
   width: 80%;
-  max-width: 600px; 
+  max-width: 600px; /* You can adjust this value to control the width */
   position: relative;
   overflow-y: auto;
-  z-index: 10000;  
+  z-index: 10000; /* Ensure the modal itself is above the overlay */
 }
 
 
