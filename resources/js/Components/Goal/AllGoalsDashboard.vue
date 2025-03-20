@@ -6,60 +6,80 @@
 
     <div v-else>
       <label for="team-select">Select Team:</label>
-      <select v-model="selectedTeam" @change="fetchGoals" id="team-select">
+      <select v-model="selectedTeam" @change="fetchGoals" id="team-select" class="border p-2 mb-2 w-full">
+        <option value="personal">Personal</option>
         <option v-for="team in teams" :key="team.id" :value="team.id">
           {{ team.name }}
         </option>
       </select>
-    </div>
-    <input
-      v-model="searchQuery"
-      type="text"
-      placeholder="Search goals..."
-      class="border p-2 mb-2 w-full"
-    />
-    <div v-if="filteredGoals.length > 0">
-      <h3>Goals for Team: {{ selectedTeamName || 'All Teams' }}</h3>
-      <ul>
-        <li v-for="goal in filteredGoals" :key="goal.id" @click="openGoalModal(goal)">
-          <h4>{{ goal.title }}</h4>
-          <p>{{ goal.description }}</p>
-          <p><strong>Start Time:</strong> {{ goal.start_time }}</p>
-          <p><strong>End Time:</strong> {{ goal.end_time }}</p>
-        </li>
-      </ul>
-    </div>
-    <div v-else>
-      <p>No goals available for the selected team.</p>
+
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Search goals..."
+        class="border p-2 mb-2 w-full"
+      />
+
+      <!-- Sorting Options -->
+      <label for="sort-select">Sort By:</label>
+      <select v-model="sortOption" id="sort-select" class="border p-2 mb-2 w-full">
+        <option value="az">Title (A-Z)</option>
+        <option value="za">Title (Z-A)</option>
+        <option value="oldest">Start Date (Oldest First)</option>
+        <option value="youngest">Start Date (Youngest First)</option>
+      </select>
+
+      <div v-if="filteredGoals.length > 0">
+        <h3>Goals for: {{ selectedTeamName }}</h3>
+        <ul>
+          <li v-for="goal in paginatedGoals" :key="goal.id" @click="openGoalModal(goal)">
+            <h4>{{ goal.title }}</h4>
+            <p>{{ goal.description }}</p>
+            <p><strong>Start Time:</strong> {{ goal.start_time }}</p>
+            <p><strong>End Time:</strong> {{ goal.end_time }}</p>
+          </li>
+        </ul>
+
+        <!-- Pagination Controls -->
+        <div v-if="totalPages > 1" class="pagination">
+          <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">Next</button>
+        </div>
+      </div>
+
+      <div v-else>
+        <p>No goals available for the selected option.</p>
+      </div>
     </div>
 
-
+    <!-- Fullscreen Modal -->
     <div v-if="isModalVisible" class="fullscreen-modal-overlay" @click.self="closeModal">
       <div class="fullscreen-modal">
         <button @click="closeModal" class="close-button">&times;</button>
-        
+
         <h2 class="text-xl font-semibold mb-4">{{ selectedGoal.title }}</h2>
-        
+
         <div v-if="isEditing">
           <input v-model="selectedGoal.title" class="border p-2 mb-2 w-full" placeholder="Goal Title" />
           <textarea v-model="selectedGoal.description" class="border p-2 mb-2 w-full" placeholder="Goal Description"></textarea>
           <input v-model="selectedGoal.start_time" type="datetime-local" class="border p-2 mb-2 w-full" />
           <input v-model="selectedGoal.end_time" type="datetime-local" class="border p-2 mb-2 w-full" />
-          
-          <div class="mt-4 flex justify-end space-x-2">
+
+          <div class="mt-4 flex justify-between space-x-2">
             <button @click="saveGoal" class="px-4 py-2 bg-green-600 text-white rounded">Save</button>
             <button @click="cancelEdit" class="px-4 py-2 bg-gray-600 text-white rounded">Cancel</button>
           </div>
         </div>
-        
+
         <div v-else>
-          <p><strong>Description:</strong> {{ selectedGoal.description }}</p>
-          <p><strong>Start Time:</strong> {{ formatDate(selectedGoal.start_time) }}</p>
-          <p><strong>End Time:</strong> {{ formatDate(selectedGoal.end_time) }}</p>
-          
+          <p>{{ selectedGoal.description }}</p>
+          <p><strong>Start Time:</strong> {{ selectedGoal.start_time }}</p>
+          <p><strong>End Time:</strong> {{ selectedGoal.end_time }}</p>
+
           <div class="mt-4 flex justify-end space-x-2">
             <button @click="startEdit" class="px-4 py-2 bg-blue-600 text-white rounded">Edit</button>
-            <button @click="deleteGoal" class="px-4 py-2 bg-red-600 text-white rounded">Delete</button>
+            <button @click="deleteGoal(selectedGoal.id)" class="px-4 py-2 bg-red-600 text-white rounded">Delete</button>
             <button @click="closeModal" class="px-4 py-2 bg-gray-600 text-white rounded">Back</button>
           </div>
         </div>
@@ -69,128 +89,159 @@
 </template>
 
 <script>
-import axios from 'axios'; 
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      teams: [],           
-      selectedTeam: null,   
-      goals: [],            
-      selectedTeamName: '', 
-      loading: true,       
-      isModalVisible: false, 
-      selectedGoal: null,   
-      isEditing: false,     
-      searchQuery: '', 
+      teams: [],
+      goals: [],
+      selectedTeam: "personal",
+      searchQuery: "",
+      loading: true,
+      error: null,
+      sortOption: "az", // Default sorting option
+      isModalVisible: false,
+      isEditing: false,
+      selectedGoal: null,
+      currentPage: 1,  // Start on page 1
+      goalsPerPage: 5, // Show 5 goals per page
     };
   },
-  created() {
-    const savedTeam = localStorage.getItem('selectedTeam');
-    if (savedTeam) {
-      this.selectedTeam = JSON.parse(savedTeam);
-    } else {
-      this.selectedTeam = null;
-    }
 
-   
-    this.fetchTeams().then(() => {
-      this.fetchGoals();
-    });
-  },
   computed: {
     filteredGoals() {
-      if (!this.searchQuery.trim()) {
-        return this.goals; 
-      }
-      const lowerCaseQuery = this.searchQuery.toLowerCase();
-      return this.goals.filter(goal => 
-        goal.title.toLowerCase().includes(lowerCaseQuery) || 
-        goal.description.toLowerCase().includes(lowerCaseQuery)
+      // First, filter by search query
+      let filtered = this.goals.filter(
+        (goal) =>
+          goal.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+          goal.description.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
-    }
+
+      // Then, apply sorting based on the selected option
+      if (this.sortOption === "az") {
+        filtered = filtered.sort((a, b) => a.title.localeCompare(b.title));
+      } else if (this.sortOption === "za") {
+        filtered = filtered.sort((a, b) => b.title.localeCompare(a.title));
+      } else if (this.sortOption === "oldest") {
+        filtered = filtered.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+      } else if (this.sortOption === "youngest") {
+        filtered = filtered.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+      }
+
+      return filtered;
+    },
+
+    paginatedGoals() {
+      // Determine the start and end index for the current page
+      const startIndex = (this.currentPage - 1) * this.goalsPerPage;
+      const endIndex = startIndex + this.goalsPerPage;
+      return this.filteredGoals.slice(startIndex, endIndex);
+    },
+
+    totalPages() {
+      // Total number of pages
+      return Math.ceil(this.filteredGoals.length / this.goalsPerPage);
+    },
+
+    selectedTeamName() {
+      if (this.selectedTeam === "personal") return "Personal Goals";
+      const team = this.teams.find((t) => t.id === this.selectedTeam);
+      return team ? team.name : "All Teams";
+    },
   },
+
+  mounted() {
+    this.fetchTeams();
+    this.fetchGoals();
+  },
+
   methods: {
     async fetchTeams() {
       try {
-        const response = await axios.get('/api/teams');
-        console.log('Fetched Teams:', response.data);
+        const response = await axios.get("/api/teams");
         this.teams = response.data;
-      } catch (error) {
-        console.error('Error fetching teams:', error);
-      } finally {
-        this.loading = false;
+      } catch (err) {
+        console.error("Failed to fetch teams", err);
+        this.error = "Failed to load teams";
       }
     },
+
     async fetchGoals() {
-      this.loading = true; 
+      this.loading = true;
       try {
-        if (this.selectedTeam === null) {
-          const response = await axios.get('/api/goals'); // Fetch all goals
-          console.log('Fetched All Goals:', response.data);
-          this.goals = response.data;
-          this.selectedTeamName = ''; 
-        } else if (this.selectedTeam) {
-          const response = await axios.get(`/api/goals/${this.selectedTeam}`);
-          console.log('Fetched Goals for Team:', response.data);
-          this.goals = response.data;
-          const team = this.teams.find((team) => team.id === this.selectedTeam);
-          this.selectedTeamName = team ? team.name : '';
-        }
-      } catch (error) {
-        console.error('Error fetching goals:', error);
+        const response = this.selectedTeam === "personal"
+          ? await axios.get("/api/goals/user/allusergoals")
+          : await axios.get(`/api/goals/${this.selectedTeam}`);
+
+        this.goals = response.data;
+      } catch (err) {
+        console.error("Failed to fetch goals", err);
+        this.error = "Failed to load goals";
       } finally {
         this.loading = false;
       }
     },
+
     openGoalModal(goal) {
-      this.selectedGoal = goal;  
-      this.isModalVisible = true; 
+      this.selectedGoal = { ...goal };
+      this.isModalVisible = true;
+      this.isEditing = false;
     },
+
     closeModal() {
-      this.isModalVisible = false; 
-      this.selectedGoal = null;   
+      this.isModalVisible = false;
+      this.selectedGoal = null;
     },
+
     startEdit() {
-      this.isEditing = true; 
+      this.isEditing = true;
     },
+
     cancelEdit() {
-      this.isEditing = false;  
-      this.selectedGoal = { ...this.selectedGoal };
+      this.isEditing = false;
     },
-    async saveGoal() {
+
+    async deleteGoal(goalId) {
+      if (!confirm("Are you sure you want to delete this goal?")) return;
       try {
-        await axios.patch(`/api/goals/${this.selectedGoal.id}`, this.selectedGoal);
-        this.isEditing = false;
-        alert('Goal updated successfully!');
-      } catch (error) {
-        console.error('Error updating goal:', error);
+        await axios.delete(`/api/goals/${goalId}`);
+        this.goals = this.goals.filter((goal) => goal.id !== goalId);
+        this.closeModal();
+      } catch (err) {
+        console.error("Failed to delete goal", err);
+        alert("Error deleting goal. Please try again.");
       }
     },
-    async deleteGoal() {
-      if (confirm('Are you sure you want to delete this goal?')) {
-        try {
-          await axios.delete(`/api/goals/${this.selectedGoal.id}`);
-          alert('Goal deleted successfully!');
-          this.fetchGoals();  
-          this.closeModal(); 
-        } catch (error) {
-          console.error('Error deleting goal:', error);
-        }
+
+    saveGoal() {
+      // Implement API call to save the edited goal
+      alert("Goal saved! (Implement API call here)");
+      this.isEditing = false;
+    },
+
+    changePage(page) {
+      // Change the current page if the new page is valid
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
       }
     },
-    formatDate(date) {
-      const d = new Date(date);
-      return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes()}`;
-    }
   },
-  watch: {
-    selectedTeam(newValue) {
-      localStorage.setItem('selectedTeam', JSON.stringify(newValue));
-      this.fetchGoals();
-    }
-  }
 };
 </script>
+
+<style scoped>
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.pagination button {
+  padding: 5px 10px;
+  margin: 0 5px;
+}
+</style>
+
 
 
 
@@ -216,6 +267,7 @@ export default {
   max-width: 600px; /* You can adjust this value to control the width */
   position: relative;
   overflow-y: auto;
+  
   z-index: 10000; /* Ensure the modal itself is above the overlay */
 }
 

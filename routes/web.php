@@ -46,9 +46,23 @@
     
         Route::delete('/api/goals/{id}', [GoalController::class, 'destroy'])->name('goals.destroy');
         Route::post('/api/goals', [GoalController::class, 'store']);
-            Route::get('/api/teams', [GoalController::class, 'index']);
-            Route::get('/api/teams', [TeamController::class, 'index']);    
-
+        Route::get('/api/teams', [GoalController::class, 'index']);
+        Route::get('/api/teams', [TeamController::class, 'index']);    
+        Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
+        Route::patch('/api/goals/{id}/done', [GoalController::class, 'markAsDone']);
+    
+        Route::get('/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
+    
+        Route::delete('/teams/{team}/users/{user}', [TeamController::class, 'removeMember']);
+    
+        Route::delete('/api/goals/{id}', [GoalController::class, 'delete'])->name('goals.delete');
+        
+        Route::patch('/api/goals/{id}', [GoalController::class, 'update']);   
+        Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
+    
+        Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
+        Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
+ 
             Route::get('/goals', function () {
                 $user = auth()->user();
                 // Assuming the user belongs to one team
@@ -58,28 +72,25 @@
                     'team_id' => $teamId
                 ]);
             })->name('goals');
+            
+            Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+                return $request->user();
+            });
 
             Route::post('/api/teams/{teamId}/votekick', [TeamController::class, 'votekick']);
+            Route::get('/api/user', function (Request $request) {
+                return auth()->user();
+            });
+       
+        Route::post('api/teams/join', [TeamController::class, 'joinTeam']);
+        Route::post('/api/teams/{teamId}/invite', [TeamController::class, 'generateInviteCode']);
+
+        Route::post('/api/teamsMake', [TeamController::class, 'createTeam']);
     });
 
-    Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-    Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
-    Route::patch('/api/goals/{id}/done', [GoalController::class, 'markAsDone']);
-
-    Route::get('/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
-
-    Route::delete('/teams/{team}/users/{user}', [TeamController::class, 'removeMember']);
-
-    Route::delete('/api/goals/{id}', [GoalController::class, 'delete'])->name('goals.delete');
-    
-    Route::patch('/api/goals/{id}', [GoalController::class, 'update']);   
-    Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
-
-     Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
+ 
+   
+   
+  
+ 
      require __DIR__.'/auth.php';
-
- 
- 
- 

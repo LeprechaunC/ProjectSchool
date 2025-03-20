@@ -1,29 +1,59 @@
 <template>
-  <div>
-    <h1>Your Teams</h1>
-
-
-    <div v-if="loading" class="loader">Loading...</div>
-
-    <div v-if="error" class="error">{{ error }}</div>
-
-    <div v-if="teams.length === 0 && !loading">No teams found.</div>
-
-    <div v-for="team in teams" :key="team.id" class="team">
-      <h2>{{ team.name }}</h2>
+  <div class="container">
  
-      <h3>Members:</h3>
-      <ul>
-        <li v-for="user in team.users" :key="user.id">
-          <span>{{ user.name }}</span>
-          <button v-if="team.pivot.role === 'admin' && user.id !== currentUser.id" @click="votekick(team.id, user.id)" class="kick-btn">
-            <i class="fa-solid fa-ban"></i>
-          </button>
-        </li>
-      </ul>
+
+    <div class="forms-container">
+      <div class="form-box">
+        <h2>Create a New Team</h2>
+        <form @submit.prevent="createTeam">
+          <input type="text" v-model="newTeamName" placeholder="Enter team name" required />
+          <button type="submit" class="btn create-btn">Create Team</button>
+        </form>
+      </div>
+
+      <div class="form-box">
+        <h2>Join a Team</h2>
+        <form @submit.prevent="joinTeam">
+          <input type="text" v-model="enteredInviteCode" placeholder="Enter invite code" required />
+          <button type="submit" class="btn join-btn">Join Team</button>
+        </form>
+      </div>
+    </div>
+    <h1>Your Teams</h1>
+    <div v-if="loading" class="loader">Loading...</div>
+    <div v-if="error" class="error">{{ error }}</div>
+    <div v-if="teams.length === 0 && !loading" class="no-teams">No teams found.</div>
+
+    <div class="teams-container">
+      <div v-for="team in teams" :key="team.id" class="team-card">
+        <div class="team-header">
+          <h2>{{ team.name }}</h2>
+        </div>
+        <div class="team-body">
+          <h3>Members</h3>
+          <ul>
+            <li v-for="user in team.users" :key="user.id">
+              <span>{{ user.name }} <span v-if="user.id === currentUser.id">(You)</span></span>
+              <span class="role">{{ user.role }}</span> <!-- Role on the right -->
+              <button v-if="team.pivot.role === 'admin' && user.id !== currentUser.id"
+                @click="removeMember(team.id, user.id)" class="kick-btn">
+                Remove
+              </button>
+            </li>
+          </ul>
+
+          <div class="invite-section">
+            <button @click="toggleInviteCode(team.id)" class="btn invite-btn">
+              {{ visibleInviteCode === team.id ? `${team.invite_code}` : 'Show Invite Code' }}
+            </button>
+            <button @click="generateNewInviteCode(team.id)" class="btn generate-btn">Generate New Invite</button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -31,17 +61,31 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      teams: [], 
+      teams: [],
       loading: true,
       error: null,
-      currentUser: { id: 4 } // Simulated logged-in user ID, replace with actual authentication logic
+      currentUser: null,
+      newTeamName: '',
+      enteredInviteCode: '',
+      visibleInviteCode: null,
     };
   },
 
   mounted() {
+    this.fetchCurrentUser();
     this.fetchTeams();
   },
+
   methods: {
+    async fetchCurrentUser() {
+      try {
+        const response = await axios.get('/api/user');
+        this.currentUser = response.data;
+      } catch (err) {
+        this.error = 'Failed to load user data';
+      }
+    },
+
     async fetchTeams() {
       try {
         const response = await axios.get('/api/teams');
@@ -52,18 +96,48 @@ export default {
         this.loading = false;
       }
     },
-    async votekick(teamId, userId) {
-      if (!confirm('Are you sure you want to votekick this user?')) return;
+
+    async createTeam() {
       try {
-        await axios.post(`/api/teams/${teamId}/votekick`, { userId });
-        this.teams = this.teams.map(team => {
-          if (team.id === teamId) {
-            team.users = team.users.filter(user => user.id !== userId);
-          }
-          return team;
-        });
+        const response = await axios.post('/api/teams', { name: this.newTeamName });
+        this.teams.push(response.data.team);
+        this.newTeamName = '';
       } catch (err) {
-        this.error = 'Failed to votekick user';
+        this.error = 'Failed to create team';
+      }
+    },
+
+    async joinTeam() {
+      try {
+        const response = await axios.post('/api/teams/join', { invite_code: this.enteredInviteCode });
+        this.teams.push(response.data.team);
+        this.enteredInviteCode = '';
+      } catch (err) {
+        this.error = 'Failed to join team';
+      }
+    },
+
+    async removeMember(teamId, userId) {
+      try {
+        await axios.delete(`/api/teams/${teamId}/users/${userId}`);
+        const team = this.teams.find(t => t.id === teamId);
+        team.users = team.users.filter(u => u.id !== userId);
+      } catch (err) {
+        this.error = 'Failed to remove the member';
+      }
+    },
+
+    toggleInviteCode(teamId) {
+      this.visibleInviteCode = this.visibleInviteCode === teamId ? null : teamId;
+    },
+
+    async generateNewInviteCode(teamId) {
+      try {
+        const response = await axios.post(`/api/teams/${teamId}/invite`);
+        const team = this.teams.find(t => t.id === teamId);
+        if (team) team.invite_code = response.data.invite_code;
+      } catch (err) {
+        this.error = 'Failed to generate new invite code';
       }
     }
   }
@@ -71,129 +145,144 @@ export default {
 </script>
 
 <style scoped>
-/* General styling for the page */
-div {
-  font-family: 'Arial', sans-serif;
-  max-width: 1000px; /* Increase the width to give more breathing room */
-  margin: 0 auto;
+.container {
+  max-width: 800px;
+  margin: auto;
+  text-align: center;
   padding: 20px;
+
 }
 
-h1 {
-  font-weight: 700;
-  font-size: 2.2rem; /* Slightly larger font size for the heading */
-  text-align: center;
-  margin-bottom: 30px; /* Increase space below the heading */
-  color: #333;
-}
-
-/* Loader styling */
-.loader {
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-  color: #555;
-  margin-top: 20px;
-}
-
-/* Error message styling */
-.error {
-  color: #d9534f;
-  background-color: #f8d7da;
-  padding: 10px;
-  text-align: center;
-  border-radius: 5px;
-  margin-top: 20px;
-  font-weight: bold;
-}
-
-/* Teams container */
-.team {
-  margin-bottom: 40px; /* Increased margin for better separation */
-  padding: 2rem;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-/* Team heading styling */
-.team h2 {
-  font-size: 1.8rem; /* Slightly larger font size for team name */
-  margin-bottom: 15px; /* Added margin for separation */
-  color: #333;
-}
-
-.team .admin-label {
-  font-size: 1rem;
-  color: #5bc0de;
-  margin-top: 10px;
-  font-weight: bold;
-}
-
-/* Members section heading */
-h3 {
-  font-size: 1.4rem;
-  color: #555;
-  margin-bottom: 10px;
-}
-
-/* List styling for members */
-ul {
-  padding-left: 0;
-  margin: 0;
-}
-
-ul li {
+.forms-container {
   display: flex;
   justify-content: space-between;
-  list-style-type: none;
-  background: #f9f9f9; /* Lighter background for list items */
-  margin: 10px 0; /* Increased gap between list items */
-  padding: 12px;
+  gap: 20px;
+  margin-bottom: 15%;
+}
+
+.form-box {
+  flex: 1;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Light shadow for list items */
 }
 
-ul li:hover {
-  background: #f1f1f1;
-}
-
-ul li span {
-  flex-grow: 1;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.user-role {
-  font-style: italic;
-  font-size: 1rem;
-  color: #777;
-  margin-left: 10px;
-}
-
-/* Button styling */
-.kick-btn {
-  margin-left: 10px;
-  background-color: #d9534f;
-  color: white;
+.btn {
+  margin-top: 10px;
+  padding: 10px 15px;
   border: none;
-  padding: 8px 12px; /* Larger padding for the button */
   border-radius: 5px;
   cursor: pointer;
+}
+
+.create-btn {
+  background: #242323;
+  color: white;
+}
+
+.join-btn {
+  background: #007bff;
+  color: white;
+}
+.invite-btn, .generate-btn {
+  min-width: 150px;   
+}
+.invite-btn {
+  background: #17a2b8;
+  color: white;
+}
+
+.generate-btn {
+  background: #ffc107;
+  color: black;
+}
+
+.teams-container {
+  display: flex;
+  flex-direction: column;
+  /* Stack teams vertically */
+  gap: 20px;
+  /* Space between teams */
+  margin-top: 30px;
+  align-items: center;
+  /* Optional: Center teams */
+}
+
+.team-card {
+  width: 320px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.team-body {
+  padding-bottom: 50px;
+}
+
+.team-body ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.team-body li {
+  display: flex;
+  justify-content: space-between;
+  /* Align name and role */
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+  /* Optional: Add a border between members */
+}
+
+.team-body li span {
+  flex: 1;
+  /* Username takes up available space */
+}
+
+.team-body li .role {
   font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  /* Smaller font for role */
+  color: #555;
+  /* Optional: Lighter color for role */
 }
 
-.kick-btn:hover {
-  background-color: #c9302c;
-  transform: scale(1.05); /* Slightly enlarge button on hover */
+.invite-section {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  /* Space between invite buttons */
+  margin-top: 15px;
 }
 
-.kick-btn:focus {
-  outline: none; /* Remove focus outline */
+.kick-btn {
+  background: #dc3545;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.kick-btn:active {
-  background-color: #c12e1b; /* Darker shade on button press */
+.loader {
+  font-size: 18px;
+  color: #999;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 16px;
+}
+
+.no-teams {
+  font-size: 18px;
+  color: #666;
 }
 </style>

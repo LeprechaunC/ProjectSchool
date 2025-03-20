@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Team extends Model
 {
     use HasFactory;
-
+    protected $fillable = ['name', 'owner', 'invite_code'];
     // Define the relationship with users (many-to-many)
     public function users()
     {

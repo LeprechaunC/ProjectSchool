@@ -17,14 +17,16 @@ class GoalController extends Controller
 
         return response()->json($goals);
     }
-    public function getAllUserGoals()
-{
-    // Fetch goals where team_id is null (indicating no team associated)
-    $goals = Goal::whereNull('team_id')
-        ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done']);
+    public function getAllUserGoals(Request $request)
+    {
+        $user = auth()->user();  
+        $goals = Goal::whereNull('team_id')
+            ->where('user_id', $user->id)  
+            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done']);
     
-    return response()->json($goals);
-}
+        return response()->json($goals);
+    }
+    
     
     
 

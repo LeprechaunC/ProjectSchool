@@ -174,29 +174,39 @@ export default {
     },
 
     renderEventContent(arg) {
-      const goalId = arg.event.extendedProps.goalId;
-      const isDone = arg.event.extendedProps.done;
+  const goalId = arg.event.extendedProps.goalId;
+  const isDone = arg.event.extendedProps.done;
 
-      // Create button element
-      const button = document.createElement("button");
-      button.innerText = isDone ? "✔" : "✖"; // Show checkmark if done, cross if not
-      button.style.marginLeft = "8px";
-      button.style.padding = "2px 6px";
-      button.style.border = "none";
-      button.style.cursor = "pointer";
-      button.style.marginLeft = "auto"; // Push the button to the right
-      button.style.color = isDone ? "green" : "red";
-      button.onclick = (e) => {
-        e.stopPropagation(); // Prevent the event from propagating
-        this.toggleGoalStatus(goalId, !isDone); // Toggle the completion status
-      };
+  // Create container div
+  const container = document.createElement("div");
+  container.style.display = "flex";
+  container.style.alignItems = "center"; // Ensures vertical alignment
+  container.style.justifyContent = "space-between"; // Aligns items to the edges
+  container.style.width = "100%"; // Ensures full width
 
-      // Create text node for event title
-      const title = document.createElement("span");
-      title.innerText = arg.event.title;
+  // Create text node for event title
+  const title = document.createElement("span");
+  title.innerText = arg.event.title;
 
-      return { domNodes: [title, button] };
-    },
+  // Create button element
+  const button = document.createElement("button");
+  button.innerText = isDone ? "✔" : "✖";
+  button.style.padding = "2px 6px";
+  button.style.border = "none";
+  button.style.cursor = "pointer";
+  button.style.color = isDone ? "green" : "red";
+  button.onclick = (e) => {
+    e.stopPropagation();
+    this.toggleGoalStatus(goalId, !isDone);
+  };
+
+  // Append elements to container
+  container.appendChild(title);
+  container.appendChild(button);
+
+  return { domNodes: [container] };
+},
+
 
     toggleGoalStatus(goalId, newStatus) {
       axios
@@ -236,43 +246,64 @@ export default {
     },
 
     submitGoal() {
-      if (
-        !this.selectedTeam ||
-        !this.newGoal.title ||
-        !this.newGoal.start_time ||
-        !this.newGoal.end_time
-      ) {
-        alert("Please fill in all fields.");
-        return;
-      }
+  if (
+    !this.selectedTeam ||
+    !this.newGoal.title ||
+    !this.newGoal.start_time ||
+    !this.newGoal.end_time
+  ) {
+    alert("Please fill in all fields.");
+    return;
+  }
 
-      const teamId =
-        this.selectedTeam && this.selectedTeam !== "none"
-          ? this.selectedTeam.id
-          : null;
+  const startDate = new Date(this.newGoal.start_time);
+  const endDate = new Date(this.newGoal.end_time);
+  const currentDate = new Date();
 
-      const goalData = {
-        title: this.newGoal.title,
-        description: this.newGoal.description,
-        start_time: this.newGoal.start_time,
-        end_time: this.newGoal.end_time,
-        team_id: teamId,
-        user_id: 4,
-        done: false, // Newly created goals are initially not done
-      };
+  // Validation checks
+  if (startDate > endDate) {
+    alert("Error: Start date cannot be after the end date.");
+    return;
+  }
 
-      axios
-        .post("/api/goals", goalData)
-        .then((response) => {
-          this.goals.push(response.data);
-          this.fetchGoals();
-          this.resetGoalForm();
-          this.showModal = false;
-        })
-        .catch((error) => {
-          console.error("Error submitting goal:", error);
-        });
-    },
+  if (startDate.getFullYear() > endDate.getFullYear()) {
+    alert("Error: The start year cannot be after the end year.");
+    return;
+  }
+
+  if (startDate.getFullYear() < currentDate.getFullYear() - 1) {
+    alert("Error: Start date is too far in the past.");
+    return;
+  }
+
+  const teamId =
+    this.selectedTeam && this.selectedTeam !== "none"
+      ? this.selectedTeam.id
+      : null;
+
+  const goalData = {
+    title: this.newGoal.title,
+    description: this.newGoal.description,
+    start_time: this.newGoal.start_time,
+    end_time: this.newGoal.end_time,
+    team_id: teamId,
+    user_id: 4,
+    done: false,
+  };
+
+  axios
+    .post("/api/goals", goalData)
+    .then((response) => {
+      this.goals.push(response.data);
+      this.fetchGoals();
+      this.resetGoalForm();
+      this.showModal = false;
+    })
+    .catch((error) => {
+      console.error("Error submitting goal:", error);
+    });
+},
+
 
     resetGoalForm() {
       this.newGoal = {
