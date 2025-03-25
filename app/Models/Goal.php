@@ -16,7 +16,9 @@ class Goal extends Model
     protected $fillable = [
         'title',
         'description',
+        'priority',
         'start_time',
+        'description',
         'end_time',
         'team_id',
         'user_id',  

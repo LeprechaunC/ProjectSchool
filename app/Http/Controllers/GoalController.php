@@ -27,43 +27,42 @@ class GoalController extends Controller
         return response()->json($goals);
     }
     
-    
-    
-
     /**
      * Store a new goal.
      */
-    public function store(Request $request)
-    {
-        // Check if the user is authenticated
-        if (!Auth::check()) {
-            return response()->json(['message' => 'User not authenticated'], 401);
-        }
-    
-        // Validate the incoming request
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after_or_equal:start_time', // Ensure end_time is after start_time
-            'team_id' => 'nullable|exists:teams,id',
-        ]);
-    
-    
-        // Create a new goal with the validated data and authenticated user's ID
-        $goal = Goal::create([
-            'title'       => $validated['title'],
-            'description' => $validated['description'] ?? null,
-            'start_time'  => $validated['start_time'],
-            'end_time'    => $validated['end_time'],
-            'team_id'     => $validated['team_id'],
-            'user_id'     => Auth::id(),  // Get the authenticated user's ID
-        ]);
-    
-        // Return the created goal as a response
-        return response()->json($goal, 201);
+   public function store(Request $request)
+{
+    // Check if the user is authenticated
+    if (!Auth::check()) {
+        return response()->json(['message' => 'User not authenticated'], 401);
     }
-    
+
+    // Validate the incoming request
+    $validated = $request->validate([
+        'title' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'priority' => 'nullable|in:high,medium,low',
+        'start_time' => 'required|date',
+        'end_time' => 'required|date|after_or_equal:start_time',
+        'team_id' => 'nullable|exists:teams,id',
+    ]);
+
+    // Use the null-coalescing operator (??) to set a default value safely
+    $priority = $validated['priority'] ?? 'medium';
+
+    // Create a new goal
+    $goal = Goal::create([
+        'title'       => $validated['title'],
+        'description' => $validated['description'] ?? null,
+        'priority'    => $priority,  // Use the safe variable instead of accessing $validated directly
+        'start_time'  => $validated['start_time'],
+        'end_time'    => $validated['end_time'],
+        'team_id'     => $validated['team_id'] ?? null,
+        'user_id'     => Auth::id(),
+    ]);
+
+    return response()->json($goal, 201);
+}
     
 public function update(Request $request, $id)
     {

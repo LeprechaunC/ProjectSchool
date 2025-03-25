@@ -1,4 +1,5 @@
 <template>
+  <SideViewDashboard></SideViewDashboard>
   <div class="goal-dashboard">
     <h3 class="text-lg font-semibold mb-4">Goal Calendar</h3>
 
@@ -43,6 +44,14 @@
             rows="3"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           ></textarea>
+        </div>
+        <div class="mb-4">
+          <label for="goal-priority" class="block text-sm font-medium text-gray-700">Priority</label>
+          <select id="goal-priority" v-model="newGoal.priority" class="input-field">
+            <option value="high">🔴 High </option>
+            <option value="medium">🟡 Medium</option>
+            <option value="low">🟢 Low</option>
+          </select>
         </div>
         <div class="mb-4">
           <label for="goal-start-time" class="block text-sm font-medium text-gray-700">Start Time</label>
@@ -93,11 +102,12 @@ import FullCalendar from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import FullscreenGoalModal from "../Goal/FullScreenGoal.vue"; // Import the new component
-
+import SideViewDashboard from "../Goal/SideViewDashboard.vue";
 export default {
   components: {
     FullCalendar,
     FullscreenGoalModal,
+    SideViewDashboard
   },
   data() {
     return {
@@ -222,18 +232,22 @@ export default {
           console.error("Error updating goal status:", error);
         });
     },
-
     handleDateClick(info) {
-      const clickedDate = new Date(info.dateStr);
-      clickedDate.setHours(0, 0, 0, 0);
-      const localDateStr = clickedDate.toISOString().slice(0, 10);
+  // Extract clicked date and ensure correct time zone handling
+  const clickedDate = new Date(info.dateStr + "T00:00:00Z"); // Forces UTC interpretation
 
-      this.newGoal.start_time = localDateStr + "T00:00";
-      this.newGoal.end_time = localDateStr + "T23:59";  // End time is one day after the start time
+  // Convert to local date string without shifting the day
+  const localDateStr = clickedDate.toISOString().split("T")[0];
 
-      this.selectedDate = localDateStr;
-      this.showModal = true;
-    },
+  // Set start and end times explicitly
+  this.newGoal.start_time = `${localDateStr}T00:00`;
+  this.newGoal.end_time = `${localDateStr}T23:59`;
+
+  this.selectedDate = localDateStr;
+  this.showModal = true;
+},
+
+
 
     handleEventClick(info) {
       const goalId = info.event.extendedProps.goalId;
@@ -284,12 +298,13 @@ export default {
   const goalData = {
     title: this.newGoal.title,
     description: this.newGoal.description,
+    priority: this.newGoal.priority,  
     start_time: this.newGoal.start_time,
     end_time: this.newGoal.end_time,
     team_id: teamId,
-    user_id: 4,
-    done: false,
-  };
+    user_id: null,
+    done: false
+   };
 
   axios
     .post("/api/goals", goalData)
@@ -331,6 +346,17 @@ export default {
 </script>
 
 <style scoped>
+
+.dashboard-container {
+  display: flex;
+  align-items: flex-start; /* Align items to top */
+}
+
+.side-view {
+  width: 250px; /* Adjust as needed */
+  min-height: 100vh; /* Full height */
+  background: #f3f4f6; /* Light gray background */
+}
 .goal-dashboard {
   padding: 20px;
   background-color: #fff;
