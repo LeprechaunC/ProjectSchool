@@ -71,27 +71,34 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
-    public function uploadImage(ProfileImageRequest $request){
-        $user = Auth::user(); // Get the authenticated user
+    public function updateProfilePicture(Request $request)
+    {
+        $request->validate([
+            'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
 
-        if ($request->hasFile('profile_image')) {
+        try {
+            if ($request->hasFile('profile_picture')) {
+                // Delete old profile picture if exists
+                if (auth()->user()->profile_picture) {
+                    Storage::disk('public')->delete(auth()->user()->profile_picture);
+                }
 
-            $file = $request->file('profile_image');
-            $filename = "XaYPfty10". $user->id . '.' . $file->getClientOriginalExtension(); // Create a unique filename
+                // Store the new image
+                $path = $request->file('profile_picture')->store('profile-pictures', 'public');
 
-            $path = $file->storeAs('public/profile_images', $filename);
+                // Update user's profile_picture in database
+                auth()->user()->update([
+                    'profile_picture' => $path
+                ]);
 
-            $user->profile_image = $filename;
-            $user->save();
+                return redirect()->back()->with('message', 'Profile picture updated successfully');
+            }
 
-            return Inertia::render('Profile/Edit', [
-                'message' => 'Profile image updated successfully.',
-                'user' => $user // Optionally pass the updated user data back
-            ]);
+            return redirect()->back()->with('error', 'No image provided');
+        } catch (\Exception $e) {
+            \Log::error('Profile picture upload error: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error uploading image');
         }
-
-        // Handle the case where no file was uploaded
-        return redirect()->back()->withErrors(['profile_image' => 'Please upload an image.']);
-}
-
+    }
 }

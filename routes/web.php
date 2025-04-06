@@ -86,6 +86,10 @@
         Route::post('/api/teams/{teamId}/invite', [TeamController::class, 'generateInviteCode']);
 
         Route::post('/api/teamsMake', [TeamController::class, 'createTeam']);
+        
+        Route::post('/profile/picture', [ProfileController::class, 'updateProfilePicture'])
+    ->name('profile.picture.update')
+    ->middleware('auth');
     });
 
  

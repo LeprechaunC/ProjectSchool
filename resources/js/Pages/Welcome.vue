@@ -1,94 +1,236 @@
 <template>
-    <Head title="Welcome" />
-    <nav v-if="canLogin" class="-mx-3 flex flex-1 justify-center">
+    <Head title="Welcome to GoalTracker" />
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">GoalTracker</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <Link
+                        v-if="$page.props.auth.user"
+                        :href="route('dashboard')"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    >
+                        Dashboard
+                    </Link>
+                    <template v-else>
                         <Link
-                            v-if="$page.props.auth.user"
-                            :href="route('dashboard')"
-                            class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
+                            :href="route('login')"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                         >
-                            Dashboard
+                            Log in
                         </Link>
-
-                        <template v-else>
-                            <div class="p-8">  
-                            <Link
-                                :href="route('login')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Log in
-                            </Link>
-
-                            <Link
-                                v-if="canRegister"
-                                :href="route('register')"
-                                class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
-                            >
-                                Register
-                            </Link>
-                        </div>
-                        </template>
-                    </nav>
-
-
-                  
-
-                    <section class="bg-white dark:bg-gray-900">
-    <div class="grid max-w-screen-xl px-4 py-8 mx-auto lg:gap-8 xl:gap-0 lg:py-16 lg:grid-cols-12">
-        <div class="mr-auto place-self-center lg:col-span-7 text-center lg:text-left">
-            <h1 class="max-w-2xl mb-4 text-4xl font-extrabold tracking-tight leading-none md:text-5xl xl:text-6xl dark:text-white">
-                Achieve Your Goals with GoalTracker
-            </h1>
-            <p class="max-w-2xl mb-6 font-light text-gray-500 lg:mb-8 md:text-lg lg:text-xl dark:text-gray-400">
-                Set daily, weekly, and monthly goals, and track your progress towards success.
-            </p>
-            <div class="flex justify-center lg:justify-start gap-4">
-                <a href="#" class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 dark:focus:ring-primary-900">
-                    Get started
-                </a>
-                <a href="#" class="inline-flex items-center justify-center px-5 py-3 text-base font-medium text-center text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
-                    Learn More
-                </a> 
+                        <Link
+                            v-if="canRegister"
+                            :href="route('register')"
+                            class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                        >
+                            Get Started
+                        </Link>
+                    </template>
+                </div>
             </div>
         </div>
-        <div class="hidden lg:mt-0 lg:col-span-5 lg:flex">
-            <img src="https://flowbite.s3.amazonaws.com/blocks/marketing-ui/hero/phone-mockup.png" alt="mockup">
-        </div>                
-    </div>
-</section>
+    </nav>
 
-    
-    <div class="entireContainer bg-[#171717] p-4 text-white"> 
-
-    <section class="mx-auto my-16 flex flex-col lg:flex-row items-center justify-between max-w-7xl px-6">
-        <div class="w-full mb-8 lg:w-1/2 lg:pr-8 lg:mb-0">
-            <h1 class="text-3xl font-bold mb-4">Stay Focused and Organized!</h1>
-            <p class="text-lg">
-                Create clear and actionable goals for every aspect of your life. Whether it's personal or professional, 
-                we provide tools to define, track, and achieve your objectives effectively.
-            </p>
-        </div>
-        <div class="w-full lg:w-1/2 lg:pl-8">
-            <img src="/welcomeimage1.png" alt="Goal dashboard screenshot" class="w-full rounded-xl shadow-xl ring-1 ring-gray-400/10" />        </div>
-    </section>
-
-    <section class="mx-auto my-16 flex flex-col-reverse items-center justify-between max-w-7xl px-6 mb-40 lg:flex-row">
-        <div class="w-full mt-8 lg:w-1/2 lg:pr-8 lg:mt-0">
-            <img src="/welcomeimage2.png" alt="Goal planning options" class="w-full rounded-xl shadow-xl ring-1 ring-gray-400/10" />
-        </div>
-        <div class="w-full lg:w-1/2 lg:pl-8">
-            <h1 class="text-3xl font-bold mb-4">Advanced Goal Planning</h1>
-            <p class="text-lg">
-                Break down your goals into manageable steps and track your progress. Set deadlines, prioritize tasks, 
-                and receive reminders to keep yourself on track.
-            </p>
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 dark:text-white mb-6">
+                    Transform Your Goals into
+                    <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Achievements</span>
+                </h1>
+                <p class="max-w-2xl mx-auto text-xl text-gray-600 dark:text-gray-300 mb-8">
+                    The all-in-one platform for setting, tracking, and achieving your personal and professional goals.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <Link
+                        v-if="canRegister"
+                        :href="route('register')"
+                        class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
+                    >
+                        Start Your Journey
+                    </Link>
+                    <a href="#features" class="inline-flex items-center justify-center px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                        Learn More
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
-</div>
+
+    <!-- Stats Section -->
+    <section class="py-12 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center p-6">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">85%</div>
+                    <div class="text-gray-600 dark:text-gray-300">Users achieve their goals faster</div>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">10K+</div>
+                    <div class="text-gray-600 dark:text-gray-300">Active users worldwide</div>
+                </div>
+                <div class="text-center p-6">
+                    <div class="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-2">24/7</div>
+                    <div class="text-gray-600 dark:text-gray-300">Goal tracking support</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Everything You Need to Succeed</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300">Powerful features to help you achieve your goals</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Smart Goal Tracking</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Set and monitor your goals with intuitive progress tracking and analytics.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Time Management</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Efficiently manage your time with smart scheduling and deadline tracking.</p>
+                </div>
+                <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-lg">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Progress Analytics</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Get detailed insights into your progress with advanced analytics and reports.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">How GoalTracker Works</h2>
+                <p class="text-xl text-gray-600 dark:text-gray-300">Simple steps to achieve your goals</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">1</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Set Your Goals</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Define clear, achievable goals with our intuitive interface.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">2</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Track Progress</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Monitor your progress with real-time updates and analytics.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Achieve Success</h3>
+                    <p class="text-gray-600 dark:text-gray-300">Celebrate your achievements and set new goals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-indigo-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Ready to Start Your Journey?</h2>
+            <p class="text-xl text-blue-100 mb-8">Join thousands of successful goal achievers today.</p>
+            <Link
+                v-if="canRegister"
+                :href="route('register')"
+                class="inline-flex items-center justify-center px-8 py-3 text-base font-medium text-blue-600 bg-white rounded-lg hover:bg-blue-50 transition-all duration-200"
+            >
+                Get Started Now
+            </Link>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300">
+        <div class="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-4">GoalTracker</h3>
+                    <p class="text-sm">Your personal goal tracking companion for success.</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Features</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Goal Setting</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Progress Tracking</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Analytics</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Reminders</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Resources</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Documentation</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Blog</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Support</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">FAQ</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-4">Legal</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-blue-400 transition-colors">Cookie Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
+                <p>&copy; {{ new Date().getFullYear() }} GoalTracker. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 </template>
-<style>
- 
 
+<style>
+.bg-gradient-to-r {
+    background-size: 200% 200%;
+    animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
 </style>
+
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 
@@ -108,11 +250,4 @@ defineProps({
         required: true,
     },
 });
-
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
-}
 </script>
