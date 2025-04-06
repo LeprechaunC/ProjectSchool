@@ -33,8 +33,8 @@ const submit = () => {
     <GuestLayout>
         <Head title="Log in" />
 
-        <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-xl">
-            <div class="w-full sm:max-w-md mt-6 px-6 py-8 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-xl">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+            <div class="w-full sm:max-w-2xl mt-6 px-8 py-8 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-xl">
                 <div class="mb-8 text-center">
                     <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
                     <p class="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account to continue</p>

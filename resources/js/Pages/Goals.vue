@@ -23,9 +23,7 @@ import Goals from '@/Components/Goal/AllGoalsDashboard.vue';
                 <div
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
-                    <div class="p-6 text-gray-900">
-                        Welcome!
-                    </div>
+                    
                   <Goals></Goals>
                 </div>
             </div>

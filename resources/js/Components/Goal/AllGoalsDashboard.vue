@@ -1,86 +1,227 @@
 <template>
-  <div>
-    <div v-if="loading">
-      <p>Loading...</p>
+  <div class="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
+    <div v-if="loading" class="flex justify-center items-center h-64">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
-    <div v-else>
-      <label for="team-select">Select Team:</label>
-      <select v-model="selectedTeam" @change="fetchGoals" id="team-select" class="border p-2 mb-2 w-full">
-        <option value="personal">Personal</option>
-        <option v-for="team in teams" :key="team.id" :value="team.id">
-          {{ team.name }}
-        </option>
-      </select>
-
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="Search goals..."
-        class="border p-2 mb-2 w-full"
-      />
-
-      <!-- Sorting Options -->
-      <label for="sort-select">Sort By:</label>
-      <select v-model="sortOption" id="sort-select" class="border p-2 mb-2 w-full">
-        <option value="az">Title (A-Z)</option>
-        <option value="za">Title (Z-A)</option>
-        <option value="oldest">Start Date (Oldest First)</option>
-        <option value="youngest">Start Date (Youngest First)</option>
-      </select>
-
-      <div v-if="filteredGoals.length > 0">
-        <h3>Goals for: {{ selectedTeamName }}</h3>
-        <ul>
-          <li v-for="goal in paginatedGoals" :key="goal.id" @click="openGoalModal(goal)">
-            <h4>{{ goal.title }}</h4>
-            <p>{{ goal.description }}</p>
-            <p><strong>Start Time:</strong> {{ goal.start_time }}</p>
-            <p><strong>End Time:</strong> {{ goal.end_time }}</p>
-          </li>
-        </ul>
-
-        <!-- Pagination Controls -->
-        <div v-if="totalPages > 1" class="pagination">
-          <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">Previous</button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">Next</button>
+    <div v-else class="max-w-4xl mx-auto">
+      <!-- Header Section -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">All Goals Dashboard</h2>
+        
+        <!-- Controls Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 mb-6">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Team Selector -->
+            <div>
+              <label for="team-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Team</label>
+              <select 
+                v-model="selectedTeam" 
+                @change="fetchGoals" 
+                id="team-select" 
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="personal">Personal</option>
+                <option v-for="team in teams" :key="team.id" :value="team.id">
+                  {{ team.name }}
+                </option>
+              </select>
+            </div>
+            
+            <!-- Search Input -->
+            <div>
+              <label for="search-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Search Goals</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  id="search-input"
+                  placeholder="Search goals..."
+                  class="w-full pl-10 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+            
+            <!-- Sort Options -->
+            <div>
+              <label for="sort-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sort By</label>
+              <select 
+                v-model="sortOption" 
+                id="sort-select" 
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="az">Title (A-Z)</option>
+                <option value="za">Title (Z-A)</option>
+                <option value="oldest">Start Date (Oldest First)</option>
+                <option value="youngest">Start Date (Youngest First)</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div v-else>
-        <p>No goals available for the selected option.</p>
+      <!-- Goals List Section -->
+      <div v-if="filteredGoals.length > 0">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Goals for: {{ selectedTeamName }}</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">{{ filteredGoals.length }} goals found</span>
+        </div>
+        
+        <div class="space-y-4">
+          <div 
+            v-for="goal in paginatedGoals" 
+            :key="goal.id" 
+            @click="openGoalModal(goal)"
+            class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer border border-gray-100 dark:border-gray-700"
+          >
+            <div class="flex justify-between items-start">
+              <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ goal.title }}</h4>
+              <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                {{ formatDate(goal.start_time) }}
+              </span>
+            </div>
+            <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{{ goal.description }}</p>
+            <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
+              <span><strong>Start:</strong> {{ formatDateTime(goal.start_time) }}</span>
+              <span><strong>End:</strong> {{ formatDateTime(goal.end_time) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pagination Controls -->
+        <div v-if="totalPages > 1" class="mt-6 flex justify-center items-center space-x-2">
+          <button 
+            @click="changePage(currentPage - 1)" 
+            :disabled="currentPage === 1"
+            class="px-3 py-1 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Previous
+          </button>
+          <span class="text-sm text-gray-600 dark:text-gray-400">Page {{ currentPage }} of {{ totalPages }}</span>
+          <button 
+            @click="changePage(currentPage + 1)" 
+            :disabled="currentPage === totalPages"
+            class="px-3 py-1 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+
+      <div v-else class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-8 text-center">
+        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <h3 class="mt-2 text-lg font-medium text-gray-900 dark:text-white">No goals available</h3>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">No goals found for the selected options.</p>
       </div>
     </div>
 
     <!-- Fullscreen Modal -->
-    <div v-if="isModalVisible" class="fullscreen-modal-overlay" @click.self="closeModal">
-      <div class="fullscreen-modal">
-        <button @click="closeModal" class="close-button">&times;</button>
-
-        <h2 class="text-xl font-semibold mb-4">{{ selectedGoal.title }}</h2>
-
-        <div v-if="isEditing">
-          <input v-model="selectedGoal.title" class="border p-2 mb-2 w-full" placeholder="Goal Title" />
-          <textarea v-model="selectedGoal.description" class="border p-2 mb-2 w-full" placeholder="Goal Description"></textarea>
-          <input v-model="selectedGoal.start_time" type="datetime-local" class="border p-2 mb-2 w-full" />
-          <input v-model="selectedGoal.end_time" type="datetime-local" class="border p-2 mb-2 w-full" />
-
-          <div class="mt-4 flex justify-between space-x-2">
-            <button @click="saveGoal" class="px-4 py-2 bg-green-600 text-white rounded">Save</button>
-            <button @click="cancelEdit" class="px-4 py-2 bg-gray-600 text-white rounded">Cancel</button>
+    <div v-if="isModalVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click.self="closeModal">
+      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ selectedGoal.title }}</h2>
+            <button @click="closeModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
-        </div>
 
-        <div v-else>
-          <p>{{ selectedGoal.description }}</p>
-          <p><strong>Start Time:</strong> {{ selectedGoal.start_time }}</p>
-          <p><strong>End Time:</strong> {{ selectedGoal.end_time }}</p>
+          <div v-if="isEditing" class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Goal Title</label>
+              <input 
+                v-model="selectedGoal.title" 
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Goal Title" 
+              />
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <textarea 
+                v-model="selectedGoal.description" 
+                class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Goal Description"
+                rows="4"
+              ></textarea>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+                <input 
+                  v-model="selectedGoal.start_time" 
+                  type="datetime-local" 
+                  class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500" 
+                />
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+                <input 
+                  v-model="selectedGoal.end_time" 
+                  type="datetime-local" 
+                  class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500" 
+                />
+              </div>
+            </div>
 
-          <div class="mt-4 flex justify-end space-x-2">
-            <button @click="startEdit" class="px-4 py-2 bg-blue-600 text-white rounded">Edit</button>
-            <button @click="deleteGoal(selectedGoal.id)" class="px-4 py-2 bg-red-600 text-white rounded">Delete</button>
-            <button @click="closeModal" class="px-4 py-2 bg-gray-600 text-white rounded">Back</button>
+            <div class="flex justify-end space-x-3 mt-6">
+              <button 
+                @click="cancelEdit" 
+                class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+              >
+                Cancel
+              </button>
+              <button 
+                @click="saveGoal" 
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+
+          <div v-else class="space-y-4">
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <p class="text-gray-700 dark:text-gray-300">{{ selectedGoal.description }}</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Start Time</h4>
+                <p class="text-gray-900 dark:text-white">{{ formatDateTime(selectedGoal.start_time) }}</p>
+              </div>
+              
+              <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">End Time</h4>
+                <p class="text-gray-900 dark:text-white">{{ formatDateTime(selectedGoal.end_time) }}</p>
+              </div>
+            </div>
+
+            <div class="flex justify-end space-x-3 mt-6">
+              <button 
+                @click="deleteGoal(selectedGoal.id)" 
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+              <button 
+                @click="startEdit" 
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Edit
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -226,148 +367,52 @@ export default {
         this.currentPage = page;
       }
     },
+    
+    formatDate(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    },
+    
+    formatDateTime(dateString) {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    }
   },
 };
 </script>
 
 <style scoped>
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 10px;
-}
-.pagination button {
-  padding: 5px 10px;
-  margin: 0 5px;
-}
-</style>
-
-
-
-
-<style scoped>
-.fullscreen-modal-overlay {
-  position: fixed; /* Fix position to the screen */
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
-  display: flex;
-  justify-content: center;
-  align-items: center; /* Center content vertically */
-  z-index: 9999; /* Ensure it's on top of other content */
+/* Custom scrollbar for the modal */
+.overflow-y-auto::-webkit-scrollbar {
+  width: 6px;
 }
 
-.fullscreen-modal {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 80%;
-  max-width: 600px; /* You can adjust this value to control the width */
-  position: relative;
-  overflow-y: auto;
-  
-  z-index: 10000; /* Ensure the modal itself is above the overlay */
+.overflow-y-auto::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
 }
 
-
-/* Close Button */
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #333;
-  cursor: pointer;
-}
-/* General Styles */
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f4f7f6;
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
 }
 
-h3 {
-  font-size: 24px;
-  color: #333;
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
-h4 {
-  font-size: 18px;
-  margin: 10px 0;
-  color: #555;
+/* Dark mode scrollbar */
+.dark .overflow-y-auto::-webkit-scrollbar-track {
+  background: #374151;
 }
 
-p {
-  font-size: 14px;
-  color: #666;
+.dark .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #4b5563;
 }
 
-/* Team Selection Styles */
-#team-select {
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin: 10px 0;
-  width: 100%;
-  max-width: 300px;
-  background-color: #fff;
-}
-
-label {
-  font-size: 16px;
-  color: #333;
-  display: block;
-  margin-bottom: 5px;
-}
-
-/* Goal List Styles */
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-li {
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  margin: 10px 0;
-  padding: 15px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.3s;
-}
-
-li:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Goal Information Styles */
-strong {
-  font-weight: bold;
-  color: #333;
-}
-
-/* No Goals Message */
-div.v-else {
-  text-align: center;
-  font-size: 16px;
-  color: #999;
-  margin-top: 20px;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-  #team-select {
-    width: 100%;
-  }
-
-  .container {
-    padding: 15px;
-  }
+.dark .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 </style>

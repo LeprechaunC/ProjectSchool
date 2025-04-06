@@ -6,6 +6,7 @@
     use Inertia\Inertia;
     use App\Http\Controllers\GoalController;
     use App\Http\Controllers\TeamController;
+    use App\Http\Controllers\TeamMessageController;
 
     // Default home page
     Route::get('/', function () {
@@ -86,7 +87,10 @@
         Route::post('/api/teams/{teamId}/invite', [TeamController::class, 'generateInviteCode']);
 
         Route::post('/api/teamsMake', [TeamController::class, 'createTeam']);
-        
+
+        Route::get('/api/teams/{team}/messages', [TeamMessageController::class, 'index']);
+        Route::post('/api/teams/{team}/messages', [TeamMessageController::class, 'store']);
+     
         Route::post('/profile/picture', [ProfileController::class, 'updateProfilePicture'])
     ->name('profile.picture.update')
     ->middleware('auth');
@@ -94,7 +98,8 @@
 
  
    
-   
+ 
+  
   
  
      require __DIR__.'/auth.php';

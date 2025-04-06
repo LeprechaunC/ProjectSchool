@@ -27,6 +27,29 @@
         <div class="calendar-container bg-white dark:bg-gray-800 rounded-lg shadow">
           <FullCalendar :options="calendarOptions" class="p-4" />
         </div>
+
+        <!-- Add this after the calendar container div -->
+        <div class="mt-6">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Team Chat</h3>
+            <button 
+              @click="showChat = !showChat" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              {{ showChat ? 'Hide Chat' : 'Show Chat' }}
+            </button>
+          </div>
+          
+          <div v-if="showChat && selectedTeam !== 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <TeamChat :team="selectedTeam" />
+          </div>
+          <div v-else-if="showChat && selectedTeam === 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+            <p class="text-gray-600 dark:text-gray-400">Select a team to view the chat.</p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -122,53 +145,367 @@
   </div>
 </template>
 
-// ... existing code ...
+<script>
+import axios from "axios";
+import FullCalendar from "@fullcalendar/vue3";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import FullscreenGoalModal from "../Goal/FullScreenGoal.vue"; // Import the new component
+import SideViewDashboard from "../Goal/SideViewDashboard.vue";
+import TeamChat from "./TeamChat.vue";
+
+export default {
+  components: {
+    FullCalendar,
+    FullscreenGoalModal,
+    SideViewDashboard,
+    TeamChat
+  },
+  data() {
+    return {
+      teams: [],
+      selectedTeam: JSON.parse(localStorage.getItem("selectedTeam")) || "none",
+      goals: [],
+      calendarOptions: {
+        plugins: [dayGridPlugin, interactionPlugin],
+        initialView: "dayGridMonth",
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek'
+        },
+        buttonText: {
+          today: 'Today',
+          month: 'Month',
+          week: 'Week'
+        },
+        firstDay: 1, // Start week on Monday
+        height: 'auto',
+        aspectRatio: 1.8,
+        expandRows: true,
+        stickyHeaderDates: true,
+        dayMaxEvents: true,
+        dateClick: this.handleDateClick,
+        eventClick: this.handleEventClick,
+        eventContent: this.renderEventContent,
+        events: [],
+        eventTimeFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          meridiem: false
+        },
+        eventDisplay: 'block',
+        eventDidMount: (info) => {
+          // Add tooltip
+          const tooltip = document.createElement('div');
+          tooltip.className = 'fc-tooltip';
+          tooltip.innerHTML = `
+            <div class="p-2">
+              <div class="font-semibold">${info.event.title}</div>
+              <div class="text-sm">${info.event.extendedProps.description || ''}</div>
+            </div>
+          `;
+          info.el.appendChild(tooltip);
+        }
+      },
+      showModal: false,
+      fullscreenModalVisible: false,
+      selectedGoal: null,
+      newGoal: {
+        title: "",
+        description: "",
+        start_time: "",
+        end_time: "",
+      },
+      selectedDate: null,
+      showChat: false,
+    };
+  },
+  mounted() {
+    this.fetchTeams();
+    if (this.selectedTeam) {
+      this.fetchGoals();
+    }
+  },
+  methods: {
+    fetchTeams() {
+      axios
+        .post("/teams")
+        .then((response) => {
+          this.teams = response.data;
+        })
+        .catch((error) => {
+          console.error("Error fetching teams:", error);
+        });
+    },
+
+    fetchGoals() {
+      const url =
+        this.selectedTeam === "none"
+          ? "/api/goals/user/allusergoals"
+          : `/api/goals/${this.selectedTeam.id}`;
+
+      axios
+        .get(url)
+        .then((response) => {
+          this.goals = response.data;
+          this.updateCalendarEvents();
+        })
+        .catch((error) => {
+          console.error("Error fetching goals:", error);
+        });
+    },
+
+    updateCalendarEvents() {
+      this.calendarOptions.events = this.goals.map((goal) => ({
+        id: goal.id,
+        title: goal.title,
+        description: goal.description,
+        start: goal.start_time,  // Ensure this is passed as the event's start time
+        end: goal.end_time,      // Ensure this is passed as the event's end time
+        goalId: goal.id,
+        done: goal.done,         // Include goal completion status
+      }));
+    },
+
+    renderEventContent(arg) {
+      const goalId = arg.event.extendedProps.goalId;
+      const isDone = arg.event.extendedProps.done;
+
+      // Create container div
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.alignItems = "center"; // Ensures vertical alignment
+      container.style.justifyContent = "space-between"; // Aligns items to the edges
+      container.style.width = "100%"; // Ensures full width
+
+      // Create text node for event title
+      const title = document.createElement("span");
+      title.innerText = arg.event.title;
+
+      // Create button element
+      const button = document.createElement("button");
+      button.innerText = isDone ? "✔" : "✖";
+      button.style.padding = "2px 6px";
+      button.style.border = "none";
+      button.style.cursor = "pointer";
+      button.style.color = isDone ? "green" : "red";
+      button.onclick = (e) => {
+        e.stopPropagation();
+        this.toggleGoalStatus(goalId, !isDone);
+      };
+
+      // Append elements to container
+      container.appendChild(title);
+      container.appendChild(button);
+
+      return { domNodes: [container] };
+    },
+
+    toggleGoalStatus(goalId, newStatus) {
+      axios
+        .patch(`/api/goals/${goalId}/done`, { done: newStatus }) // Send PATCH request to toggle status
+        .then(() => {
+          // Update the local goals array with the new status
+          this.goals = this.goals.map((goal) =>
+            goal.id === goalId ? { ...goal, done: newStatus } : goal
+          );
+          this.updateCalendarEvents(); // Refresh calendar events with updated status
+        })
+        .catch((error) => {
+          console.error("Error updating goal status:", error);
+        });
+    },
+    handleDateClick(info) {
+      // Extract clicked date and ensure correct time zone handling
+      const clickedDate = new Date(info.dateStr + "T00:00:00Z"); // Forces UTC interpretation
+
+      // Convert to local date string without shifting the day
+      const localDateStr = clickedDate.toISOString().split("T")[0];
+
+      // Set start and end times explicitly
+      this.newGoal.start_time = `${localDateStr}T00:00`;
+      this.newGoal.end_time = `${localDateStr}T23:59`;
+
+      this.selectedDate = localDateStr;
+      this.showModal = true;
+    },
+
+    handleEventClick(info) {
+      const goalId = info.event.extendedProps.goalId;
+      const clickedGoal = this.goals.find((goal) => goal.id === goalId);
+
+      if (clickedGoal) {
+        this.selectedGoal = clickedGoal;
+        this.fullscreenModalVisible = true;
+      }
+    },
+
+    submitGoal() {
+      if (
+        !this.selectedTeam ||
+        !this.newGoal.title ||
+        !this.newGoal.start_time ||
+        !this.newGoal.end_time
+      ) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const startDate = new Date(this.newGoal.start_time);
+      const endDate = new Date(this.newGoal.end_time);
+      const currentDate = new Date();
+
+      // Validation checks
+      if (startDate > endDate) {
+        alert("Error: Start date cannot be after the end date.");
+        return;
+      }
+
+      if (startDate.getFullYear() > endDate.getFullYear()) {
+        alert("Error: The start year cannot be after the end year.");
+        return;
+      }
+
+      if (startDate.getFullYear() < currentDate.getFullYear() - 1) {
+        alert("Error: Start date is too far in the past.");
+        return;
+      }
+
+      const teamId =
+        this.selectedTeam && this.selectedTeam !== "none"
+          ? this.selectedTeam.id
+          : null;
+
+      const goalData = {
+        title: this.newGoal.title,
+        description: this.newGoal.description,
+        priority: this.newGoal.priority,  
+        start_time: this.newGoal.start_time,
+        end_time: this.newGoal.end_time,
+        team_id: teamId,
+        user_id: null,
+        done: false
+      };
+
+      axios
+        .post("/api/goals", goalData)
+        .then((response) => {
+          this.goals.push(response.data);
+          this.fetchGoals();
+          this.resetGoalForm();
+          this.showModal = false;
+        })
+        .catch((error) => {
+          console.error("Error submitting goal:", error);
+        });
+    },
+
+    resetGoalForm() {
+      this.newGoal = {
+        title: "",
+        description: "",
+        start_time: "",
+        end_time: "",
+      };
+      this.selectedDate = null;
+    },
+
+    closeFullscreenModal() {
+      this.fullscreenModalVisible = false;
+    },
+  },
+  watch: {
+    selectedTeam(newTeam) {
+      if (newTeam) {
+        localStorage.setItem("selectedTeam", JSON.stringify(newTeam));
+        this.fetchGoals();
+      }
+    },
+  },
+};
+</script>
 
 <style scoped>
 .calendar-container {
   overflow: hidden;
   border-radius: 0.5rem;
+  background: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
 :deep(.fc) {
   font-family: inherit;
+  --fc-border-color: #e5e7eb;
+  --fc-button-bg-color: #3b82f6;
+  --fc-button-border-color: #3b82f6;
+  --fc-button-hover-bg-color: #2563eb;
+  --fc-button-hover-border-color: #2563eb;
+  --fc-button-active-bg-color: #1d4ed8;
+  --fc-button-active-border-color: #1d4ed8;
 }
 
 :deep(.fc-toolbar-title) {
   font-size: 1.25rem !important;
   font-weight: 600 !important;
+  color: #111827;
 }
 
 :deep(.fc-button-primary) {
-  background-color: #3b82f6 !important;
-  border-color: #3b82f6 !important;
+  text-transform: capitalize !important;
+  font-weight: 500 !important;
+  padding: 0.5rem 1rem !important;
+  border-radius: 0.375rem !important;
+  transition: all 0.2s !important;
 }
 
-:deep(.fc-button-primary:hover) {
-  background-color: #2563eb !important;
-  border-color: #2563eb !important;
+:deep(.fc-button-primary:not(:disabled):hover) {
+  background-color: var(--fc-button-hover-bg-color) !important;
+  border-color: var(--fc-button-hover-border-color) !important;
+}
+
+:deep(.fc-button-primary:not(:disabled):active) {
+  background-color: var(--fc-button-active-bg-color) !important;
+  border-color: var(--fc-button-active-border-color) !important;
 }
 
 :deep(.fc-daygrid-day) {
   min-height: 120px;
+  transition: background-color 0.2s;
+}
+
+:deep(.fc-daygrid-day:hover) {
+  background-color: #f9fafb;
 }
 
 :deep(.fc-event) {
   border-radius: 0.375rem;
-  padding: 0.25rem;
+  padding: 0.25rem 0.5rem;
   margin: 0.125rem 0;
   border: none;
   background-color: #3b82f6;
   color: white;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+:deep(.fc-event:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.fc-event-title) {
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 :deep(.fc-daygrid-day-number) {
   font-weight: 500;
   color: #6b7280;
+  padding: 0.5rem;
+  transition: all 0.2s;
 }
 
 :deep(.fc-day-today) {
@@ -182,10 +519,28 @@
   padding: 0.25rem 0.5rem;
 }
 
+:deep(.fc-tooltip) {
+  position: absolute;
+  z-index: 1000;
+  background: white;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  pointer-events: none;
+}
+
+:deep(.fc-event:hover .fc-tooltip) {
+  opacity: 1;
+  visibility: visible;
+}
+
 /* Dark mode styles */
 :deep(.dark .fc) {
   background-color: #1f2937;
   color: #f3f4f6;
+  --fc-border-color: #374151;
 }
 
 :deep(.dark .fc-theme-standard td),
@@ -195,6 +550,10 @@
 
 :deep(.dark .fc-daygrid-day) {
   background-color: #1f2937;
+}
+
+:deep(.dark .fc-daygrid-day:hover) {
+  background-color: #374151;
 }
 
 :deep(.dark .fc-day-today) {
@@ -209,6 +568,12 @@
   color: #f3f4f6;
 }
 
+:deep(.dark .fc-tooltip) {
+  background: #374151;
+  color: #f3f4f6;
+  border: 1px solid #4b5563;
+}
+
 :deep(.dark .fc-button-primary) {
   background-color: #3b82f6 !important;
   border-color: #3b82f6 !important;
@@ -218,307 +583,9 @@
   background-color: #2563eb !important;
   border-color: #2563eb !important;
 }
+
+:deep(.dark .fc-button-primary:active) {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
 </style>
-  <script>
-  import axios from "axios";
-  import FullCalendar from "@fullcalendar/vue3";
-  import dayGridPlugin from "@fullcalendar/daygrid";
-  import interactionPlugin from "@fullcalendar/interaction";
-  import FullscreenGoalModal from "../Goal/FullScreenGoal.vue"; // Import the new component
-  import SideViewDashboard from "../Goal/SideViewDashboard.vue";
-  export default {
-    components: {
-      FullCalendar,
-      FullscreenGoalModal,
-      SideViewDashboard
-    },
-    data() {
-      return {
-        teams: [],
-        selectedTeam: JSON.parse(localStorage.getItem("selectedTeam")) || "none",
-        goals: [],
-        calendarOptions: {
-          plugins: [dayGridPlugin, interactionPlugin],
-          initialView: "dayGridMonth",
-  
-    
-          dateClick: this.handleDateClick,
-          eventClick: this.handleEventClick,
-          eventContent: this.renderEventContent, // Custom event rendering
-          events: [],
-        },
-        showModal: false,
-        fullscreenModalVisible: false,
-        selectedGoal: null,
-        newGoal: {
-          title: "",
-          description: "",
-          start_time: "",
-          end_time: "",
-        },
-        selectedDate: null,
-      };
-    },
-    mounted() {
-      this.fetchTeams();
-      if (this.selectedTeam) {
-        this.fetchGoals();
-      }
-    },
-    methods: {
-      fetchTeams() {
-        axios
-          .post("/teams")
-          .then((response) => {
-            this.teams = response.data;
-          })
-          .catch((error) => {
-            console.error("Error fetching teams:", error);
-          });
-      },
-
-      fetchGoals() {
-        const url =
-          this.selectedTeam === "none"
-            ? "/api/goals/user/allusergoals"
-            : `/api/goals/${this.selectedTeam.id}`;
-
-        axios
-          .get(url)
-          .then((response) => {
-            this.goals = response.data;
-            this.updateCalendarEvents();
-          })
-          .catch((error) => {
-            console.error("Error fetching goals:", error);
-          });
-      },
-
-      updateCalendarEvents() {
-        this.calendarOptions.events = this.goals.map((goal) => ({
-          id: goal.id,
-          title: goal.title,
-          description: goal.description,
-          start: goal.start_time,  // Ensure this is passed as the event's start time
-          end: goal.end_time,      // Ensure this is passed as the event's end time
-          goalId: goal.id,
-          done: goal.done,         // Include goal completion status
-        }));
-      },
-
-      renderEventContent(arg) {
-    const goalId = arg.event.extendedProps.goalId;
-    const isDone = arg.event.extendedProps.done;
-
-    // Create container div
-    const container = document.createElement("div");
-    container.style.display = "flex";
-    container.style.alignItems = "center"; // Ensures vertical alignment
-    container.style.justifyContent = "space-between"; // Aligns items to the edges
-    container.style.width = "100%"; // Ensures full width
-
-    // Create text node for event title
-    const title = document.createElement("span");
-    title.innerText = arg.event.title;
-
-    // Create button element
-    const button = document.createElement("button");
-    button.innerText = isDone ? "✔" : "✖";
-    button.style.padding = "2px 6px";
-    button.style.border = "none";
-    button.style.cursor = "pointer";
-    button.style.color = isDone ? "green" : "red";
-    button.onclick = (e) => {
-      e.stopPropagation();
-      this.toggleGoalStatus(goalId, !isDone);
-    };
-
-    // Append elements to container
-    container.appendChild(title);
-    container.appendChild(button);
-
-    return { domNodes: [container] };
-  },
-
-
-      toggleGoalStatus(goalId, newStatus) {
-        axios
-          .patch(`/api/goals/${goalId}/done`, { done: newStatus }) // Send PATCH request to toggle status
-          .then(() => {
-            // Update the local goals array with the new status
-            this.goals = this.goals.map((goal) =>
-              goal.id === goalId ? { ...goal, done: newStatus } : goal
-            );
-            this.updateCalendarEvents(); // Refresh calendar events with updated status
-          })
-          .catch((error) => {
-            console.error("Error updating goal status:", error);
-          });
-      },
-      handleDateClick(info) {
-    // Extract clicked date and ensure correct time zone handling
-    const clickedDate = new Date(info.dateStr + "T00:00:00Z"); // Forces UTC interpretation
-
-    // Convert to local date string without shifting the day
-    const localDateStr = clickedDate.toISOString().split("T")[0];
-
-    // Set start and end times explicitly
-    this.newGoal.start_time = `${localDateStr}T00:00`;
-    this.newGoal.end_time = `${localDateStr}T23:59`;
-
-    this.selectedDate = localDateStr;
-    this.showModal = true;
-  },
-
-
-
-      handleEventClick(info) {
-        const goalId = info.event.extendedProps.goalId;
-        const clickedGoal = this.goals.find((goal) => goal.id === goalId);
-
-        if (clickedGoal) {
-          this.selectedGoal = clickedGoal;
-          this.fullscreenModalVisible = true;
-        }
-      },
-
-      submitGoal() {
-    if (
-      !this.selectedTeam ||
-      !this.newGoal.title ||
-      !this.newGoal.start_time ||
-      !this.newGoal.end_time
-    ) {
-      alert("Please fill in all fields.");
-      return;
-    }
-
-    const startDate = new Date(this.newGoal.start_time);
-    const endDate = new Date(this.newGoal.end_time);
-    const currentDate = new Date();
-
-    // Validation checks
-    if (startDate > endDate) {
-      alert("Error: Start date cannot be after the end date.");
-      return;
-    }
-
-    if (startDate.getFullYear() > endDate.getFullYear()) {
-      alert("Error: The start year cannot be after the end year.");
-      return;
-    }
-
-    if (startDate.getFullYear() < currentDate.getFullYear() - 1) {
-      alert("Error: Start date is too far in the past.");
-      return;
-    }
-
-    const teamId =
-      this.selectedTeam && this.selectedTeam !== "none"
-        ? this.selectedTeam.id
-        : null;
-
-    const goalData = {
-      title: this.newGoal.title,
-      description: this.newGoal.description,
-      priority: this.newGoal.priority,  
-      start_time: this.newGoal.start_time,
-      end_time: this.newGoal.end_time,
-      team_id: teamId,
-      user_id: null,
-      done: false
-    };
-
-    axios
-      .post("/api/goals", goalData)
-      .then((response) => {
-        this.goals.push(response.data);
-        this.fetchGoals();
-        this.resetGoalForm();
-        this.showModal = false;
-      })
-      .catch((error) => {
-        console.error("Error submitting goal:", error);
-      });
-  },
-
-
-      resetGoalForm() {
-        this.newGoal = {
-          title: "",
-          description: "",
-          start_time: "",
-          end_time: "",
-        };
-        this.selectedDate = null;
-      },
-
-      closeFullscreenModal() {
-        this.fullscreenModalVisible = false;
-      },
-    },
-    watch: {
-      selectedTeam(newTeam) {
-        if (newTeam) {
-          localStorage.setItem("selectedTeam", JSON.stringify(newTeam));
-          this.fetchGoals();
-        }
-      },
-    },
-  };
-  </script>
-
-  <style scoped>
-
-  .dashboard-container {
-    display: flex;
-    align-items: flex-start; /* Align items to top */
-  }
-
-  .side-view {
-    width: 250px; /* Adjust as needed */
-    min-height: 100vh; /* Full height */
-    background: #f3f4f6; /* Light gray background */
-  }
-  .goal-dashboard {
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-
-  .fullcalendar {
-    max-width: 100%;
-    margin: 0 auto;
-  }
-
-  select {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  /* Modal styles */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 99;
-  }
-
-  .modal {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 400px;
-    position: relative;
-  }
-
-  </style>
