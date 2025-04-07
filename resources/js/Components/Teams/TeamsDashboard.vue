@@ -202,9 +202,9 @@
                 Members
               </h5>
               
-              <div class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2">
+              <div class="space-y-3 mb-6 h-[200px] overflow-y-auto pr-2">
                 <div 
-                  v-for="user in team.users" 
+                  v-for="user in paginatedMembers(team)" 
                   :key="user.id" 
                   class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
                 >
@@ -260,6 +260,35 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Pagination Controls -->
+              <div v-if="team.users.length > 5" class="flex justify-center items-center space-x-2 mb-4">
+                <button 
+                  @click="prevPage(team.id)"
+                  :disabled="currentPages[team.id] === 1"
+                  class="px-2 py-1 text-sm rounded-md"
+                  :class="{
+                    'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300': currentPages[team.id] > 1,
+                    'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed': currentPages[team.id] === 1
+                  }"
+                >
+                  Previous
+                </button>
+                <span class="text-sm text-gray-600 dark:text-gray-400">
+                  Page {{ currentPages[team.id] }} of {{ Math.ceil(team.users.length / 5) }}
+                </span>
+                <button 
+                  @click="nextPage(team.id)"
+                  :disabled="currentPages[team.id] >= Math.ceil(team.users.length / 5)"
+                  class="px-2 py-1 text-sm rounded-md"
+                  :class="{
+                    'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300': currentPages[team.id] < Math.ceil(team.users.length / 5),
+                    'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed': currentPages[team.id] >= Math.ceil(team.users.length / 5)
+                  }"
+                >
+                  Next
+                </button>
+              </div>
               
               <!-- Team Actions -->
               <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 space-y-3">
@@ -304,7 +333,7 @@
 
     <!-- Add this at the end of the template, before the closing </div> -->
     <Modal :show="showChat" @close="closeChat">
-      <div class="h-[600px] w-[800px]">
+      <div class="mb-6 transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:mx-auto sm:w-full sm:max-w-2xl">
         <TeamChat 
           v-if="selectedTeamForChat"
           :team="selectedTeamForChat"
@@ -380,6 +409,7 @@ export default {
       showEditNameModal: false,
       editingTeamName: '',
       selectedTeamForEdit: null,
+      currentPages: {},
       notification: {
         show: false,
         message: '',
@@ -594,6 +624,28 @@ export default {
       setTimeout(() => {
         this.notification.show = false;
       }, 3000);
+    },
+
+    paginatedMembers(team) {
+      if (!this.currentPages[team.id]) {
+        this.currentPages[team.id] = 1;
+      }
+      const start = (this.currentPages[team.id] - 1) * 5;
+      const end = start + 5;
+      return team.users.slice(start, end);
+    },
+
+    prevPage(teamId) {
+      if (this.currentPages[teamId] > 1) {
+        this.currentPages[teamId]--;
+      }
+    },
+
+    nextPage(teamId) {
+      const team = this.teams.find(t => t.id === teamId);
+      if (team && this.currentPages[teamId] < Math.ceil(team.users.length / 5)) {
+        this.currentPages[teamId]++;
+      }
     },
   }
 };

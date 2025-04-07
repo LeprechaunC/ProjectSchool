@@ -422,6 +422,29 @@ export default {
           }
         });
         messages.value.push(response.data);
+        
+        // Check if the conversation already exists in the list
+        const conversationExists = conversations.value.some(c => c.user?.id === selectedUser.value.id);
+        
+        // If the conversation doesn't exist, add it to the list
+        if (!conversationExists) {
+          const newConversation = {
+            user: selectedUser.value,
+            last_message: response.data,
+            unread_count: 0
+          };
+          conversations.value.unshift(newConversation);
+        } else {
+          // Update the last message in the existing conversation
+          const conversationIndex = conversations.value.findIndex(c => c.user?.id === selectedUser.value.id);
+          if (conversationIndex !== -1) {
+            conversations.value[conversationIndex].last_message = response.data;
+            // Move the conversation to the top of the list
+            const conversation = conversations.value.splice(conversationIndex, 1)[0];
+            conversations.value.unshift(conversation);
+          }
+        }
+        
         newMessage.value = '';
         removeSelectedImage();
         scrollToBottom();

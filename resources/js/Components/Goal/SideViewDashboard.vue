@@ -3,7 +3,7 @@
     <!-- Toggle Button -->
     <button 
       class="toggle-button" 
-      @click="isOpen = !isOpen"
+      @click="toggleSidebar"
       :class="{ 'toggle-open': isOpen }"
     >
       <svg 
@@ -22,8 +22,8 @@
     <div class="sidebar-content">
       <div class="p-5">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Filters & Labels</h3>
-          <span class="text-sm text-gray-500 dark:text-gray-400">{{ selectedFiltersCount }} active</span>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Filters</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">{{ filtersCount }} active</span>
         </div>
 
         <!-- Priority Filter -->
@@ -35,27 +35,10 @@
               :key="priority.value"
               @click="togglePriority(priority.value)"
               class="priority-button"
-              :class="{ 'priority-selected': selectedPriority === priority.value }"
+              :class="{ 'priority-selected': filters.priorities.includes(priority.value) }"
             >
               <span class="priority-icon">{{ priority.icon }}</span>
               <span class="priority-text">{{ priority.label }}</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Type Filter -->
-        <div class="filter-section">
-          <label class="filter-label">Goal Type</label>
-          <div class="type-options">
-            <button 
-              v-for="type in types" 
-              :key="type.value"
-              @click="toggleType(type.value)"
-              class="type-button"
-              :class="{ 'type-selected': selectedType === type.value }"
-            >
-              <span class="type-icon">{{ type.icon }}</span>
-              <span class="type-text">{{ type.label }}</span>
             </button>
           </div>
         </div>
@@ -68,7 +51,7 @@
               <label class="date-label">From</label>
               <input 
                 type="date" 
-                v-model="dateRange.start" 
+                v-model="filters.dateRange.start" 
                 class="date-input"
               />
             </div>
@@ -76,7 +59,7 @@
               <label class="date-label">To</label>
               <input 
                 type="date" 
-                v-model="dateRange.end" 
+                v-model="filters.dateRange.end" 
                 class="date-input"
               />
             </div>
@@ -87,7 +70,7 @@
         <div class="filter-section">
           <div class="flex items-center justify-between mb-2">
             <label class="filter-label">Labels</label>
-            <span class="text-xs text-gray-500 dark:text-gray-400">{{ selectedLabels.length }} selected</span>
+            <span class="text-xs text-gray-500 dark:text-gray-400">{{ filters.labels.length }} selected</span>
           </div>
           <div class="labels-container">
             <div class="labels-input-group">
@@ -108,9 +91,9 @@
                 </svg>
               </button>
             </div>
-            <div class="selected-labels" v-if="selectedLabels.length > 0">
+            <div class="selected-labels" v-if="filters.labels.length > 0">
               <div 
-                v-for="(label, index) in selectedLabels" 
+                v-for="(label, index) in filters.labels" 
                 :key="index"
                 class="label-tag"
               >
@@ -131,11 +114,12 @@
           </div>
         </div>
 
-        <!-- Apply Filters Button -->
+        <!-- Filter Actions -->
         <div class="mt-8 flex flex-col gap-3">
           <button 
             @click="applyFilters"
             class="apply-filters-button"
+            :class="{ 'apply-button-highlight': hasChanges }"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
@@ -146,6 +130,7 @@
           <button 
             @click="resetFilters"
             class="reset-filters-button"
+            :disabled="!filtersCount"
           >
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -162,80 +147,138 @@
 export default {
   data() {
     return {
-      isOpen: true,
-      selectedPriority: "",
-      selectedType: "",
-      dateRange: {
-        start: "",
-        end: ""
+      isOpen: false,
+      // Main filter state
+      filters: {
+        priorities: [],
+        dateRange: { start: "", end: "" },
+        labels: []
       },
-      selectedLabels: [],
+      // Applied filters (last emitted filters)
+      appliedFilters: {
+        priorities: [],
+        dateRange: { start: "", end: "" },
+        labels: []
+      },
       newLabel: "",
       priorities: [
         { value: "high", label: "High", icon: "🔴" },
         { value: "medium", label: "Medium", icon: "🟡" },
         { value: "low", label: "Low", icon: "🟢" }
-      ],
-      types: [
-        { value: "project", label: "Project", icon: "🚀" },
-        { value: "task", label: "Task", icon: "✅" },
-        { value: "challenge", label: "Challenge", icon: "🏆" }
       ]
     };
   },
+  created() {
+    // Load sidebar state
+    const savedSidebarState = localStorage.getItem('sidebarState');
+    if (savedSidebarState !== null) {
+      this.isOpen = JSON.parse(savedSidebarState);
+    }
+    
+    // Load saved filters
+    this.loadSavedFilters();
+  },
   computed: {
-    selectedFiltersCount() {
+    filtersCount() {
       let count = 0;
-      if (this.selectedPriority) count++;
-      if (this.selectedType) count++;
-      if (this.dateRange.start || this.dateRange.end) count++;
-      if (this.selectedLabels.length > 0) count++;
+      if (this.filters.priorities.length > 0) count++;
+      if (this.filters.dateRange.start || this.filters.dateRange.end) count++;
+      if (this.filters.labels.length > 0) count++;
       return count;
+    },
+    hasChanges() {
+      // Check if current filters are different from applied filters
+      return JSON.stringify(this.filters) !== JSON.stringify(this.appliedFilters);
     }
   },
   methods: {
+    toggleSidebar() {
+      this.isOpen = !this.isOpen;
+      localStorage.setItem('sidebarState', JSON.stringify(this.isOpen));
+    },
+    
     togglePriority(value) {
-      this.selectedPriority = this.selectedPriority === value ? "" : value;
-      this.applyFilters(); // Auto-apply when priority is changed
-    },
-    toggleType(value) {
-      this.selectedType = this.selectedType === value ? "" : value;
-      this.applyFilters(); // Auto-apply when type is changed
-    },
-    addLabel() {
-      if (this.newLabel.trim() && !this.selectedLabels.includes(this.newLabel)) {
-        this.selectedLabels.push(this.newLabel.trim());
-        this.newLabel = "";
-        this.applyFilters(); // Auto-apply when label is added
+      const index = this.filters.priorities.indexOf(value);
+      if (index === -1) {
+        this.filters.priorities.push(value);
+      } else {
+        this.filters.priorities.splice(index, 1);
       }
     },
+    
+    addLabel() {
+      if (this.newLabel.trim() && !this.filters.labels.includes(this.newLabel.trim())) {
+        this.filters.labels.push(this.newLabel.trim());
+        this.newLabel = "";
+      }
+    },
+    
     removeLabel(index) {
-      this.selectedLabels.splice(index, 1);
-      this.applyFilters(); // Auto-apply when label is removed
+      this.filters.labels.splice(index, 1);
     },
+    
     applyFilters() {
-      this.$emit("filter-applied", {
-        priority: this.selectedPriority,
-        type: this.selectedType,
-        dateRange: this.dateRange,
-        labels: this.selectedLabels,
-      });
+      // Create deep copies to prevent reference issues
+      this.appliedFilters = JSON.parse(JSON.stringify(this.filters));
+      
+      // Save filters to localStorage
+      this.saveFilters();
+      
+      // Emit filter event to parent
+      this.$emit("filter-applied", this.appliedFilters);
     },
+    
     resetFilters() {
-      this.selectedPriority = "";
-      this.selectedType = "";
-      this.dateRange = { start: "", end: "" };
-      this.selectedLabels = [];
-      this.applyFilters();
-    }
-  },
-  watch: {
-    // Watch for date range changes and auto-apply filters
-    'dateRange.start'() {
-      this.applyFilters();
+      // Reset all filter states
+      this.filters = {
+        priorities: [],
+        dateRange: { start: "", end: "" },
+        labels: []
+      };
+      
+      // Apply reset filters
+      this.appliedFilters = JSON.parse(JSON.stringify(this.filters));
+      
+      // Clear saved filters
+      localStorage.removeItem('savedFilters');
+      
+      // Emit reset event
+      this.$emit('filter-applied', this.appliedFilters);
     },
-    'dateRange.end'() {
-      this.applyFilters();
+    
+    saveFilters() {
+      localStorage.setItem('savedFilters', JSON.stringify(this.filters));
+    },
+    
+    loadSavedFilters() {
+      const savedFilters = localStorage.getItem('savedFilters');
+      if (savedFilters) {
+        try {
+          const parsed = JSON.parse(savedFilters);
+          // Validate and merge with defaults
+          this.filters = {
+            priorities: Array.isArray(parsed.priorities) ? parsed.priorities : [],
+            dateRange: {
+              start: parsed.dateRange?.start || "",
+              end: parsed.dateRange?.end || ""
+            },
+            labels: Array.isArray(parsed.labels) ? parsed.labels : []
+          };
+          
+          // Set applied filters to match loaded filters
+          this.appliedFilters = JSON.parse(JSON.stringify(this.filters));
+          
+          // Apply filters on load if any exist
+          if (this.filtersCount > 0) {
+            this.$nextTick(() => {
+              this.applyFilters();
+            });
+          }
+        } catch (e) {
+          console.error('Error loading saved filters:', e);
+          localStorage.removeItem('savedFilters');
+        }
+      }
     }
   }
 };
@@ -262,7 +305,7 @@ export default {
 
 .toggle-button {
   position: absolute;
-  right: -48px;
+  right: -120px;
   top: 20px;
   background: #3b82f6;
   color: white;
@@ -273,6 +316,9 @@ export default {
   font-weight: 500;
   transition: all 0.2s;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 40;
+  width: 120px;
+  justify-content: center;
 }
 
 .toggle-button:hover {
@@ -308,15 +354,13 @@ export default {
   margin-bottom: 0.75rem;
 }
 
-.priority-options,
-.type-options {
+.priority-options {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.priority-button,
-.type-button {
+.priority-button {
   display: flex;
   align-items: center;
   padding: 0.625rem;
@@ -328,21 +372,18 @@ export default {
   font-weight: 500;
 }
 
-.priority-button:hover,
-.type-button:hover {
+.priority-button:hover {
   background: #f9fafb;
   border-color: #d1d5db;
 }
 
-.priority-selected,
-.type-selected {
+.priority-selected {
   background: #eff6ff;
   border-color: #3b82f6;
   color: #1e40af;
 }
 
-.priority-icon,
-.type-icon {
+.priority-icon {
   margin-right: 0.75rem;
   font-size: 1.125rem;
 }
@@ -470,6 +511,20 @@ export default {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
+.apply-button-highlight {
+  background: #2563eb;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(59, 130, 246, 0);
+  }
+}
+
 .apply-filters-button:hover {
   background: #2563eb;
 }
@@ -488,9 +543,14 @@ export default {
   transition: all 0.2s;
 }
 
-.reset-filters-button:hover {
+.reset-filters-button:hover:not(:disabled) {
   background: #f9fafb;
   border-color: #d1d5db;
+}
+
+.reset-filters-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* Dark mode styles */
@@ -507,21 +567,18 @@ export default {
   color: #e5e7eb;
 }
 
-:deep(.dark) .priority-button,
-:deep(.dark) .type-button {
+:deep(.dark) .priority-button {
   background: #374151;
   border-color: #4b5563;
   color: #e5e7eb;
 }
 
-:deep(.dark) .priority-button:hover,
-:deep(.dark) .type-button:hover {
+:deep(.dark) .priority-button:hover {
   background: #4b5563;
   border-color: #6b7280;
 }
 
-:deep(.dark) .priority-selected,
-:deep(.dark) .type-selected {
+:deep(.dark) .priority-selected {
   background: #1e40af;
   border-color: #3b82f6;
   color: #e5e7eb;
@@ -572,7 +629,7 @@ export default {
   color: #e5e7eb;
 }
 
-:deep(.dark) .reset-filters-button:hover {
+:deep(.dark) .reset-filters-button:hover:not(:disabled) {
   background: #4b5563;
   border-color: #6b7280;
 }
@@ -596,5 +653,4 @@ export default {
   }
 }
 </style>
-  
   

@@ -4,6 +4,14 @@ import { Head } from '@inertiajs/vue3';
 
 // Import the GoalDashboard component
 import Goals from '@/Components/Goal/AllGoalsDashboard.vue';
+
+// Get the team_id from the page props
+const props = defineProps({
+  team_id: {
+    type: [Number, String, null],
+    default: null
+  }
+});
 </script>
 
 <template>
@@ -24,7 +32,7 @@ import Goals from '@/Components/Goal/AllGoalsDashboard.vue';
                     class="overflow-hidden bg-white shadow-sm sm:rounded-lg"
                 >
                     
-                  <Goals></Goals>
+                  <Goals :team_id="team_id"></Goals>
                 </div>
             </div>
         </div>

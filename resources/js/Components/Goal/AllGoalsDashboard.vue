@@ -21,6 +21,7 @@
                 id="team-select" 
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               >
+                <option value="all">All Teams</option>
                 <option value="personal">Personal</option>
                 <option v-for="team in teams" :key="team.id" :value="team.id">
                   {{ team.name }}
@@ -62,6 +63,46 @@
               </select>
             </div>
           </div>
+          
+          <!-- PDF Export Options -->
+          <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Export Options</h3>
+            <div class="flex flex-wrap gap-2">
+              <a
+                href="/export/personal-goals"
+                target="_blank"
+                class="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export Personal Goals
+              </a>
+              
+              <a
+                v-if="selectedTeam !== 'all' && selectedTeam !== 'personal' && selectedTeam"
+                :href="`/export/team-goals/${selectedTeam}`"
+                target="_blank"
+                class="inline-flex items-center px-4 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export {{ selectedTeamName }} Goals
+              </a>
+              
+              <a
+                href="/export/user-teams"
+                target="_blank"
+                class="inline-flex items-center px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Export My Teams
+              </a>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -74,7 +115,7 @@
         
         <div class="space-y-4">
           <div 
-            v-for="goal in paginatedGoals" 
+            v-for="goal in filteredGoals" 
             :key="goal.id" 
             @click="openGoalModal(goal)"
             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer border border-gray-100 dark:border-gray-700"
@@ -233,11 +274,17 @@
 import axios from 'axios';
 
 export default {
+  props: {
+    team_id: {
+      type: [Number, String, null],
+      default: null
+    }
+  },
   data() {
     return {
       teams: [],
       goals: [],
-      selectedTeam: "personal",
+      selectedTeam: this.team_id ? this.team_id : "personal",
       searchQuery: "",
       loading: true,
       error: null,
@@ -246,7 +293,7 @@ export default {
       isEditing: false,
       selectedGoal: null,
       currentPage: 1,  // Start on page 1
-      goalsPerPage: 5, // Show 5 goals per page
+      goalsPerPage: 10, // Increased to show more goals per page
     };
   },
 
@@ -287,6 +334,7 @@ export default {
 
     selectedTeamName() {
       if (this.selectedTeam === "personal") return "Personal Goals";
+      if (this.selectedTeam === "all") return "All Teams";
       const team = this.teams.find((t) => t.id === this.selectedTeam);
       return team ? team.name : "All Teams";
     },
@@ -311,10 +359,21 @@ export default {
     async fetchGoals() {
       this.loading = true;
       try {
-        const response = this.selectedTeam === "personal"
-          ? await axios.get("/api/goals/user/allusergoals")
-          : await axios.get(`/api/goals/${this.selectedTeam}`);
-
+        let response;
+        if (this.selectedTeam === "personal") {
+          response = await axios.get("/api/goals/user/allusergoals");
+        } else if (this.selectedTeam === "all") {
+          // Fetch goals from all teams
+          const [personalGoals, teamsGoals] = await Promise.all([
+            axios.get("/api/goals/user/allusergoals"),
+            axios.get("/api/goals/all")
+          ]);
+          // Combine personal and team goals
+          this.goals = [...personalGoals.data, ...teamsGoals.data];
+          return;
+        } else {
+          response = await axios.get(`/api/goals/${this.selectedTeam}`);
+        }
         this.goals = response.data;
       } catch (err) {
         console.error("Failed to fetch goals", err);

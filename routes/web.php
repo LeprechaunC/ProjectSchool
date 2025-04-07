@@ -9,6 +9,8 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMessageController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MessageController;
+use App\Http\Controllers\PdfExportController;
+use App\Http\Controllers\AdminPdfExportController;
 
 Route::middleware(['web'])->group(function () {
     // Default home page
@@ -79,8 +81,10 @@ Route::middleware(['web'])->group(function () {
  
         Route::get('/goals', function () {
             $user = auth()->user();
-            // Assuming the user belongs to one team
-            $teamId = $user->teams()->first()->id;  // Make sure the user is in a team
+            
+            // Check if the user has any teams
+            $firstTeam = $user->teams()->first();
+            $teamId = $firstTeam ? $firstTeam->id : null;
     
             return Inertia::render('Goals', [
                 'team_id' => $teamId
@@ -109,6 +113,14 @@ Route::middleware(['web'])->group(function () {
             ->middleware('auth');
 
         Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+
+        // PDF Export Routes for Users
+        Route::get('/export/personal-goals', [PdfExportController::class, 'exportPersonalGoals'])
+            ->name('export.personal-goals');
+        Route::get('/export/team-goals/{teamId}', [PdfExportController::class, 'exportTeamGoals'])
+            ->name('export.team-goals');
+        Route::get('/export/user-teams', [PdfExportController::class, 'exportUserTeams'])
+            ->name('export.user-teams');
     });
 
     // Admin Routes
@@ -131,6 +143,18 @@ Route::middleware(['web'])->group(function () {
 
             Route::get('/settings', [AdminController::class, 'getSettings']);
             Route::put('/settings', [AdminController::class, 'updateSettings']);
+        });
+
+        // PDF Export Routes for Admin
+        Route::prefix('admin/export')->group(function () {
+            Route::get('/users', [AdminPdfExportController::class, 'exportUsers'])
+                ->name('admin.export.users');
+            Route::get('/teams', [AdminPdfExportController::class, 'exportTeams'])
+                ->name('admin.export.teams');
+            Route::get('/goal-stats', [AdminPdfExportController::class, 'exportGoalStats'])
+                ->name('admin.export.goal-stats');
+            Route::get('/system-report', [AdminPdfExportController::class, 'exportSystemReport'])
+                ->name('admin.export.system-report');
         });
     });
 });

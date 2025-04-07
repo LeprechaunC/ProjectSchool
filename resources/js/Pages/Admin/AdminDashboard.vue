@@ -29,7 +29,33 @@
             
             <!-- Statistics Tab -->
             <div v-if="activeTab === 'statistics'" class="space-y-6">
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Statistics</h2>
+              <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Statistics</h2>
+                
+                <!-- Export Buttons -->
+                <div class="flex gap-2">
+                  <a 
+                    href="/admin/export/system-report" 
+                    target="_blank"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export System Report
+                  </a>
+                  <a 
+                    href="/admin/export/goal-stats" 
+                    target="_blank"
+                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export Goal Stats
+                  </a>
+                </div>
+              </div>
               
               <!-- Statistics Cards -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -150,12 +176,27 @@
             <div v-if="activeTab === 'users'" class="space-y-6">
               <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">User Management</h2>
-                <button 
-                  @click="openUserModal()"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Add User
-                </button>
+                <div class="flex gap-2">
+                  <a 
+                    href="/admin/export/users" 
+                    target="_blank"
+                    class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export Users
+                  </a>
+                  <button 
+                    @click="openUserModal()"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add User
+                  </button>
+                </div>
               </div>
               
               <!-- Users Table -->
@@ -200,12 +241,27 @@
             <div v-if="activeTab === 'teams'" class="space-y-6">
               <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Team Management</h2>
-                <button 
-                  @click="openTeamModal()"
-                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  Add Team
-                </button>
+                <div class="flex gap-2">
+                  <a 
+                    href="/admin/export/teams" 
+                    target="_blank"
+                    class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Export Teams
+                  </a>
+                  <button 
+                    @click="openTeamModal()"
+                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Team
+                  </button>
+                </div>
               </div>
               
               <!-- Teams Table -->

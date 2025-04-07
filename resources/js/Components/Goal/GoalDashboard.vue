@@ -55,7 +55,7 @@
               </div>
               
             </div>
-            <FullCalendar :options="calendarOptions" class="p-4" />
+            <FullCalendar ref="fullCalendar" :options="calendarOptions" class="p-4" />
           </div>
 
           <!-- Add this after the calendar container div -->
@@ -73,7 +73,7 @@
               </button>
             </div>
             
-            <div v-if="showChat && selectedTeam !== 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+            <div v-if="showChat && selectedTeam !== 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden h-[400px]">
               <TeamChat :team="selectedTeam" />
             </div>
             <div v-else-if="showChat && selectedTeam === 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
@@ -316,8 +316,7 @@ export default {
       showChat: false,
       // Filter state
       activeFilters: {
-        priority: "",
-        type: "",
+        priorities: [],
         dateRange: { start: "", end: "" },
         labels: []
       },
@@ -333,10 +332,10 @@ export default {
     
     // Get the calendar API after the component is mounted
     this.$nextTick(() => {
-      const calendarEl = document.querySelector('.fc');
-      if (calendarEl) {
-        this.calendarApi = calendarEl.__vue__._instance.proxy.getApi();
-      }
+      // Allow more time for the calendar to fully initialize
+      setTimeout(() => {
+        this.initializeCalendarApi();
+      }, 500);
     });
   },
   methods: {
@@ -361,8 +360,22 @@ export default {
         .get(url)
         .then((response) => {
           this.goals = response.data;
-          this.filteredGoals = [...this.goals]; // Initialize filtered goals
-          this.updateCalendarEvents();
+          
+          // Check if we have active filters to apply
+          const hasActiveFilters = 
+            (this.activeFilters.priorities && this.activeFilters.priorities.length > 0) ||
+            this.activeFilters.dateRange.start || 
+            this.activeFilters.dateRange.end ||
+            (this.activeFilters.labels && this.activeFilters.labels.length > 0);
+            
+          if (hasActiveFilters) {
+            // Apply existing filters to the new team's goals
+            this.filterGoalsLocally(this.activeFilters);
+          } else {
+            // If no filters, just show all goals
+            this.filteredGoals = [...this.goals];
+            this.updateCalendarEvents();
+          }
         })
         .catch((error) => {
           console.error("Error fetching goals:", error);
@@ -394,56 +407,39 @@ export default {
 
     // Apply filters from SideViewDashboard
     applyFilters(filters) {
+      console.log('Applying filters:', filters);
       this.activeFilters = filters;
       
-      // Build query parameters for the API
-      const params = new URLSearchParams();
+      // If all filters are empty, reset to show all goals
+      const hasNoFilters = (!filters.priorities || filters.priorities.length === 0) && 
+                          !filters.dateRange.start && 
+                          !filters.dateRange.end && 
+                          (!filters.labels || filters.labels.length === 0);
       
-      // Add priority filter
-      if (filters.priority) {
-        params.append('priority', filters.priority);
-      }
-      
-      // Add date range filter
-      if (filters.dateRange.start) {
-        params.append('start_date', filters.dateRange.start);
-      }
-      
-      if (filters.dateRange.end) {
-        params.append('end_date', filters.dateRange.end);
-      }
-      
-      // Add team/user filter
-      if (this.selectedTeam !== 'none') {
-        params.append('team_id', this.selectedTeam.id);
-      } else {
-        // For personal goals, we'll filter on the client side
-        // since the API endpoint for personal goals doesn't support filtering yet
-        this.filterGoalsLocally(filters);
+      if (hasNoFilters) {
+        console.log('No filters active, showing all goals');
+        this.filteredGoals = [...this.goals];
+        this.updateCalendarEvents();
         return;
       }
       
-      // Call the filtered goals API
-      axios.get(`/api/goals/filtered?${params.toString()}`)
-        .then(response => {
-          this.filteredGoals = response.data;
-          this.updateCalendarEvents();
-        })
-        .catch(error => {
-          console.error('Error fetching filtered goals:', error);
-          // Fallback to client-side filtering if API fails
-          this.filterGoalsLocally(filters);
-        });
+      // Filter goals locally for better performance and reliability
+      this.filterGoalsLocally(filters);
     },
     
-    // Client-side filtering for personal goals or as fallback
+    // Client-side filtering for all goals
     filterGoalsLocally(filters) {
+      console.log('Filtering goals locally with filters:', filters);
       // Start with all goals
       let filtered = [...this.goals];
       
-      // Apply priority filter
-      if (filters.priority) {
-        filtered = filtered.filter(goal => goal.priority === filters.priority);
+      // Apply priority filter (if any priorities are selected)
+      if (filters.priorities && filters.priorities.length > 0) {
+        filtered = filtered.filter(goal => {
+          // If goal has no priority, default to medium
+          const goalPriority = goal.priority || 'medium';
+          return filters.priorities.includes(goalPriority);
+        });
       }
       
       // Apply date range filter
@@ -451,26 +447,42 @@ export default {
         const startDate = filters.dateRange.start ? new Date(filters.dateRange.start) : null;
         const endDate = filters.dateRange.end ? new Date(filters.dateRange.end) : null;
         
+        if (startDate) startDate.setHours(0, 0, 0, 0); // Start of day
+        if (endDate) endDate.setHours(23, 59, 59, 999); // End of day
+        
         filtered = filtered.filter(goal => {
           const goalStartDate = new Date(goal.start_time);
+          const goalEndDate = new Date(goal.end_time);
           
-          if (startDate && goalStartDate < startDate) return false;
-          if (endDate) {
-            // Set end date to end of day
-            endDate.setHours(23, 59, 59, 999);
-            if (goalStartDate > endDate) return false;
+          // Start date filter (if provided)
+          if (startDate && goalEndDate < startDate) {
+            return false; // Goal ends before filter start date
+          }
+          
+          // End date filter (if provided)
+          if (endDate && goalStartDate > endDate) {
+            return false; // Goal starts after filter end date
           }
           
           return true;
         });
       }
       
-      // Apply labels filter (if implemented in backend)
+      // Apply labels filter (if implemented and any labels selected)
       if (filters.labels && filters.labels.length > 0) {
-        // This would require backend support for labels
-        // For now, we'll just log that labels were selected
-        console.log('Labels filter applied:', filters.labels);
+        filtered = filtered.filter(goal => {
+          // This implementation assumes goals might have a labels array
+          // If you don't have labels implemented yet, this won't filter anything
+          if (!goal.labels) return false;
+          
+          // Check if any of the selected labels match the goal's labels
+          return filters.labels.some(label => 
+            goal.labels.includes(label)
+          );
+        });
       }
+      
+      console.log(`Filtered from ${this.goals.length} to ${filtered.length} goals`);
       
       // Update filtered goals
       this.filteredGoals = filtered;
@@ -656,6 +668,58 @@ export default {
         }
       } else {
         console.error('Calendar API not available');
+      }
+    },
+
+    initializeCalendarApi() {
+      // Modern way to access FullCalendar API in Vue 3
+      try {
+        // Direct reference approach (most reliable)
+        const fcComponent = this.$refs.fullCalendar;
+        if (fcComponent) {
+          this.calendarApi = fcComponent.getApi();
+          console.log('Calendar API initialized successfully via ref');
+          return;
+        }
+        
+        // Fallback to DOM approach if ref not available
+        const calendarEl = document.querySelector('.fc');
+        if (calendarEl) {
+          // Try Vue 3 approach
+          const fcInstance = calendarEl.__vnode;
+          if (fcInstance) {
+            console.log('Found calendar element but could not get API directly');
+            
+            // Schedule another attempt
+            setTimeout(() => {
+              const fc = this.$refs.fullCalendar;
+              if (fc) {
+                this.calendarApi = fc.getApi();
+                console.log('Calendar API initialized successfully on retry');
+              }
+            }, 500);
+          }
+        } else {
+          console.warn('Calendar element not found in DOM');
+          
+          // Final fallback - try again later
+          setTimeout(() => this.initializeCalendarApi(), 1000);
+        }
+      } catch (err) {
+        console.error('Error initializing calendar API:', err);
+        
+        // One last retry with a longer delay
+        setTimeout(() => {
+          try {
+            const fc = this.$refs.fullCalendar;
+            if (fc) {
+              this.calendarApi = fc.getApi();
+              console.log('Calendar API initialized on final retry');
+            }
+          } catch (e) {
+            console.error('Failed to initialize calendar API after retries');
+          }
+        }, 2000);
       }
     },
   },
