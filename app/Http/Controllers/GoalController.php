@@ -65,9 +65,18 @@ class GoalController extends Controller
 }
     
 public function update(Request $request, $id)
-    {
+{
+    try {
         // Find the goal by ID
-        $goal = Goal::findOrFail($id);
+        $goal = Goal::find($id);
+        
+        // Check if the goal exists
+        if (!$goal) {
+            return response()->json([
+                'message' => 'Goal not found.',
+                'id' => $id
+            ], 404);
+        }
 
         // Validate the incoming request
         $request->validate([
@@ -75,6 +84,7 @@ public function update(Request $request, $id)
             'description' => 'nullable|string',
             'start_time' => 'required|date',
             'end_time' => 'required|date',
+            'priority' => 'nullable|in:high,medium,low',
         ]);
 
         // Update the goal with new data
@@ -83,10 +93,17 @@ public function update(Request $request, $id)
             'description' => $request->description,
             'start_time' => $request->start_time,
             'end_time' => $request->end_time,
+            'priority' => $request->priority ?? $goal->priority,
         ]);
 
         return response()->json($goal);
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Error updating goal: ' . $e->getMessage(),
+            'id' => $id
+        ], 500);
     }
+}
     public function delete($id)
     {
         // Find the goal by ID
@@ -112,6 +129,46 @@ public function update(Request $request, $id)
     {
         // Fetch all goals for all teams
         $goals = Goal::all(['id', 'title', 'description', 'start_time', 'end_time', 'done', 'priority']);
+        return response()->json($goals);
+    }
+
+    /**
+     * Get filtered goals based on various criteria
+     */
+    public function getFilteredGoals(Request $request)
+    {
+        $query = Goal::query();
+        
+        // Filter by priority
+        if ($request->has('priority') && !empty($request->priority)) {
+            $query->where('priority', $request->priority);
+        }
+        
+        // Filter by date range
+        if ($request->has('start_date') && !empty($request->start_date)) {
+            $query->where('start_time', '>=', $request->start_date);
+        }
+        
+        if ($request->has('end_date') && !empty($request->end_date)) {
+            $query->where('end_time', '<=', $request->end_date);
+        }
+        
+        // Filter by team
+        if ($request->has('team_id') && !empty($request->team_id)) {
+            $query->where('team_id', $request->team_id);
+        } else if ($request->has('user_id') && !empty($request->user_id)) {
+            // If no team_id is provided, filter by user_id
+            $query->where('user_id', $request->user_id);
+        }
+        
+        // Filter by completion status
+        if ($request->has('done') && $request->done !== null) {
+            $query->where('done', $request->done);
+        }
+        
+        // Get the filtered goals
+        $goals = $query->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'team_id', 'done', 'priority']);
+        
         return response()->json($goals);
     }
 

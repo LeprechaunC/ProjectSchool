@@ -196,18 +196,22 @@ export default {
   methods: {
     togglePriority(value) {
       this.selectedPriority = this.selectedPriority === value ? "" : value;
+      this.applyFilters(); // Auto-apply when priority is changed
     },
     toggleType(value) {
       this.selectedType = this.selectedType === value ? "" : value;
+      this.applyFilters(); // Auto-apply when type is changed
     },
     addLabel() {
       if (this.newLabel.trim() && !this.selectedLabels.includes(this.newLabel)) {
         this.selectedLabels.push(this.newLabel.trim());
         this.newLabel = "";
+        this.applyFilters(); // Auto-apply when label is added
       }
     },
     removeLabel(index) {
       this.selectedLabels.splice(index, 1);
+      this.applyFilters(); // Auto-apply when label is removed
     },
     applyFilters() {
       this.$emit("filter-applied", {
@@ -225,6 +229,15 @@ export default {
       this.applyFilters();
     }
   },
+  watch: {
+    // Watch for date range changes and auto-apply filters
+    'dateRange.start'() {
+      this.applyFilters();
+    },
+    'dateRange.end'() {
+      this.applyFilters();
+    }
+  }
 };
 </script>
 
@@ -240,6 +253,7 @@ export default {
   z-index: 50;
   width: 300px;
   transform: translateX(-100%);
+  border-right: 1px solid #e5e7eb;
 }
 
 .sidebar-open {
@@ -561,6 +575,25 @@ export default {
 :deep(.dark) .reset-filters-button:hover {
   background: #4b5563;
   border-color: #6b7280;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar-container {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .toggle-button {
+    right: 0;
+    top: 0;
+    border-radius: 0;
+    padding: 10px;
+  }
+  
+  .sidebar-open {
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
 }
 </style>
   

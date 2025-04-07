@@ -1,6 +1,36 @@
 <template>
   <div class="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
     <div class="max-w-6xl mx-auto">
+      <!-- Notification -->
+      <Transition
+        enter-active-class="transform ease-out duration-300 transition"
+        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+        leave-active-class="transition ease-in duration-100"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div v-if="notification.show" 
+          class="fixed bottom-4 right-4 p-4 rounded-lg shadow-lg z-50"
+          :class="{
+            'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': notification.type === 'success',
+            'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': notification.type === 'error'
+          }"
+        >
+          <div class="flex items-center">
+            <span class="mr-2">
+              <svg v-if="notification.type === 'success'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </span>
+            <span>{{ notification.message }}</span>
+          </div>
+        </div>
+      </Transition>
+
       <!-- Header Section -->
       <div class="mb-8">
         <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Teams Dashboard</h2>
@@ -144,7 +174,19 @@
             <!-- Team Header -->
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800 px-6 py-4">
               <div class="flex items-center justify-between">
-                <h4 class="text-lg font-semibold text-white">{{ team.name }}</h4>
+                <div class="flex items-center space-x-2">
+                  <h4 class="text-lg font-semibold text-white">{{ team.name }}</h4>
+                  <button 
+                    v-if="isTeamAdmin(team)"
+                    @click="openEditNameModal(team)" 
+                    class="text-white/80 hover:text-white transition-colors"
+                    title="Edit team name"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                </div>
                 <span class="text-xs bg-white/20 text-white px-2 py-1 rounded-full">
                   {{ team.users.length }} {{ team.users.length === 1 ? 'member' : 'members' }}
                 </span>
@@ -177,75 +219,82 @@
                         {{ user.name }} 
                         <span v-if="user.id === currentUser.id" class="text-xs text-blue-600 dark:text-blue-400">(You)</span>
                       </span>
-                      <span class="block text-xs text-gray-500 dark:text-gray-400">{{ user.role }}</span>
+                      <span class="block text-xs text-gray-500 dark:text-gray-400">{{ user.pivot.role }}</span>
                     </div>
                   </div>
                   
-                  <button 
-                    v-if="team.pivot.role === 'admin' && user.id !== currentUser.id"
-                    @click="removeMember(team.id, user.id)" 
-                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                    title="Remove member"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Invite Section -->
-              <div class="space-y-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <div class="flex items-center justify-between">
-                  <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-                    <svg class="w-4 h-4 mr-1.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
-                    </svg>
-                    Invite Code
-                  </h5>
-                  <div class="flex items-center space-x-2">
+                  <!-- Admin Actions -->
+                  <div class="flex items-center space-x-2" v-if="team.pivot.role === 'admin' && user.id !== currentUser.id">
+                    <!-- Make/Remove Admin Button -->
                     <button 
-                      @click="toggleInviteCode(team.id)" 
-                      class="text-sm px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-md hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                    >
-                      {{ visibleInviteCode === team.id ? 'Hide' : 'Show' }}
-                    </button>
-                    <button 
-                      @click="generateNewInviteCode(team.id)" 
-                      class="text-sm px-3 py-1 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-                    >
-                      Generate New
-                    </button>
-                  </div>
-                </div>
-                
-                <div v-if="visibleInviteCode === team.id" class="bg-gray-50 dark:bg-gray-700 p-3 rounded-md border border-gray-200 dark:border-gray-600">
-                  <div class="flex items-center justify-between">
-                    <code class="text-sm font-mono text-gray-800 dark:text-gray-200">{{ team.invite_code }}</code>
-                    <button 
-                      @click="copyInviteCode(team.invite_code)" 
-                      class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
-                      title="Copy to clipboard"
+                      v-if="user.pivot.role !== 'admin'"
+                      @click="makeAdmin(team.id, user.id)" 
+                      class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                      title="Make admin"
                     >
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                    <button 
+                      v-else
+                      @click="removeAdmin(team.id, user.id)" 
+                      class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+                      title="Remove admin"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                    
+                    <!-- Remove Member Button -->
+                    <button 
+                      @click="removeMember(team.id, user.id)" 
+                      class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                      title="Remove member"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
                   </div>
                 </div>
               </div>
-
-              <!-- Add this inside the team card, after the invite section -->
-              <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <button 
-                  @click="openChat(team)" 
-                  class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center"
-                >
-                  <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                  Open Chat
-                </button>
+              
+              <!-- Team Actions -->
+              <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 space-y-3">
+                <!-- Team Action Buttons -->
+                <div class="flex space-x-2">
+                  <button 
+                    @click="openChat(team)" 
+                    class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center"
+                  >
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Open Chat
+                  </button>
+                  
+                  <!-- Delete Team (Admin Only) -->
+                  <button 
+                    v-if="isTeamAdmin(team)"
+                    @click="deleteTeam(team.id)" 
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                  
+                  <!-- Leave Team (Non-Admin) -->
+                  <button 
+                    v-else
+                    @click="exitTeam(team.id)" 
+                    class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+                  >
+                    Leave Team
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -263,16 +312,59 @@
         />
       </div>
     </Modal>
+
+    <!-- Add this at the end of the template, before the closing </div> -->
+    <Modal :show="showEditNameModal" @close="closeEditNameModal">
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-4">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Edit Team Name</h2>
+          <button @click="closeEditNameModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team Name</label>
+            <input 
+              v-model="editingTeamName" 
+              type="text" 
+              class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Enter team name"
+            />
+          </div>
+          
+          <div class="mt-6 flex justify-end space-x-3">
+            <button 
+              @click="closeEditNameModal" 
+              class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              @click="updateTeamName" 
+              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
 import axios from 'axios';
 import TeamChat from '../Goal/TeamChat.vue';
+import Modal from '@/Components/Modal.vue';
 
 export default {
   components: {
-    TeamChat
+    TeamChat,
+    Modal
   },
   data() {
     return {
@@ -285,6 +377,14 @@ export default {
       visibleInviteCode: null,
       showChat: false,
       selectedTeamForChat: null,
+      showEditNameModal: false,
+      editingTeamName: '',
+      selectedTeamForEdit: null,
+      notification: {
+        show: false,
+        message: '',
+        type: 'success'
+      }
     };
   },
 
@@ -319,8 +419,10 @@ export default {
         const response = await axios.post('/api/teams', { name: this.newTeamName });
         this.teams.push(response.data.team);
         this.newTeamName = '';
+        this.showNotification('Team created successfully!');
       } catch (err) {
         this.error = 'Failed to create team';
+        this.showNotification('Failed to create team', 'error');
       }
     },
 
@@ -329,8 +431,10 @@ export default {
         const response = await axios.post('/api/teams/join', { invite_code: this.enteredInviteCode });
         this.teams.push(response.data.team);
         this.enteredInviteCode = '';
+        this.showNotification('Successfully joined the team!');
       } catch (err) {
         this.error = 'Failed to join team';
+        this.showNotification('Failed to join team', 'error');
       }
     },
 
@@ -341,8 +445,10 @@ export default {
         await axios.delete(`/api/teams/${teamId}/users/${userId}`);
         const team = this.teams.find(t => t.id === teamId);
         team.users = team.users.filter(u => u.id !== userId);
+        this.showNotification('Member removed successfully');
       } catch (err) {
         this.error = 'Failed to remove the member';
+        this.showNotification('Failed to remove member', 'error');
       }
     },
 
@@ -396,6 +502,99 @@ export default {
       this.showChat = false;
       this.selectedTeamForChat = null;
     },
+
+    async makeAdmin(teamId, userId) {
+      try {
+        await axios.post(`/api/teams/${teamId}/members/${userId}/make-admin`);
+        await this.fetchTeams();
+        this.showNotification('User promoted to admin successfully');
+      } catch (err) {
+        this.error = 'Failed to make user admin';
+        this.showNotification('Failed to promote user to admin', 'error');
+      }
+    },
+    
+    async removeAdmin(teamId, userId) {
+      try {
+        await axios.post(`/api/teams/${teamId}/members/${userId}/remove-admin`);
+        await this.fetchTeams();
+        this.showNotification('Admin privileges removed successfully');
+      } catch (err) {
+        this.error = 'Failed to remove admin privileges';
+        this.showNotification('Failed to remove admin privileges', 'error');
+      }
+    },
+    
+    openEditNameModal(team) {
+      this.selectedTeamForEdit = team;
+      this.editingTeamName = team.name;
+      this.showEditNameModal = true;
+    },
+    
+    closeEditNameModal() {
+      this.showEditNameModal = false;
+      this.selectedTeamForEdit = null;
+      this.editingTeamName = '';
+    },
+    
+    async updateTeamName() {
+      if (!this.editingTeamName || !this.selectedTeamForEdit) return;
+      
+      try {
+        await axios.put(`/api/teams/${this.selectedTeamForEdit.id}/name`, {
+          name: this.editingTeamName
+        });
+        await this.fetchTeams();
+        this.closeEditNameModal();
+        this.showNotification('Team name updated successfully');
+      } catch (err) {
+        this.error = 'Failed to update team name';
+        this.showNotification('Failed to update team name', 'error');
+      }
+    },
+    
+    async deleteTeam(teamId) {
+      if (!confirm('Are you sure you want to delete this team? This action cannot be undone.')) return;
+      
+      try {
+        await axios.delete(`/api/teams/${teamId}`);
+        await this.fetchTeams();
+        this.showNotification('Team deleted successfully');
+      } catch (err) {
+        this.error = 'Failed to delete team';
+        this.showNotification('Failed to delete team', 'error');
+      }
+    },
+    
+    async exitTeam(teamId) {
+      if (!confirm('Are you sure you want to leave this team?')) return;
+      
+      try {
+        await axios.post(`/api/teams/${teamId}/exit`);
+        await this.fetchTeams();
+        this.showNotification('Successfully left the team');
+      } catch (err) {
+        this.error = 'Failed to leave team';
+        this.showNotification('Failed to leave team', 'error');
+      }
+    },
+
+    isTeamAdmin(team) {
+      return team.users.find(user => user.id === this.currentUser.id)?.pivot?.role === 'admin';
+    },
+
+    showNotification(message, type = 'success') {
+      this.notification = {
+        show: true,
+        message,
+        type
+      };
+      
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        this.notification.show = false;
+      }, 3000);
+    },
   }
 };
 </script>
@@ -440,5 +639,17 @@ export default {
 
 .team-card:hover {
   transform: translateY(-2px);
+}
+
+/* Notification animation */
+.notification-enter-active,
+.notification-leave-active {
+  transition: all 0.3s ease;
+}
+
+.notification-enter-from,
+.notification-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
 }
 </style>

@@ -8,6 +8,7 @@ use App\Http\Controllers\GoalController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\TeamMessageController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MessageController;
 
 Route::middleware(['web'])->group(function () {
     // Default home page
@@ -34,12 +35,23 @@ Route::middleware(['web'])->group(function () {
         return Inertia::render('goals');
     })->middleware(['auth', 'verified'])->name('goals');
     
+    Route::get('/messages', function () {
+        return Inertia::render('Messages');
+    })->name('messages');
+    
     // Profile routes
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
         Route::post('/profile_image', [ProfileController::class, 'uploadImage'])->name('profile.image.upload');
+
+        // Message routes
+        Route::get('/api/messages', [MessageController::class, 'index']);
+        Route::get('/api/messages/{user}', [MessageController::class, 'show']);
+        Route::post('/api/messages/{user}', [MessageController::class, 'store']);
+        Route::get('/api/messages/unread/count', [MessageController::class, 'unreadCount']);
+        Route::get('/api/users', [MessageController::class, 'getUsers']);
 
         Route::post('/teams', [TeamController::class, 'index'])->name('teams.index');
         Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
@@ -63,6 +75,7 @@ Route::middleware(['web'])->group(function () {
     
         Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
         Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
+        Route::get('/api/goals/filtered', [GoalController::class, 'getFilteredGoals']);
  
         Route::get('/goals', function () {
             $user = auth()->user();
@@ -82,10 +95,10 @@ Route::middleware(['web'])->group(function () {
         Route::get('/api/user', function (Request $request) {
             return auth()->user();
         });
-   
+        Route::post('/api/teams/{id}/exit', [TeamController::class, 'exitTeam']);
         Route::post('api/teams/join', [TeamController::class, 'joinTeam']);
         Route::post('/api/teams/{teamId}/invite', [TeamController::class, 'generateInviteCode']);
-
+        Route::get('/api/teams/{id}/name', [TeamController::class, 'updateTeamName']);
         Route::post('/api/teamsMake', [TeamController::class, 'createTeam']);
 
         Route::get('/api/teams/{team}/messages', [TeamMessageController::class, 'index']);
@@ -94,6 +107,8 @@ Route::middleware(['web'])->group(function () {
         Route::post('/profile/picture', [ProfileController::class, 'updateProfilePicture'])
             ->name('profile.picture.update')
             ->middleware('auth');
+
+        Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     });
 
     // Admin Routes

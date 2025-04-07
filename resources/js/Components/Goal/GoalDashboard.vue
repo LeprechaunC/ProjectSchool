@@ -1,68 +1,84 @@
 <template>
   <div class="min-h-screen bg-gray-50 dark:bg-gray-900">
-    <SideViewDashboard></SideViewDashboard>
-    <div class="p-6 lg:p-8">
-      <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Goal Calendar</h3>
-            <p class="text-gray-600 dark:text-gray-400">Manage and track your goals efficiently</p>
+    <div class="flex">
+      <!-- SideViewDashboard with proper integration -->
+      <SideViewDashboard 
+        @filter-applied="applyFilters" 
+        ref="sideView"
+      />
+      
+      <div class="flex-1 p-6 lg:p-8">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
+          <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Goal Calendar</h3>
+              <p class="text-gray-600 dark:text-gray-400">Manage and track your goals efficiently</p>
+              <div v-if="upcomingGoalsCount > 0" class="mt-2">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {{ upcomingGoalsCount }} goal{{ upcomingGoalsCount === 1 ? '' : 's' }} due within 24 hours
+                </span>
+              </div>
+            </div>
+            <div class="mt-4 md:mt-0 w-full md:w-auto">
+              <label for="team-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Team</label>
+              <select
+                id="team-select"
+                v-model="selectedTeam"
+                class="w-full md:w-64 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              >
+                <option value="none">Personal</option>
+                <option v-for="team in teams" :key="team.id" :value="team">
+                  {{ team.name }}
+                </option>
+              </select>
+            </div>
           </div>
-          <div class="mt-4 md:mt-0 w-full md:w-auto">
-            <label for="team-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Team</label>
-            <select
-              id="team-select"
-              v-model="selectedTeam"
-              class="w-full md:w-64 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-            >
-              <option value="none">Personal</option>
-              <option v-for="team in teams" :key="team.id" :value="team">
-                {{ team.name }}
-              </option>
-            </select>
-          </div>
-        </div>
 
-        <!-- FullCalendar Component -->
-        <div class="calendar-container bg-white dark:bg-gray-800 rounded-lg shadow">
-          <!-- Priority Legend -->
-          <div class="p-4 flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center">
-              <div class="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
-              <span class="text-sm font-medium">High Priority</span>
+          <!-- FullCalendar Component -->
+          <div class="calendar-container bg-white dark:bg-gray-800 rounded-lg shadow">
+            <!-- Priority Legend -->
+            <div class="p-4 flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center">
+                <div class="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
+                <span class="text-sm font-medium">High Priority</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 rounded-full bg-amber-500 mr-2"></div>
+                <span class="text-sm font-medium">Medium Priority</span>
+              </div>
+              <div class="flex items-center">
+                <div class="w-4 h-4 rounded-full bg-emerald-500 mr-2"></div>
+                <span class="text-sm font-medium">Low Priority</span>
+              </div>
+              
             </div>
-            <div class="flex items-center">
-              <div class="w-4 h-4 rounded-full bg-amber-500 mr-2"></div>
-              <span class="text-sm font-medium">Medium Priority</span>
-            </div>
-            <div class="flex items-center">
-              <div class="w-4 h-4 rounded-full bg-emerald-500 mr-2"></div>
-              <span class="text-sm font-medium">Low Priority</span>
-            </div>
+            <FullCalendar :options="calendarOptions" class="p-4" />
           </div>
-          <FullCalendar :options="calendarOptions" class="p-4" />
-        </div>
 
-        <!-- Add this after the calendar container div -->
-        <div class="mt-6">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-bold text-gray-900 dark:text-white">Team Chat</h3>
-            <button 
-              @click="showChat = !showChat" 
-              class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center"
-            >
-              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-              </svg>
-              {{ showChat ? 'Hide Chat' : 'Show Chat' }}
-            </button>
-          </div>
-          
-          <div v-if="showChat && selectedTeam !== 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
-            <TeamChat :team="selectedTeam" />
-          </div>
-          <div v-else-if="showChat && selectedTeam === 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
-            <p class="text-gray-600 dark:text-gray-400">Select a team to view the chat.</p>
+          <!-- Add this after the calendar container div -->
+          <div class="mt-6">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Team Chat</h3>
+              <button 
+                @click="showChat = !showChat" 
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center"
+              >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                {{ showChat ? 'Hide Chat' : 'Show Chat' }}
+              </button>
+            </div>
+            
+            <div v-if="showChat && selectedTeam !== 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+              <TeamChat :team="selectedTeam" />
+            </div>
+            <div v-else-if="showChat && selectedTeam === 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
+              <p class="text-gray-600 dark:text-gray-400">Select a team to view the chat.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -165,6 +181,7 @@ import axios from "axios";
 import FullCalendar from "@fullcalendar/vue3";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import timeGridPlugin from "@fullcalendar/timegrid";
 import FullscreenGoalModal from "../Goal/FullScreenGoal.vue"; // Import the new component
 import SideViewDashboard from "../Goal/SideViewDashboard.vue";
 import TeamChat from "./TeamChat.vue";
@@ -181,18 +198,20 @@ export default {
       teams: [],
       selectedTeam: JSON.parse(localStorage.getItem("selectedTeam")) || "none",
       goals: [],
+      filteredGoals: [], // New array to store filtered goals
       calendarOptions: {
-        plugins: [dayGridPlugin, interactionPlugin],
+        plugins: [dayGridPlugin, timeGridPlugin, interactionPlugin],
         initialView: "dayGridMonth",
         headerToolbar: {
           left: 'prev,next today',
           center: 'title',
-          right: 'dayGridMonth,dayGridWeek'
+          right: 'dayGridMonth,dayGridWeek,timeGridDay'
         },
         buttonText: {
           today: 'Today',
           month: 'Month',
-          week: 'Week'
+          week: 'Week',
+          day: 'Day'
         },
         firstDay: 1, // Start week on Monday
         height: 'auto',
@@ -210,6 +229,15 @@ export default {
           meridiem: false
         },
         eventDisplay: 'block',
+        slotMinTime: '00:00:00',
+        slotMaxTime: '23:59:59',
+        slotDuration: '00:30:00',
+        slotLabelInterval: '01:00',
+        slotLabelFormat: {
+          hour: '2-digit',
+          minute: '2-digit',
+          meridiem: false
+        },
         eventDidMount: (info) => {
           // Debug logging
           console.log('Event mounted:', {
@@ -282,10 +310,19 @@ export default {
         description: "",
         start_time: "",
         end_time: "",
-        priority: "medium",
+        priority: "medium", // Add default priority
       },
       selectedDate: null,
       showChat: false,
+      // Filter state
+      activeFilters: {
+        priority: "",
+        type: "",
+        dateRange: { start: "", end: "" },
+        labels: []
+      },
+      isDayView: false,
+      calendarApi: null
     };
   },
   mounted() {
@@ -293,6 +330,14 @@ export default {
     if (this.selectedTeam) {
       this.fetchGoals();
     }
+    
+    // Get the calendar API after the component is mounted
+    this.$nextTick(() => {
+      const calendarEl = document.querySelector('.fc');
+      if (calendarEl) {
+        this.calendarApi = calendarEl.__vue__._instance.proxy.getApi();
+      }
+    });
   },
   methods: {
     fetchTeams() {
@@ -316,6 +361,7 @@ export default {
         .get(url)
         .then((response) => {
           this.goals = response.data;
+          this.filteredGoals = [...this.goals]; // Initialize filtered goals
           this.updateCalendarEvents();
         })
         .catch((error) => {
@@ -324,8 +370,8 @@ export default {
     },
 
     updateCalendarEvents() {
-      console.log('Raw goals data:', this.goals); // Debug log
-      this.calendarOptions.events = this.goals.map((goal) => {
+      console.log('Raw goals data:', this.filteredGoals); // Debug log
+      this.calendarOptions.events = this.filteredGoals.map((goal) => {
         console.log('Processing goal:', {
           id: goal.id,
           title: goal.title,
@@ -344,6 +390,93 @@ export default {
         };
       });
       console.log('Final calendar events:', this.calendarOptions.events); // Debug log
+    },
+
+    // Apply filters from SideViewDashboard
+    applyFilters(filters) {
+      this.activeFilters = filters;
+      
+      // Build query parameters for the API
+      const params = new URLSearchParams();
+      
+      // Add priority filter
+      if (filters.priority) {
+        params.append('priority', filters.priority);
+      }
+      
+      // Add date range filter
+      if (filters.dateRange.start) {
+        params.append('start_date', filters.dateRange.start);
+      }
+      
+      if (filters.dateRange.end) {
+        params.append('end_date', filters.dateRange.end);
+      }
+      
+      // Add team/user filter
+      if (this.selectedTeam !== 'none') {
+        params.append('team_id', this.selectedTeam.id);
+      } else {
+        // For personal goals, we'll filter on the client side
+        // since the API endpoint for personal goals doesn't support filtering yet
+        this.filterGoalsLocally(filters);
+        return;
+      }
+      
+      // Call the filtered goals API
+      axios.get(`/api/goals/filtered?${params.toString()}`)
+        .then(response => {
+          this.filteredGoals = response.data;
+          this.updateCalendarEvents();
+        })
+        .catch(error => {
+          console.error('Error fetching filtered goals:', error);
+          // Fallback to client-side filtering if API fails
+          this.filterGoalsLocally(filters);
+        });
+    },
+    
+    // Client-side filtering for personal goals or as fallback
+    filterGoalsLocally(filters) {
+      // Start with all goals
+      let filtered = [...this.goals];
+      
+      // Apply priority filter
+      if (filters.priority) {
+        filtered = filtered.filter(goal => goal.priority === filters.priority);
+      }
+      
+      // Apply date range filter
+      if (filters.dateRange.start || filters.dateRange.end) {
+        const startDate = filters.dateRange.start ? new Date(filters.dateRange.start) : null;
+        const endDate = filters.dateRange.end ? new Date(filters.dateRange.end) : null;
+        
+        filtered = filtered.filter(goal => {
+          const goalStartDate = new Date(goal.start_time);
+          
+          if (startDate && goalStartDate < startDate) return false;
+          if (endDate) {
+            // Set end date to end of day
+            endDate.setHours(23, 59, 59, 999);
+            if (goalStartDate > endDate) return false;
+          }
+          
+          return true;
+        });
+      }
+      
+      // Apply labels filter (if implemented in backend)
+      if (filters.labels && filters.labels.length > 0) {
+        // This would require backend support for labels
+        // For now, we'll just log that labels were selected
+        console.log('Labels filter applied:', filters.labels);
+      }
+      
+      // Update filtered goals
+      this.filteredGoals = filtered;
+      
+      // Update calendar events
+      this.updateCalendarEvents();
     },
 
     renderEventContent(arg) {
@@ -388,6 +521,12 @@ export default {
           this.goals = this.goals.map((goal) =>
             goal.id === goalId ? { ...goal, done: newStatus } : goal
           );
+          
+          // Also update filtered goals
+          this.filteredGoals = this.filteredGoals.map((goal) =>
+            goal.id === goalId ? { ...goal, done: newStatus } : goal
+          );
+          
           this.updateCalendarEvents(); // Refresh calendar events with updated status
         })
         .catch((error) => {
@@ -474,6 +613,7 @@ export default {
         .post("/api/goals", goalData)
         .then((response) => {
           this.goals.push(response.data);
+          this.filteredGoals.push(response.data); // Add to filtered goals too
           this.fetchGoals();
           this.resetGoalForm();
           this.showModal = false;
@@ -489,13 +629,34 @@ export default {
         description: "",
         start_time: "",
         end_time: "",
-        priority: "medium",
+        priority: "medium", // Reset to default priority
       };
       this.selectedDate = null;
     },
 
     closeFullscreenModal() {
       this.fullscreenModalVisible = false;
+    },
+
+    goToToday() {
+      if (this.calendarApi) {
+        this.calendarApi.today();
+      } else {
+        console.error('Calendar API not available');
+      }
+    },
+
+    toggleDayView() {
+      this.isDayView = !this.isDayView;
+      if (this.calendarApi) {
+        if (this.isDayView) {
+          this.calendarApi.changeView('timeGridDay');
+        } else {
+          this.calendarApi.changeView('dayGridMonth');
+        }
+      } else {
+        console.error('Calendar API not available');
+      }
     },
   },
   watch: {
@@ -505,6 +666,17 @@ export default {
         this.fetchGoals();
       }
     },
+  },
+  computed: {
+    upcomingGoalsCount() {
+      const now = new Date();
+      const twentyFourHoursFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      
+      return this.filteredGoals.filter(goal => {
+        const endTime = new Date(goal.end_time);
+        return endTime >= now && endTime <= twentyFourHoursFromNow;
+      }).length;
+    }
   },
 };
 </script>
@@ -639,6 +811,49 @@ export default {
   visibility: visible;
 }
 
+/* Time Grid Styles */
+:deep(.fc-timegrid-slot) {
+  height: 3em !important;
+}
+
+:deep(.fc-timegrid-slot-label) {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+:deep(.fc-timegrid-axis) {
+  padding: 0.5rem;
+  font-weight: 500;
+}
+
+:deep(.fc-timegrid-event) {
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  margin: 0.125rem 0;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+:deep(.fc-timegrid-event:hover) {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+}
+
+:deep(.fc-timegrid-event-title) {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:deep(.fc-timegrid-now-indicator-line) {
+  border-color: #ef4444;
+}
+
+:deep(.fc-timegrid-now-indicator-arrow) {
+  border-color: #ef4444;
+}
+
 /* Dark mode styles */
 :deep(.dark .fc) {
   background-color: #1f2937;
@@ -690,5 +905,21 @@ export default {
 :deep(.dark .fc-button-primary:active) {
   background-color: #1d4ed8 !important;
   border-color: #1d4ed8 !important;
+}
+
+:deep(.dark .fc-timegrid-slot-label) {
+  color: #9ca3af;
+}
+
+:deep(.dark .fc-timegrid-axis) {
+  color: #f3f4f6;
+}
+
+:deep(.dark .fc-timegrid-now-indicator-line) {
+  border-color: #ef4444;
+}
+
+:deep(.dark .fc-timegrid-now-indicator-arrow) {
+  border-color: #ef4444;
 }
 </style>

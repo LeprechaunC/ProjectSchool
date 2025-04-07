@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Team;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class TeamController extends Controller
 {
@@ -125,6 +126,102 @@ class TeamController extends Controller
         return response()->json(['invite_code' => $newInviteCode]);
     }
     
+    public function exitTeam($teamId)
+    {
+        $team = Team::with('users')->findOrFail($teamId);
+        $user = auth()->user();
 
-    
+        // Check if user is the last admin
+        $adminCount = $team->users()->wherePivot('role', 'admin')->count();
+        $isAdmin = $team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists();
+
+        if ($isAdmin && $adminCount <= 1) {
+            // If this is the last admin, find the next oldest member to make admin
+            $nextAdmin = $team->users()
+                ->wherePivot('user_id', '!=', $user->id)
+                ->orderBy('created_at', 'asc')
+                ->first();
+
+            if ($nextAdmin) {
+                $team->users()->updateExistingPivot($nextAdmin->id, ['role' => 'admin']);
+            }
+        }
+
+        // Remove user from team
+        $team->users()->detach($user->id);
+
+        return response()->json(['message' => 'Successfully left the team']);
+    }
+
+    public function updateTeamName(Request $request, $teamId)
+    {
+        $team = Team::findOrFail($teamId);
+        $user = auth()->user();
+
+        // Check if user is admin
+        if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $team->update(['name' => $request->name]);
+
+        return response()->json($team);
+    }
+
+    public function makeAdmin($teamId, $userId)
+    {
+        $team = Team::findOrFail($teamId);
+        $user = auth()->user();
+
+        // Check if current user is admin
+        if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Update user role to admin
+        $team->users()->updateExistingPivot($userId, ['role' => 'admin']);
+
+        return response()->json(['message' => 'User is now an admin']);
+    }
+
+    public function removeAdmin($teamId, $userId)
+    {
+        $team = Team::findOrFail($teamId);
+        $user = auth()->user();
+
+        // Check if current user is admin
+        if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Check if this is the last admin
+        $adminCount = $team->users()->wherePivot('role', 'admin')->count();
+        if ($adminCount <= 1) {
+            return response()->json(['error' => 'Cannot remove the last admin'], 400);
+        }
+
+        // Update user role to member
+        $team->users()->updateExistingPivot($userId, ['role' => 'member']);
+
+        return response()->json(['message' => 'User is no longer an admin']);
+    }
+
+    public function deleteTeam($teamId)
+    {
+        $team = Team::findOrFail($teamId);
+        $user = auth()->user();
+
+        // Check if user is admin
+        if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $team->delete();
+
+        return response()->json(['message' => 'Team deleted successfully']);
+    }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
@@ -7,8 +7,31 @@ import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
 import { Link } from '@inertiajs/vue3';
 import DarkModeToggle from '@/Components/DarkModeToggle.vue';
+import axios from 'axios';
 
 const showingNavigationDropdown = ref(false);
+const unreadCount = ref(0);
+let pollingInterval;
+
+const fetchUnreadCount = async () => {
+    try {
+        const response = await axios.get('/api/messages/unread/count');
+        unreadCount.value = response.data.count;
+    } catch (error) {
+        console.error('Failed to fetch unread count:', error);
+    }
+};
+
+onMounted(() => {
+    fetchUnreadCount();
+    pollingInterval = setInterval(fetchUnreadCount, 30000); // Poll every 30 seconds
+});
+
+onUnmounted(() => {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+    }
+});
 </script>
 
 <template>
@@ -66,6 +89,21 @@ const showingNavigationDropdown = ref(false);
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                         </svg>
                                         Teams
+                                    </div>
+                                </NavLink>
+                                <NavLink
+                                    :href="route('messages')"
+                                    :active="route().current('messages')"
+                                    class="px-3 py-2 rounded-md text-sm font-medium transition-colors"
+                                >
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                        </svg>
+                                        Messages
+                                        <span v-if="unreadCount > 0" class="ml-2 bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full">
+                                            {{ unreadCount }}
+                                        </span>
                                     </div>
                                 </NavLink>
                                 <NavLink
@@ -210,6 +248,16 @@ const showingNavigationDropdown = ref(false);
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                             </svg>
                             Teams
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('messages')"
+                            :active="route().current('messages')"
+                            class="flex items-center px-3 py-2 rounded-md text-base font-medium"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Messages
                         </ResponsiveNavLink>
                         <ResponsiveNavLink
                             v-if="$page.props.auth.user.role === 'admin'"
