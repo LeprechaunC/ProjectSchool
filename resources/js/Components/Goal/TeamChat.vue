@@ -4,10 +4,16 @@
     <div class="p-4 border-b border-gray-200 dark:border-gray-700">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-            <span class="text-lg font-semibold text-blue-800 dark:text-blue-200">
-              {{ team?.name?.charAt(0) }}
-            </span>
+          <div class="w-10 h-10 rounded-full overflow-hidden">
+            <img v-if="team?.profile_picture" 
+                 :src="`/storage/${team.profile_picture}`" 
+                 alt="Team Profile" 
+                 class="w-full h-full object-cover" />
+            <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+              <span class="text-lg font-semibold text-blue-800 dark:text-blue-200">
+                {{ team?.name?.charAt(0) }}
+              </span>
+            </div>
           </div>
           <div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ team?.name }}</h3>
@@ -29,10 +35,16 @@
     <!-- Chat Messages -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4" ref="messagesContainer">
       <div v-for="message in messages" :key="message.id" class="flex items-start space-x-3">
-        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-          <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
-            {{ message.user.name.charAt(0) }}
-          </span>
+        <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+          <img v-if="message.user.profile_picture" 
+               :src="`/storage/${message.user.profile_picture}`" 
+               alt="Profile" 
+               class="w-full h-full object-cover" />
+          <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+            <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
+              {{ message.user.name.charAt(0) }}
+            </span>
+          </div>
         </div>
         <div class="flex-1">
           <div class="flex items-center space-x-2">

@@ -41,10 +41,16 @@
               :class="{ 'bg-blue-50 dark:bg-blue-900': selectedUser?.id === conversation.user?.id }"
             >
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                  <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">
-                    {{ conversation.user?.name?.charAt(0) || '?' }}
-                  </span>
+                <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                  <img v-if="conversation.user?.profile_picture" 
+                       :src="`/storage/${conversation.user.profile_picture}`" 
+                       alt="Profile" 
+                       class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                      {{ conversation.user?.name?.charAt(0) || '?' }}
+                    </span>
+                  </div>
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex justify-between items-start">
@@ -79,10 +85,16 @@
           <!-- Chat Header -->
           <div v-if="selectedUser" class="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                <span class="text-lg font-medium text-blue-800 dark:text-blue-200">
-                  {{ selectedUser.name.charAt(0) }}
-                </span>
+              <div class="w-10 h-10 rounded-full overflow-hidden">
+                <img v-if="selectedUser.profile_picture" 
+                     :src="`/storage/${selectedUser.profile_picture}`" 
+                     alt="Profile" 
+                     class="w-full h-full object-cover" />
+                <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                  <span class="text-lg font-medium text-blue-800 dark:text-blue-200">
+                    {{ selectedUser.name.charAt(0) }}
+                  </span>
+                </div>
               </div>
               <div>
                 <div class="font-medium text-gray-900 dark:text-white">
@@ -120,6 +132,22 @@
             <div v-for="message in messages" :key="message.id" 
               class="flex" 
               :class="{ 'justify-end': message.sender_id === currentUser.id }">
+              
+              <!-- Sender profile picture (only show for messages not from current user) -->
+              <div v-if="message.sender_id !== currentUser.id" class="mr-2 flex-shrink-0">
+                <div class="w-8 h-8 rounded-full overflow-hidden">
+                  <img v-if="message.sender?.profile_picture" 
+                      :src="`/storage/${message.sender.profile_picture}`" 
+                      alt="Profile" 
+                      class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <span class="text-xs font-medium text-blue-800 dark:text-blue-200">
+                      {{ message.sender?.name?.charAt(0) || '?' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
               <div class="max-w-[70%] rounded-lg px-4 py-2"
                 :class="{
                   'bg-blue-600 text-white': message.sender_id === currentUser.id,
@@ -132,7 +160,11 @@
                   class="max-w-full rounded-lg mb-2"
                   @click="openImagePreview('/storage/' + message.image_path)"
                 />
-                <p v-if="message.content" class="text-sm">{{ message.content }}</p>
+                <p v-if="message.image_path && message.content" class="text-sm">{{ message.content }}</p>
+                <p v-else-if="message.image_path && !message.content" class="text-sm text-gray-500 dark:text-gray-400">
+                  [Image: {{ message.image_path }}]
+                </p>
+                <p v-else-if="message.content" class="text-sm">{{ message.content }}</p>
                 <div class="flex justify-between items-center mt-1">
                   <p class="text-xs" 
                     :class="{
@@ -248,10 +280,16 @@
                 @click="startChat(user)"
                 class="w-full p-3 flex items-center space-x-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
-                <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
-                  <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">
-                    {{ user.name.charAt(0) }}
-                  </span>
+                <div class="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
+                  <img v-if="user.profile_picture" 
+                       :src="`/storage/${user.profile_picture}`" 
+                       alt="Profile" 
+                       class="w-full h-full object-cover" />
+                  <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                    <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                      {{ user.name.charAt(0) }}
+                    </span>
+                  </div>
                 </div>
                 <div class="flex-1 text-left">
                   <div class="font-medium text-gray-900 dark:text-white">{{ user.name }}</div>
@@ -374,8 +412,11 @@ export default {
       try {
         const response = await axios.get(`/api/messages/${selectedUser.value.id}`);
         messages.value = response.data;
+        console.log('Messages retrieved:', messages.value);
+        console.log('Messages with images:', messages.value.filter(m => m.image_path));
         scrollToBottom();
       } catch (err) {
+        console.error('Error fetching messages:', err);
         error.value = 'Failed to load messages';
       }
     };

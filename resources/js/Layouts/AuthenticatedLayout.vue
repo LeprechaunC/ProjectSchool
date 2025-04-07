@@ -138,7 +138,18 @@ onUnmounted(() => {
                                             type="button"
                                             class="flex items-center rounded-full bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
                                         >
-                                            
+                                            <!-- Profile Picture -->
+                                            <div class="w-8 h-8 rounded-full overflow-hidden mr-2 border-2 border-gray-200 dark:border-gray-700">
+                                                <img v-if="$page.props.auth.user.profile_picture" 
+                                                    :src="`/storage/${$page.props.auth.user.profile_picture}`" 
+                                                    alt="Profile" 
+                                                    class="w-full h-full object-cover" />
+                                                <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                                    <span class="text-sm font-semibold text-blue-800 dark:text-blue-200">
+                                                        {{ $page.props.auth.user.name.charAt(0) }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                             <span class="text-gray-700 dark:text-gray-300">{{ $page.props.auth.user.name }}</span>
                                             <svg
                                                 class="ms-2 h-4 w-4 text-gray-500 dark:text-gray-400"
@@ -157,8 +168,24 @@ onUnmounted(() => {
 
                                     <template #content>
                                         <div class="px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                                            <p class="text-sm text-gray-900 dark:text-white">{{ $page.props.auth.user.name }}</p>
-                                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $page.props.auth.user.email }}</p>
+                                            <!-- Profile Picture in Dropdown -->
+                                            <div class="flex items-center space-x-3 mb-2">
+                                                <div class="w-10 h-10 rounded-full overflow-hidden">
+                                                    <img v-if="$page.props.auth.user.profile_picture" 
+                                                        :src="`/storage/${$page.props.auth.user.profile_picture}`" 
+                                                        alt="Profile" 
+                                                        class="w-full h-full object-cover" />
+                                                    <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                                        <span class="text-lg font-semibold text-blue-800 dark:text-blue-200">
+                                                            {{ $page.props.auth.user.name.charAt(0) }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm text-gray-900 dark:text-white">{{ $page.props.auth.user.name }}</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $page.props.auth.user.email }}</p>
+                                                </div>
+                                            </div>
                                         </div>
                                         <DropdownLink :href="route('profile.edit')" class="flex items-center">
                                             <svg class="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,6 +246,25 @@ onUnmounted(() => {
                     class="sm:hidden border-t border-gray-200 dark:border-gray-700"
                 >
                     <div class="space-y-1 px-4 pt-2 pb-3">
+                        <!-- User profile info in mobile menu -->
+                        <div class="flex items-center space-x-3 py-3 mb-2 border-b border-gray-200 dark:border-gray-700">
+                            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                                <img v-if="$page.props.auth.user.profile_picture" 
+                                    :src="`/storage/${$page.props.auth.user.profile_picture}`" 
+                                    alt="Profile" 
+                                    class="w-full h-full object-cover" />
+                                <div v-else class="w-full h-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                    <span class="text-lg font-semibold text-blue-800 dark:text-blue-200">
+                                        {{ $page.props.auth.user.name.charAt(0) }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $page.props.auth.user.name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ $page.props.auth.user.email }}</p>
+                            </div>
+                        </div>
+                        
                         <ResponsiveNavLink
                             :href="route('dashboard')"
                             :active="route().current('dashboard')"
