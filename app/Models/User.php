@@ -24,6 +24,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
+        'status',
         'profile_picture'
     ];
 
@@ -37,24 +39,20 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-
-    public function getId()
-{
-  return $this->id;
-}
     /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
+    public function getId()
+{
+  return $this->id;
+}
     public function teams()
 {
     return $this->belongsToMany(Team::class)->withPivot('role'); // Include 'role' in the pivot data

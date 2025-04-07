@@ -89,8 +89,46 @@
             <label class="filter-label">Labels</label>
             <span class="text-xs text-gray-500 dark:text-gray-400">{{ selectedLabels.length }} selected</span>
           </div>
-        
-  
+          <div class="labels-container">
+            <div class="labels-input-group">
+              <input 
+                type="text" 
+                v-model="newLabel" 
+                @keyup.enter="addLabel"
+                placeholder="Add new label..."
+                class="label-input"
+              />
+              <button 
+                @click="addLabel"
+                class="add-label-button"
+                :disabled="!newLabel.trim()"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+              </button>
+            </div>
+            <div class="selected-labels" v-if="selectedLabels.length > 0">
+              <div 
+                v-for="(label, index) in selectedLabels" 
+                :key="index"
+                class="label-tag"
+              >
+                <span>{{ label }}</span>
+                <button 
+                  @click="removeLabel(index)"
+                  class="remove-label-button"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div v-else class="text-sm text-gray-500 dark:text-gray-400 italic mt-2">
+              No labels added yet
+            </div>
+          </div>
         </div>
 
         <!-- Apply Filters Button -->
@@ -141,7 +179,7 @@ export default {
       types: [
         { value: "project", label: "Project", icon: "🚀" },
         { value: "task", label: "Task", icon: "✅" },
-      
+        { value: "challenge", label: "Challenge", icon: "🏆" }
       ]
     };
   },
@@ -525,3 +563,5 @@ export default {
   border-color: #6b7280;
 }
 </style>
+  
+  

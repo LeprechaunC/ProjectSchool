@@ -1,13 +1,15 @@
-    <?php
+<?php
 
-    use App\Http\Controllers\ProfileController;
-    use Illuminate\Foundation\Application;
-    use Illuminate\Support\Facades\Route;
-    use Inertia\Inertia;
-    use App\Http\Controllers\GoalController;
-    use App\Http\Controllers\TeamController;
-    use App\Http\Controllers\TeamMessageController;
+use App\Http\Controllers\ProfileController;
+use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Controllers\GoalController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TeamMessageController;
+use App\Http\Controllers\AdminController;
 
+Route::middleware(['web'])->group(function () {
     // Default home page
     Route::get('/', function () {
         return Inertia::render('Welcome', [
@@ -28,8 +30,6 @@
         ]);
     })->middleware(['auth', 'verified'])->name('teams');
     
-    
-
     Route::get('/goals', function () {
         return Inertia::render('goals');
     })->middleware(['auth', 'verified'])->name('goals');
@@ -64,25 +64,25 @@
         Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
         Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
  
-            Route::get('/goals', function () {
-                $user = auth()->user();
-                // Assuming the user belongs to one team
-                $teamId = $user->teams()->first()->id;  // Make sure the user is in a team
-        
-                return Inertia::render('Goals', [
-                    'team_id' => $teamId
-                ]);
-            })->name('goals');
+        Route::get('/goals', function () {
+            $user = auth()->user();
+            // Assuming the user belongs to one team
+            $teamId = $user->teams()->first()->id;  // Make sure the user is in a team
+    
+            return Inertia::render('Goals', [
+                'team_id' => $teamId
+            ]);
+        })->name('goals');
             
-            Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-                return $request->user();
-            });
+        Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+            return $request->user();
+        });
 
-            Route::post('/api/teams/{teamId}/votekick', [TeamController::class, 'votekick']);
-            Route::get('/api/user', function (Request $request) {
-                return auth()->user();
-            });
-       
+        Route::post('/api/teams/{teamId}/votekick', [TeamController::class, 'votekick']);
+        Route::get('/api/user', function (Request $request) {
+            return auth()->user();
+        });
+   
         Route::post('api/teams/join', [TeamController::class, 'joinTeam']);
         Route::post('/api/teams/{teamId}/invite', [TeamController::class, 'generateInviteCode']);
 
@@ -92,14 +92,31 @@
         Route::post('/api/teams/{team}/messages', [TeamMessageController::class, 'store']);
      
         Route::post('/profile/picture', [ProfileController::class, 'updateProfilePicture'])
-    ->name('profile.picture.update')
-    ->middleware('auth');
+            ->name('profile.picture.update')
+            ->middleware('auth');
     });
 
- 
-   
- 
-  
-  
- 
-     require __DIR__.'/auth.php';
+    // Admin Routes
+    Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
+        Route::get('/admin', function () {
+            return Inertia::render('Admin/AdminDashboard');
+        })->name('admin.dashboard');
+
+        Route::prefix('api/admin')->group(function () {
+            Route::get('/users', [AdminController::class, 'getUsers']);
+            Route::post('/users', [AdminController::class, 'createUser']);
+            Route::put('/users/{user}', [AdminController::class, 'updateUser']);
+            Route::delete('/users/{user}', [AdminController::class, 'deleteUser']);
+
+            Route::get('/teams', [AdminController::class, 'getTeams']);
+            Route::post('/teams', [AdminController::class, 'createTeam']);
+            Route::put('/teams/{team}', [AdminController::class, 'updateTeam']);
+            Route::delete('/teams/{team}', [AdminController::class, 'deleteTeam']);
+
+            Route::get('/settings', [AdminController::class, 'getSettings']);
+            Route::put('/settings', [AdminController::class, 'updateSettings']);
+        });
+    });
+});
+
+require __DIR__.'/auth.php';
