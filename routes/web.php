@@ -103,6 +103,7 @@ Route::middleware(['web'])->group(function () {
         })->name('admin.dashboard');
 
         Route::prefix('api/admin')->group(function () {
+            Route::get('/statistics', [AdminController::class, 'getStatistics']);
             Route::get('/users', [AdminController::class, 'getUsers']);
             Route::post('/users', [AdminController::class, 'createUser']);
             Route::put('/users/{user}', [AdminController::class, 'updateUser']);

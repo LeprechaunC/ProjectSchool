@@ -26,6 +26,8 @@
         "@fullcalendar/daygrid": "^6.1.15",
         "@fullcalendar/interaction": "^6.1.15",
         "@fullcalendar/timegrid": "^6.1.15",
-        "@fullcalendar/vue3": "^6.1.15"
+        "@fullcalendar/vue3": "^6.1.15",
+        "chart.js": "^4.4.8",
+        "vue-chartjs": "^5.3.2"
     }
 }

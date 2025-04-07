@@ -13,7 +13,7 @@ class GoalController extends Controller
     public function getGoalsByTeam($teamId)
     {
         $goals = Goal::where('team_id', $teamId)
-            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done']);
+            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done', 'priority']);
 
         return response()->json($goals);
     }
@@ -22,7 +22,7 @@ class GoalController extends Controller
         $user = auth()->user();  
         $goals = Goal::whereNull('team_id')
             ->where('user_id', $user->id)  
-            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done']);
+            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'done', 'priority']);
     
         return response()->json($goals);
     }
@@ -109,11 +109,11 @@ public function update(Request $request, $id)
         ]);
     }
     public function getAllGoals(Request $request)
-{
-    // Fetch all goals for all teams
-    $goals = Goal::all(['id', 'title', 'description', 'start_time', 'end_time', 'done']);
-    return response()->json($goals);
-}
+    {
+        // Fetch all goals for all teams
+        $goals = Goal::all(['id', 'title', 'description', 'start_time', 'end_time', 'done', 'priority']);
+        return response()->json($goals);
+    }
 
 public function markAsDone(Request $request, $id)
 {

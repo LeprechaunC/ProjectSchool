@@ -1,11 +1,15 @@
 <template>
-  <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+  <AuthenticatedLayout>
+    <template #header>
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+        Admin Dashboard
+      </h2>
+    </template>
+
     <div class="py-12">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
           <div class="p-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h1>
-            
             <!-- Admin Navigation Tabs -->
             <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
               <nav class="flex -mb-px">
@@ -21,6 +25,125 @@
                   {{ tab.name }}
                 </button>
               </nav>
+            </div>
+            
+            <!-- Statistics Tab -->
+            <div v-if="activeTab === 'statistics'" class="space-y-6">
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Statistics</h2>
+              
+              <!-- Statistics Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg shadow">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-800 mr-4">
+                      <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</p>
+                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.totalUsers }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg shadow">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 dark:bg-green-800 mr-4">
+                      <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Teams</p>
+                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.totalTeams }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg shadow">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-800 mr-4">
+                      <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Goals</p>
+                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.totalGoals }}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg shadow">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-800 mr-4">
+                      <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed Goals</p>
+                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.completedGoals }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Activity Charts -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">User Activity</h3>
+                  <div class="h-64">
+                    <UserActivityChart :activity-data="recentActivity" />
+                  </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Goal Completion Rate</h3>
+                  <div class="h-64">
+                    <GoalCompletionChart 
+                      :total-goals="statistics.totalGoals" 
+                      :completed-goals="statistics.completedGoals" 
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Recent Activity -->
+              <div class="mt-6">
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
+                  <ul class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <li v-for="(activity, index) in recentActivity" :key="index" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+                      <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                          <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" 
+                            :class="{
+                              'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': activity.type === 'user',
+                              'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': activity.type === 'team',
+                              'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': activity.type === 'goal'
+                            }">
+                            <svg v-if="activity.type === 'user'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                            <svg v-if="activity.type === 'team'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <svg v-if="activity.type === 'goal'" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                          </span>
+                        </div>
+                        <div class="ml-4">
+                          <p class="text-sm font-medium text-gray-900 dark:text-white">{{ activity.description }}</p>
+                          <p class="text-xs text-gray-500 dark:text-gray-400">{{ formatDate(activity.timestamp) }}</p>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
             
             <!-- Users Management Tab -->
@@ -308,17 +431,26 @@
         </div>
       </div>
     </div>
-  </div>
+  </AuthenticatedLayout>
 </template>
 
 <script>
 import axios from 'axios';
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import UserActivityChart from '@/Components/Charts/UserActivityChart.vue';
+import GoalCompletionChart from '@/Components/Charts/GoalCompletionChart.vue';
 
 export default {
+  components: {
+    AuthenticatedLayout,
+    UserActivityChart,
+    GoalCompletionChart
+  },
   data() {
     return {
-      activeTab: 'users',
+      activeTab: 'statistics',
       tabs: [
+        { id: 'statistics', name: 'Statistics' },
         { id: 'users', name: 'Users' },
         { id: 'teams', name: 'Teams' },
         { id: 'settings', name: 'Settings' }
@@ -330,6 +462,13 @@ export default {
         defaultRole: 'user',
         emailNotifications: true
       },
+      statistics: {
+        totalUsers: 0,
+        totalTeams: 0,
+        totalGoals: 0,
+        completedGoals: 0
+      },
+      recentActivity: [],
       showUserModal: false,
       showTeamModal: false,
       editingUser: null,
@@ -353,6 +492,7 @@ export default {
     this.fetchUsers();
     this.fetchTeams();
     this.fetchSettings();
+    this.fetchStatistics();
   },
   
   methods: {
@@ -380,6 +520,23 @@ export default {
         this.settings = response.data;
       } catch (error) {
         console.error('Error fetching settings:', error);
+      }
+    },
+    
+    async fetchStatistics() {
+      try {
+        const response = await axios.get('/api/admin/statistics');
+        this.statistics = response.data;
+        this.recentActivity = response.data.recentActivity || [];
+      } catch (error) {
+        console.error('Error fetching statistics:', error);
+        // Fallback data if API is not available
+        this.statistics = {
+          totalUsers: this.users.length,
+          totalTeams: this.teams.length,
+          totalGoals: 0,
+          completedGoals: 0
+        };
       }
     },
     
@@ -477,7 +634,7 @@ export default {
         if (this.editingTeam) {
           await axios.put(`/api/admin/teams/${this.editingTeam.id}`, this.teamForm);
         } else {
-          await axios.post('/api/teams', this.teamForm);
+          await axios.post('/api/admin/teams', this.teamForm);
         }
         this.fetchTeams();
         this.closeTeamModal();
@@ -490,7 +647,7 @@ export default {
       if (!confirm('Are you sure you want to delete this team?')) return;
       
       try {
-        await axios.delete(`/api/teams/${teamId}`);
+        await axios.delete(`/api/admin/teams/${teamId}`);
         this.fetchTeams();
       } catch (error) {
         console.error('Error deleting team:', error);

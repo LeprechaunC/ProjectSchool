@@ -25,6 +25,21 @@
 
         <!-- FullCalendar Component -->
         <div class="calendar-container bg-white dark:bg-gray-800 rounded-lg shadow">
+          <!-- Priority Legend -->
+          <div class="p-4 flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center">
+              <div class="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
+              <span class="text-sm font-medium">High Priority</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-4 h-4 rounded-full bg-amber-500 mr-2"></div>
+              <span class="text-sm font-medium">Medium Priority</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-4 h-4 rounded-full bg-emerald-500 mr-2"></div>
+              <span class="text-sm font-medium">Low Priority</span>
+            </div>
+          </div>
           <FullCalendar :options="calendarOptions" class="p-4" />
         </div>
 
@@ -196,6 +211,13 @@ export default {
         },
         eventDisplay: 'block',
         eventDidMount: (info) => {
+          // Debug logging
+          console.log('Event mounted:', {
+            title: info.event.title,
+            priority: info.event.extendedProps.priority,
+            rawPriority: info.event.extendedProps
+          });
+          
           // Add tooltip
           const tooltip = document.createElement('div');
           tooltip.className = 'fc-tooltip';
@@ -206,6 +228,50 @@ export default {
             </div>
           `;
           info.el.appendChild(tooltip);
+          
+          // Apply priority-based styling
+          const priority = info.event.extendedProps.priority || 'medium';
+          console.log('Using priority:', priority); // Debug log
+          
+          const priorityColors = {
+            high: {
+              backgroundColor: '#ef4444', // red-500
+              borderColor: '#dc2626', // red-600
+              textColor: '#ffffff'
+            },
+            medium: {
+              backgroundColor: '#f59e0b', // amber-500
+              borderColor: '#d97706', // amber-600
+              textColor: '#ffffff'
+            },
+            low: {
+              backgroundColor: '#10b981', // emerald-500
+              borderColor: '#059669', // emerald-600
+              textColor: '#ffffff'
+            }
+          };
+          
+          const colors = priorityColors[priority] || priorityColors.medium;
+          console.log('Selected colors:', colors); // Debug log
+          
+          // Apply colors to the event element
+          info.el.style.backgroundColor = colors.backgroundColor;
+          info.el.style.borderColor = colors.borderColor;
+          info.el.style.color = colors.textColor;
+          
+          // Add priority indicator dot - with safety check
+          const titleElement = info.el.querySelector('.fc-event-title');
+          if (titleElement) {
+            const dot = document.createElement('div');
+            dot.className = 'priority-dot';
+            dot.style.width = '8px';
+            dot.style.height = '8px';
+            dot.style.borderRadius = '50%';
+            dot.style.marginRight = '4px';
+            dot.style.display = 'inline-block';
+            dot.style.backgroundColor = colors.backgroundColor;
+            titleElement.prepend(dot);
+          }
         }
       },
       showModal: false,
@@ -216,6 +282,7 @@ export default {
         description: "",
         start_time: "",
         end_time: "",
+        priority: "medium",
       },
       selectedDate: null,
       showChat: false,
@@ -257,15 +324,26 @@ export default {
     },
 
     updateCalendarEvents() {
-      this.calendarOptions.events = this.goals.map((goal) => ({
-        id: goal.id,
-        title: goal.title,
-        description: goal.description,
-        start: goal.start_time,  // Ensure this is passed as the event's start time
-        end: goal.end_time,      // Ensure this is passed as the event's end time
-        goalId: goal.id,
-        done: goal.done,         // Include goal completion status
-      }));
+      console.log('Raw goals data:', this.goals); // Debug log
+      this.calendarOptions.events = this.goals.map((goal) => {
+        console.log('Processing goal:', {
+          id: goal.id,
+          title: goal.title,
+          priority: goal.priority,
+          rawPriority: goal
+        });
+        return {
+          id: goal.id,
+          title: goal.title,
+          description: goal.description,
+          start: goal.start_time,
+          end: goal.end_time,
+          goalId: goal.id,
+          done: goal.done,
+          priority: goal.priority || 'medium',
+        };
+      });
+      console.log('Final calendar events:', this.calendarOptions.events); // Debug log
     },
 
     renderEventContent(arg) {
@@ -377,6 +455,8 @@ export default {
           ? this.selectedTeam.id
           : null;
 
+      console.log('Submitting goal with priority:', this.newGoal.priority); // Debug log
+
       const goalData = {
         title: this.newGoal.title,
         description: this.newGoal.description,
@@ -387,6 +467,8 @@ export default {
         user_id: null,
         done: false
       };
+
+      console.log('Goal data being sent:', goalData); // Debug log
 
       axios
         .post("/api/goals", goalData)
@@ -407,6 +489,7 @@ export default {
         description: "",
         start_time: "",
         end_time: "",
+        priority: "medium",
       };
       this.selectedDate = null;
     },
@@ -427,6 +510,19 @@ export default {
 </script>
 
 <style scoped>
+ .dark .fc {
+    background-color: #1f2937; /* Tailwind's gray-800 */
+    color: white;
+  }
+
+  .dark .fc .fc-daygrid-day-number {
+    color: white;
+  }
+
+  .dark .fc .fc-toolbar-title {
+    color: white;
+  }
+
 .calendar-container {
   overflow: hidden;
   border-radius: 0.5rem;
@@ -487,11 +583,12 @@ export default {
   color: white;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 :deep(.fc-event:hover) {
   transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 }
 
 :deep(.fc-event-title) {
@@ -499,6 +596,12 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.priority-dot) {
+  flex-shrink: 0;
 }
 
 :deep(.fc-daygrid-day-number) {

@@ -11,11 +11,7 @@ import Teams from '@/Components/Teams/TeamsDashboard.vue';
 
     <AuthenticatedLayout>
         <template #header>
-            <h2
-                class="text-xl font-semibold leading-tight text-gray-800"
-            >
-                Teams Dashboard
-            </h2>
+         
         </template>
 
         <div class="py-12">
