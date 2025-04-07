@@ -186,8 +186,22 @@ public function markAsDone(Request $request, $id)
     ]);
 }
 
-
- 
+    /**
+     * Get all goals from teams that the authenticated user is a member of
+     */
+    public function getUserTeamGoals(Request $request)
+    {
+        $user = auth()->user();
+        
+        // Get IDs of all teams the user is part of
+        $teamIds = $user->teams()->pluck('teams.id')->toArray();
+        
+        // Get all goals from these teams
+        $goals = Goal::whereIn('team_id', $teamIds)
+            ->get(['id', 'title', 'description', 'start_time', 'end_time', 'user_id', 'team_id', 'done', 'priority']);
+            
+        return response()->json($goals);
+    }
 
 }
 

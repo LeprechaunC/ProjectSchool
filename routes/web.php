@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use App\Http\Controllers\GoalController;
 use App\Http\Controllers\TeamController;
@@ -78,6 +79,7 @@ Route::middleware(['web'])->group(function () {
         Route::get('/api/goals/{teamId}', [GoalController::class, 'getGoalsByTeam']);
         Route::get('/api/goals/user/allusergoals', [GoalController::class, 'getAllUserGoals']);
         Route::get('/api/goals/filtered', [GoalController::class, 'getFilteredGoals']);
+        Route::get('/api/goals/user/teamgoals', [GoalController::class, 'getUserTeamGoals']);
  
         Route::get('/goals', function () {
             $user = auth()->user();

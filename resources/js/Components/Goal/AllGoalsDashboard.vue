@@ -4,6 +4,15 @@
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
     </div>
 
+    <div v-else-if="error" class="max-w-4xl mx-auto">
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg my-4">
+        <p>{{ error }}</p>
+        <button @click="fetchGoals" class="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          Try Again
+        </button>
+      </div>
+    </div>
+
     <div v-else class="max-w-4xl mx-auto">
       <!-- Header Section -->
       <div class="mb-8">
@@ -21,7 +30,7 @@
                 id="team-select" 
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="all">All Teams</option>
+                <option value="all">All Goals</option>
                 <option value="personal">Personal</option>
                 <option v-for="team in teams" :key="team.id" :value="team.id">
                   {{ team.name }}
@@ -61,6 +70,41 @@
                 <option value="oldest">Start Date (Oldest First)</option>
                 <option value="youngest">Start Date (Youngest First)</option>
               </select>
+            </div>
+          </div>
+          
+          <!-- Priority Filters -->
+          <div class="mt-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Filter by Priority</label>
+            <div class="flex flex-wrap gap-2">
+              <button 
+                @click="togglePriorityFilter('all')" 
+                class="px-3 py-1.5 text-sm rounded-lg transition-colors" 
+                :class="priorityFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'"
+              >
+                All
+              </button>
+              <button 
+                @click="togglePriorityFilter('high')" 
+                class="px-3 py-1.5 text-sm rounded-lg transition-colors" 
+                :class="priorityFilter === 'high' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300'"
+              >
+                High
+              </button>
+              <button 
+                @click="togglePriorityFilter('medium')" 
+                class="px-3 py-1.5 text-sm rounded-lg transition-colors" 
+                :class="priorityFilter === 'medium' ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/50 dark:text-yellow-300'"
+              >
+                Medium
+              </button>
+              <button 
+                @click="togglePriorityFilter('low')" 
+                class="px-3 py-1.5 text-sm rounded-lg transition-colors" 
+                :class="priorityFilter === 'low' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300'"
+              >
+                Low
+              </button>
             </div>
           </div>
           
@@ -107,7 +151,7 @@
       </div>
 
       <!-- Goals List Section -->
-      <div v-if="filteredGoals.length > 0">
+      <div v-if="paginatedGoals.length > 0">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Goals for: {{ selectedTeamName }}</h3>
           <span class="text-sm text-gray-500 dark:text-gray-400">{{ filteredGoals.length }} goals found</span>
@@ -115,18 +159,32 @@
         
         <div class="space-y-4">
           <div 
-            v-for="goal in filteredGoals" 
+            v-for="goal in paginatedGoals" 
             :key="goal.id" 
             @click="openGoalModal(goal)"
             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer border border-gray-100 dark:border-gray-700"
           >
             <div class="flex justify-between items-start">
               <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ goal.title }}</h4>
-              <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                {{ formatDate(goal.start_time) }}
-              </span>
+              <div class="flex items-center space-x-2">
+                <!-- Priority Badge -->
+                <span 
+                  class="text-xs px-2 py-1 rounded-full"
+                  :class="{
+                    'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': goal.priority === 'high',
+                    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': goal.priority === 'medium',
+                    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': goal.priority === 'low',
+                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200': !goal.priority
+                  }"
+                >
+                  {{ goal.priority ? goal.priority.charAt(0).toUpperCase() + goal.priority.slice(1) : 'Medium' }}
+                </span>
+                <span class="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  {{ formatDate(goal.start_time) }}
+                </span>
+              </div>
             </div>
-            <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{{ goal.description }}</p>
+            <p class="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">{{ goal.description || 'No description provided' }}</p>
             <div class="flex justify-between text-sm text-gray-500 dark:text-gray-400">
               <span><strong>Start:</strong> {{ formatDateTime(goal.start_time) }}</span>
               <span><strong>End:</strong> {{ formatDateTime(goal.end_time) }}</span>
@@ -216,6 +274,61 @@
               </div>
             </div>
 
+            <!-- Priority Selector -->
+            <div class="mt-4">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Priority</label>
+              <div class="flex space-x-3">
+                <label class="relative flex items-center">
+                  <input 
+                    type="radio" 
+                    v-model="selectedGoal.priority" 
+                    value="high" 
+                    class="sr-only"
+                  />
+                  <div 
+                    class="p-2 rounded-lg cursor-pointer border-2"
+                    :class="selectedGoal.priority === 'high' 
+                      ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200 border-red-500' 
+                      : 'bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-300 border-transparent'"
+                  >
+                    High
+                  </div>
+                </label>
+                <label class="relative flex items-center">
+                  <input 
+                    type="radio" 
+                    v-model="selectedGoal.priority" 
+                    value="medium" 
+                    class="sr-only"
+                  />
+                  <div 
+                    class="p-2 rounded-lg cursor-pointer border-2"
+                    :class="selectedGoal.priority === 'medium' || !selectedGoal.priority
+                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 border-yellow-500' 
+                      : 'bg-yellow-50 text-yellow-600 dark:bg-yellow-900/30 dark:text-yellow-300 border-transparent'"
+                  >
+                    Medium
+                  </div>
+                </label>
+                <label class="relative flex items-center">
+                  <input 
+                    type="radio" 
+                    v-model="selectedGoal.priority" 
+                    value="low" 
+                    class="sr-only"
+                  />
+                  <div 
+                    class="p-2 rounded-lg cursor-pointer border-2"
+                    :class="selectedGoal.priority === 'low' 
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 border-green-500' 
+                      : 'bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-300 border-transparent'"
+                  >
+                    Low
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div class="flex justify-end space-x-3 mt-6">
               <button 
                 @click="cancelEdit" 
@@ -234,7 +347,27 @@
 
           <div v-else class="space-y-4">
             <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-              <p class="text-gray-700 dark:text-gray-300">{{ selectedGoal.description }}</p>
+              <!-- Priority display at the top of the details -->
+              <div class="mb-4 flex justify-between items-center">
+                <div>
+                  <h4 class="text-sm font-medium text-gray-500 dark:text-gray-400">Priority</h4>
+                  <span 
+                    class="inline-block px-3 py-1 mt-1 text-sm font-medium rounded-full"
+                    :class="{
+                      'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200': selectedGoal.priority === 'high',
+                      'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200': selectedGoal.priority === 'medium' || !selectedGoal.priority,
+                      'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200': selectedGoal.priority === 'low'
+                    }"
+                  >
+                    {{ selectedGoal.priority ? (selectedGoal.priority.charAt(0).toUpperCase() + selectedGoal.priority.slice(1)) : 'Medium' }}
+                  </span>
+                </div>
+                <div v-if="selectedGoal.done" class="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-sm">
+                  Completed
+                </div>
+              </div>
+              
+              <p class="text-gray-700 dark:text-gray-300">{{ selectedGoal.description || 'No description provided' }}</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -294,30 +427,46 @@ export default {
       selectedGoal: null,
       currentPage: 1,  // Start on page 1
       goalsPerPage: 10, // Increased to show more goals per page
+      allTeamsGoals: [], // Separate array to store goals from all teams
+      personalGoals: [], // Separate array to store personal goals
+      teamsGoals: [], // Separate array to store team goals
+      priorityFilter: 'all',
     };
   },
 
   computed: {
     filteredGoals() {
-      // First, filter by search query
-      let filtered = this.goals.filter(
-        (goal) =>
-          goal.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-          goal.description.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-
-      // Then, apply sorting based on the selected option
-      if (this.sortOption === "az") {
-        filtered = filtered.sort((a, b) => a.title.localeCompare(b.title));
-      } else if (this.sortOption === "za") {
-        filtered = filtered.sort((a, b) => b.title.localeCompare(a.title));
-      } else if (this.sortOption === "oldest") {
-        filtered = filtered.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
-      } else if (this.sortOption === "youngest") {
-        filtered = filtered.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+      // Start with all goals
+      let filtered = [...this.goals];
+      
+      // Apply priority filter
+      if (this.priorityFilter !== 'all') {
+        filtered = filtered.filter(goal => {
+          // If no priority is set, treat it as 'medium' (default)
+          const goalPriority = goal.priority || 'medium';
+          return goalPriority === this.priorityFilter;
+        });
       }
-
-      return filtered;
+      
+      // If search query is empty, just return the priority-filtered goals with sorting
+      if (!this.searchQuery.trim()) {
+        return this.sortGoals(filtered);
+      }
+      
+      // Apply search query filter with null checks
+      const searchLower = this.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(goal => {
+        // Check title (with null check)
+        const titleMatch = goal.title ? goal.title.toLowerCase().includes(searchLower) : false;
+        
+        // Check description (with null check)
+        const descriptionMatch = goal.description ? goal.description.toLowerCase().includes(searchLower) : false;
+        
+        return titleMatch || descriptionMatch;
+      });
+      
+      // Apply sorting
+      return this.sortGoals(filtered);
     },
 
     paginatedGoals() {
@@ -334,10 +483,26 @@ export default {
 
     selectedTeamName() {
       if (this.selectedTeam === "personal") return "Personal Goals";
-      if (this.selectedTeam === "all") return "All Teams";
+      if (this.selectedTeam === "all") return "All Goals";
       const team = this.teams.find((t) => t.id === this.selectedTeam);
-      return team ? team.name : "All Teams";
+      return team ? team.name : "All Goals";
     },
+  },
+
+  watch: {
+    // Watch for changes in the search query to reset pagination
+    searchQuery() {
+      this.currentPage = 1;
+    },
+    // Watch for changes in the selected team to fetch the right goals
+    selectedTeam() {
+      this.fetchGoals();
+      this.currentPage = 1;
+    },
+    // Watch for changes in priority filter to reset pagination
+    priorityFilter() {
+      this.currentPage = 1;
+    }
   },
 
   mounted() {
@@ -358,29 +523,82 @@ export default {
 
     async fetchGoals() {
       this.loading = true;
+      this.error = null;
+      
       try {
         let response;
         if (this.selectedTeam === "personal") {
           response = await axios.get("/api/goals/user/allusergoals");
+          this.goals = response.data || [];
         } else if (this.selectedTeam === "all") {
-          // Fetch goals from all teams
-          const [personalGoals, teamsGoals] = await Promise.all([
+          // Fetch personal goals and team goals separately
+          const [personalGoalsResponse, teamGoalsResponse] = await Promise.all([
             axios.get("/api/goals/user/allusergoals"),
-            axios.get("/api/goals/all")
+            axios.get("/api/goals/user/teamgoals")
           ]);
+          
           // Combine personal and team goals
-          this.goals = [...personalGoals.data, ...teamsGoals.data];
-          return;
+          const personalGoals = personalGoalsResponse.data || [];
+          const teamGoals = teamGoalsResponse.data || [];
+          const allGoals = [...personalGoals, ...teamGoals];
+          
+          // Remove duplicates (in case a goal appears in both personal and team goals)
+          const uniqueGoals = [];
+          const seenIds = new Set();
+          
+          for (const goal of allGoals) {
+            if (goal && goal.id && !seenIds.has(goal.id)) {
+              seenIds.add(goal.id);
+              uniqueGoals.push(goal);
+            }
+          }
+          
+          this.goals = uniqueGoals;
         } else {
+          // Fetch goals for a specific team
           response = await axios.get(`/api/goals/${this.selectedTeam}`);
+          this.goals = response.data || [];
         }
-        this.goals = response.data;
       } catch (err) {
         console.error("Failed to fetch goals", err);
         this.error = "Failed to load goals";
+        this.goals = []; // Reset goals on error
       } finally {
         this.loading = false;
       }
+    },
+    
+    // Helper to sort goals based on the selected sort option
+    sortGoals(goals) {
+      const sortedGoals = [...goals]; // Create a new array to avoid mutating the original
+      
+      if (this.sortOption === "az") {
+        sortedGoals.sort((a, b) => {
+          const titleA = a.title || "";
+          const titleB = b.title || "";
+          return titleA.localeCompare(titleB);
+        });
+      } else if (this.sortOption === "za") {
+        sortedGoals.sort((a, b) => {
+          const titleA = a.title || "";
+          const titleB = b.title || "";
+          return titleB.localeCompare(titleA);
+        });
+      } else if (this.sortOption === "oldest") {
+        sortedGoals.sort((a, b) => {
+          const dateA = a.start_time ? new Date(a.start_time) : new Date(0);
+          const dateB = b.start_time ? new Date(b.start_time) : new Date(0);
+          return dateA - dateB;
+        });
+      } else if (this.sortOption === "youngest") {
+        sortedGoals.sort((a, b) => {
+          const dateA = a.start_time ? new Date(a.start_time) : new Date(0);
+          const dateB = b.start_time ? new Date(b.start_time) : new Date(0);
+          return dateB - dateA;
+        });
+      }
+      
+      return sortedGoals;
     },
 
     openGoalModal(goal) {
@@ -392,6 +610,7 @@ export default {
     closeModal() {
       this.isModalVisible = false;
       this.selectedGoal = null;
+      this.isEditing = false;
     },
 
     startEdit() {
@@ -399,14 +618,29 @@ export default {
     },
 
     cancelEdit() {
+      // Revert to original goal data
+      if (this.selectedGoal) {
+        const originalGoal = this.findOriginalGoal(this.selectedGoal.id);
+        if (originalGoal) {
+          this.selectedGoal = { ...originalGoal };
+        }
+      }
       this.isEditing = false;
+    },
+    
+    // Helper to find the original goal in our data
+    findOriginalGoal(goalId) {
+      return this.goals.find(g => g.id === goalId);
     },
 
     async deleteGoal(goalId) {
       if (!confirm("Are you sure you want to delete this goal?")) return;
       try {
         await axios.delete(`/api/goals/${goalId}`);
-        this.goals = this.goals.filter((goal) => goal.id !== goalId);
+        
+        // Remove the goal from the goals array
+        this.goals = this.goals.filter(goal => goal.id !== goalId);
+        
         this.closeModal();
       } catch (err) {
         console.error("Failed to delete goal", err);
@@ -414,10 +648,23 @@ export default {
       }
     },
 
-    saveGoal() {
-      // Implement API call to save the edited goal
-      alert("Goal saved! (Implement API call here)");
-      this.isEditing = false;
+    async saveGoal() {
+      if (!this.selectedGoal) return;
+      
+      try {
+        const updatedGoal = await axios.put(`/api/goals/${this.selectedGoal.id}`, this.selectedGoal);
+        
+        // Update the goal in the goals array
+        const index = this.goals.findIndex(g => g.id === updatedGoal.data.id);
+        if (index !== -1) {
+          this.goals[index] = updatedGoal.data;
+        }
+        
+        this.isEditing = false;
+      } catch (err) {
+        console.error("Failed to save goal", err);
+        alert("Error saving goal. Please try again.");
+      }
     },
 
     changePage(page) {
@@ -437,7 +684,11 @@ export default {
       if (!dateString) return '';
       const date = new Date(dateString);
       return date.toLocaleString();
-    }
+    },
+
+    togglePriorityFilter(priority) {
+      this.priorityFilter = priority;
+    },
   },
 };
 </script>

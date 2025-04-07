@@ -596,6 +596,10 @@ export default {
       }
     },
     
+    editUser(user) {
+      this.openUserModal(user);
+    },
+    
     openUserModal(user = null) {
       this.editingUser = user;
       if (user) {
@@ -645,6 +649,10 @@ export default {
       } catch (error) {
         console.error('Error deleting user:', error);
       }
+    },
+    
+    editTeam(team) {
+      this.openTeamModal(team);
     },
     
     openTeamModal(team = null) {

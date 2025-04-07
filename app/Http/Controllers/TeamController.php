@@ -45,12 +45,15 @@ class TeamController extends Controller
 
         $team = Team::create([
             'name' => $request->name,
-            'owner' => $user->id,
             'invite_code' => Str::random(8), // Generates an 8-letter random invite code
+            'owner_id' => $user->id, // Set the owner_id to the current user's ID
         ]);
 
         // Attach the creator as an admin
         $team->users()->attach($user->id, ['role' => 'admin']);
+
+        // Reload the team with users relationship
+        $team = Team::with('users')->find($team->id);
 
         return response()->json([
             'message' => 'Team created successfully',

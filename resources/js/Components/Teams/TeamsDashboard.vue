@@ -187,141 +187,208 @@
                     </svg>
                   </button>
                 </div>
-                <span class="text-xs bg-white/20 text-white px-2 py-1 rounded-full">
-                  {{ team.users.length }} {{ team.users.length === 1 ? 'member' : 'members' }}
-                </span>
+                <div class="flex items-center space-x-2">
+                  <!-- Invite Code Button (Admin only) -->
+                  <div v-if="isTeamAdmin(team)" class="relative">
+                    <button 
+                      @click="toggleInviteCodeVisible(team.id)"
+                      class="text-white bg-blue-700/50 hover:bg-blue-700/80 transition-colors flex items-center px-2 py-1 rounded"
+                      title="Show invite code"
+                    >
+                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                      </svg>
+                      Invite
+                    </button>
+                    
+                    <!-- Invite Code Dropdown -->
+                    <div 
+                      v-if="visibleInviteCode === team.id"
+                      class="absolute [left:-80px] top-full mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg z-50 p-3 border border-gray-200 dark:border-gray-700"
+                      :ref="`invite-dropdown-${team.id}`"
+                    >
+                      <div class="flex justify-between items-center mb-2">
+                        <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Invite Code</h5>
+                        <button 
+                          @click="generateNewInviteCode(team.id)"
+                          class="text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                        >
+                          Generate New
+                        </button>
+                      </div>
+                      <div class="flex items-center mb-2">
+                        <code class="bg-gray-100 dark:bg-gray-900 px-2 py-1 rounded text-xs text-blue-800 dark:text-blue-300 flex-1 border border-gray-200 dark:border-gray-700 overflow-x-auto">
+                          {{ team.invite_code }}
+                        </code>
+                        <button 
+                          @click="copyInviteCode(team.invite_code)"
+                          class="ml-2 p-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+                          title="Copy invite code"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                          </svg>
+                        </button>
+                      </div>
+                      <div class="text-xs text-gray-500 dark:text-gray-400">
+                        Share this code with others to let them join your team
+                      </div>
+                    </div>
+                  </div>
+                  <span class="text-xs bg-white/20 text-white px-2 py-1 rounded-full">
+                    {{ (team.users && team.users.length) ? team.users.length : 0 }} {{ (team.users && team.users.length) === 1 ? 'member' : 'members' }}
+                  </span>
+                </div>
               </div>
             </div>
             
             <!-- Team Body -->
-            <div class="p-6">
-              <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-                <svg class="w-4 h-4 mr-1.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Members
-              </h5>
-              
-              <div class="space-y-3 mb-6 h-[200px] overflow-y-auto pr-2">
-                <div 
-                  v-for="user in paginatedMembers(team)" 
-                  :key="user.id" 
-                  class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
-                >
-                  <div class="flex items-center">
-                    <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3">
-                      <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
-                        {{ user.name.charAt(0) }}
-                      </span>
+            <div class="p-6 flex flex-col">
+              <div class="flex flex-col flex-grow min-h-[300px]">
+                <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                  <svg class="w-4 h-4 mr-1.5 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                  Members
+                </h5>
+                
+                <div class="space-y-3 mb-6 overflow-y-auto pr-2 flex-grow">
+                  <div 
+                    v-for="user in paginatedMembers(team)" 
+                    :key="user.id" 
+                    class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0"
+                  >
+                    <div class="flex items-center">
+                      <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-3">
+                        <span class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                          {{ user.name.charAt(0) }}
+                        </span>
+                      </div>
+                      <div>
+                        <span class="text-sm font-medium text-gray-900 dark:text-white">
+                          {{ user.name }} 
+                          <span v-if="user.id === currentUser.id" class="text-xs text-blue-600 dark:text-blue-400">(You)</span>
+                        </span>
+                        <span class="block text-xs text-gray-500 dark:text-gray-400">{{ user.pivot.role }}</span>
+                      </div>
                     </div>
-                    <div>
-                      <span class="text-sm font-medium text-gray-900 dark:text-white">
-                        {{ user.name }} 
-                        <span v-if="user.id === currentUser.id" class="text-xs text-blue-600 dark:text-blue-400">(You)</span>
-                      </span>
-                      <span class="block text-xs text-gray-500 dark:text-gray-400">{{ user.pivot.role }}</span>
+                    
+                    <!-- Admin Actions -->
+                    <div class="flex items-center space-x-2" v-if="isTeamAdmin(team) && user.id !== currentUser.id">
+                      <!-- Make/Remove Admin Button -->
+                      <button 
+                        v-if="user.pivot.role !== 'admin'"
+                        @click="makeAdmin(team.id, user.id)" 
+                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                        title="Make admin"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                      <button 
+                        v-else
+                        @click="removeAdmin(team.id, user.id)" 
+                        class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
+                        title="Remove admin"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                      
+                      <!-- Remove Member Button -->
+                      <button 
+                        @click="removeMember(team.id, user.id)" 
+                        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
+                        title="Remove member"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
                     </div>
                   </div>
+                </div>
+
+                <!-- Pagination Controls -->
+                <div v-if="team.users && team.users.length > 5" class="flex justify-center items-center space-x-2 mb-4">
+                  <button 
+                    @click="prevPage(team.id)"
+                    :disabled="currentPages[team.id] === 1"
+                    class="px-2 py-1 text-sm rounded-md"
+                    :class="{
+                      'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300': currentPages[team.id] > 1,
+                      'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed': currentPages[team.id] === 1
+                    }"
+                  >
+                    Previous
+                  </button>
+                  <span class="text-sm text-gray-600 dark:text-gray-400">
+                    Page {{ currentPages[team.id] }} of {{ Math.ceil((team.users ? team.users.length : 0) / 5) }}
+                  </span>
+                  <button 
+                    @click="nextPage(team.id)"
+                    :disabled="currentPages[team.id] >= Math.ceil((team.users ? team.users.length : 0) / 5)"
+                    class="px-2 py-1 text-sm rounded-md"
+                    :class="{
+                      'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300': currentPages[team.id] < Math.ceil((team.users ? team.users.length : 0) / 5),
+                      'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed': currentPages[team.id] >= Math.ceil((team.users ? team.users.length : 0) / 5)
+                    }"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+                
+              <!-- Team Actions -->
+              <div class="mt-auto pt-3 border-t border-gray-100 dark:border-gray-700 h-14">
+                <!-- Team Action Buttons -->
+                <div class="flex justify-between items-center h-full">
+                  <button 
+                    @click="openChat(team)" 
+                    class="flex-1 mr-2 py-2 px-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center h-10"
+                  >
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Chat
+                  </button>
                   
-                  <!-- Admin Actions -->
-                  <div class="flex items-center space-x-2" v-if="team.pivot.role === 'admin' && user.id !== currentUser.id">
-                    <!-- Make/Remove Admin Button -->
+                  <div v-if="isTeamAdmin(team)" class="flex space-x-1">
+                    <!-- Leave Team (Admin) -->
                     <button 
-                      v-if="user.pivot.role !== 'admin'"
-                      @click="makeAdmin(team.id, user.id)" 
-                      class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                      title="Make admin"
+                      @click="exitTeam(team.id)" 
+                      class="px-2 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-10 flex items-center justify-center"
+                      title="Leave Team"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </button>
-                    <button 
-                      v-else
-                      @click="removeAdmin(team.id, user.id)" 
-                      class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
-                      title="Remove admin"
-                    >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                       </svg>
                     </button>
                     
-                    <!-- Remove Member Button -->
+                    <!-- Delete Team (Admin) -->
                     <button 
-                      @click="removeMember(team.id, user.id)" 
-                      class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                      title="Remove member"
+                      @click="deleteTeam(team.id)" 
+                      class="px-2 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-10 flex items-center justify-center"
+                      title="Delete Team"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
                   </div>
-                </div>
-              </div>
-
-              <!-- Pagination Controls -->
-              <div v-if="team.users.length > 5" class="flex justify-center items-center space-x-2 mb-4">
-                <button 
-                  @click="prevPage(team.id)"
-                  :disabled="currentPages[team.id] === 1"
-                  class="px-2 py-1 text-sm rounded-md"
-                  :class="{
-                    'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300': currentPages[team.id] > 1,
-                    'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed': currentPages[team.id] === 1
-                  }"
-                >
-                  Previous
-                </button>
-                <span class="text-sm text-gray-600 dark:text-gray-400">
-                  Page {{ currentPages[team.id] }} of {{ Math.ceil(team.users.length / 5) }}
-                </span>
-                <button 
-                  @click="nextPage(team.id)"
-                  :disabled="currentPages[team.id] >= Math.ceil(team.users.length / 5)"
-                  class="px-2 py-1 text-sm rounded-md"
-                  :class="{
-                    'bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300': currentPages[team.id] < Math.ceil(team.users.length / 5),
-                    'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500 cursor-not-allowed': currentPages[team.id] >= Math.ceil(team.users.length / 5)
-                  }"
-                >
-                  Next
-                </button>
-              </div>
-              
-              <!-- Team Actions -->
-              <div class="mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 space-y-3">
-                <!-- Team Action Buttons -->
-                <div class="flex space-x-2">
-                  <button 
-                    @click="openChat(team)" 
-                    class="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center"
-                  >
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    Open Chat
-                  </button>
-                  
-                  <!-- Delete Team (Admin Only) -->
-                  <button 
-                    v-if="isTeamAdmin(team)"
-                    @click="deleteTeam(team.id)" 
-                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
                   
                   <!-- Leave Team (Non-Admin) -->
                   <button 
                     v-else
                     @click="exitTeam(team.id)" 
-                    class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+                    class="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-20 flex items-center justify-center"
                   >
-                    Leave Team
+                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Leave
                   </button>
                 </div>
               </div>
@@ -446,7 +513,7 @@ export default {
 
     async createTeam() {
       try {
-        const response = await axios.post('/api/teams', { name: this.newTeamName });
+        const response = await axios.post('/api/teamsMake', { name: this.newTeamName });
         this.teams.push(response.data.team);
         this.newTeamName = '';
         this.showNotification('Team created successfully!');
@@ -482,28 +549,62 @@ export default {
       }
     },
 
-    toggleInviteCode(teamId) {
-      this.visibleInviteCode = this.visibleInviteCode === teamId ? null : teamId;
+    toggleInviteCodeVisible(teamId) {
+      if (this.visibleInviteCode === teamId) {
+        this.visibleInviteCode = null;
+      } else {
+        this.visibleInviteCode = teamId;
+        
+        // Add a click event listener to close the dropdown when clicking outside
+        this.$nextTick(() => {
+          const handleClickOutside = (event) => {
+            // Get both the dropdown and the button
+            const dropdownRef = this.$refs[`invite-dropdown-${teamId}`];
+            const buttons = document.querySelectorAll(`button[title="Show invite code"]`);
+            let clickedOnButton = false;
+            
+            // Check if the click was on the invite button
+            buttons.forEach(button => {
+              if (button.contains(event.target)) {
+                clickedOnButton = true;
+              }
+            });
+            
+            // If click was not on the dropdown and not on the button, close the dropdown
+            if (dropdownRef && !dropdownRef.contains(event.target) && !clickedOnButton) {
+              this.visibleInviteCode = null;
+              document.removeEventListener('mousedown', handleClickOutside);
+            }
+          };
+          
+          // Use mousedown instead of click for better handling
+          document.addEventListener('mousedown', handleClickOutside);
+        });
+      }
     },
 
     async generateNewInviteCode(teamId) {
       try {
         const response = await axios.post(`/api/teams/${teamId}/invite`);
         const team = this.teams.find(t => t.id === teamId);
-        if (team) team.invite_code = response.data.invite_code;
+        if (team) {
+          team.invite_code = response.data.invite_code;
+          this.showNotification('New invite code generated');
+        }
       } catch (err) {
         this.error = 'Failed to generate new invite code';
+        this.showNotification('Failed to generate new invite code', 'error');
       }
     },
     
     copyInviteCode(code) {
       navigator.clipboard.writeText(code)
         .then(() => {
-          // You could add a toast notification here
-          console.log('Invite code copied to clipboard');
+          this.showNotification('Invite code copied to clipboard');
         })
         .catch(err => {
           console.error('Failed to copy invite code', err);
+          this.showNotification('Failed to copy invite code', 'error');
         });
     },
     
@@ -610,7 +711,8 @@ export default {
     },
 
     isTeamAdmin(team) {
-      return team.users.find(user => user.id === this.currentUser.id)?.pivot?.role === 'admin';
+      return team.pivot && team.pivot.role === 'admin' || 
+            (team.users && team.users.find(user => user.id === this.currentUser?.id)?.pivot?.role === 'admin');
     },
 
     showNotification(message, type = 'success') {
@@ -627,6 +729,10 @@ export default {
     },
 
     paginatedMembers(team) {
+      if (!team.users || !Array.isArray(team.users)) {
+        return [];
+      }
+
       if (!this.currentPages[team.id]) {
         this.currentPages[team.id] = 1;
       }

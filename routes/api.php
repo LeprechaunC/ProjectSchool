@@ -1,3 +1,11 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\TeamMessageController;
+use App\Http\Controllers\MessageController;
+
 // Team Message Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/teams/{team}/messages', [TeamMessageController::class, 'index']);
