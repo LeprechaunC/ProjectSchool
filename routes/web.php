@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\AdminPdfExportController;
+use App\Http\Controllers\Auth\GoogleController;
 
 Route::middleware(['web'])->group(function () {
     // Default home page
@@ -105,6 +106,7 @@ Route::middleware(['web'])->group(function () {
         Route::post('api/teams/join', [TeamController::class, 'joinTeam']);
         Route::post('/api/teams/{teamId}/invite', [TeamController::class, 'generateInviteCode']);
         Route::get('/api/teams/{id}/name', [TeamController::class, 'updateTeamName']);
+        Route::put('/api/teams/{team}/name', [TeamController::class, 'updateTeamName']);
         Route::post('/api/teamsMake', [TeamController::class, 'createTeam']);
 
         Route::get('/api/teams/{team}/messages', [TeamMessageController::class, 'index']);
@@ -123,6 +125,11 @@ Route::middleware(['web'])->group(function () {
             ->name('export.team-goals');
         Route::get('/export/user-teams', [PdfExportController::class, 'exportUserTeams'])
             ->name('export.user-teams');
+
+        // Add missing team management routes
+        Route::delete('/api/teams/{team}/users/{user}', [TeamController::class, 'removeMember']);
+        Route::post('/api/teams/{team}/members/{user}/make-admin', [TeamController::class, 'makeAdmin']);
+        Route::post('/api/teams/{team}/members/{user}/remove-admin', [TeamController::class, 'removeAdmin']);
     });
 
     // Admin Routes
@@ -159,6 +166,10 @@ Route::middleware(['web'])->group(function () {
                 ->name('admin.export.system-report');
         });
     });
+
+    // Google OAuth Routes
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
 require __DIR__.'/auth.php';

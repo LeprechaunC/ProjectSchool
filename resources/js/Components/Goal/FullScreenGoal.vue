@@ -74,8 +74,17 @@
           
           <div class="goal-detail-item">
             <span class="goal-detail-label">Status:</span>
-            <div class="status-badge" :class="goal.done ? 'status-completed' : 'status-pending'">
-              {{ goal.done ? 'Completed' : 'Pending' }}
+            <div class="flex items-center space-x-2">
+              <div class="status-badge" :class="goal.done ? 'status-completed' : 'status-pending'">
+                {{ goal.done ? 'Completed' : 'Pending' }}
+              </div>
+              <button 
+                @click="toggleGoalStatus" 
+                class="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                :class="goal.done ? 'text-green-500' : 'text-red-500'"
+              >
+                {{ goal.done ? '✓' : '✖' }}
+              </button>
             </div>
           </div>
         </div>
@@ -269,6 +278,19 @@ export default defineComponent({
       emit("closeModal");
     };
 
+    const toggleGoalStatus = async () => {
+      try {
+        const newStatus = !goal.value.done;
+        await axios.patch(`/api/goals/${goal.value.id}/done`, { done: newStatus });
+        goal.value.done = newStatus;
+        showNotification(`Goal marked as ${newStatus ? 'completed' : 'pending'}!`);
+        emit("updateGoal", goal.value);
+      } catch (error) {
+        console.error("Error updating goal status:", error);
+        showNotification("Failed to update goal status", "error");
+      }
+    };
+
     return { 
       goal, 
       isEditing, 
@@ -286,7 +308,8 @@ export default defineComponent({
       getPriorityLabel,
       getPriorityClass,
       showNotification,
-      closeNotification
+      closeNotification,
+      toggleGoalStatus
     };
   },
 });
@@ -305,6 +328,7 @@ export default defineComponent({
   justify-content: center;
   align-items: center;
   z-index: 9999;
+  cursor: pointer; /* Add cursor pointer to indicate clickable area */
 }
 
 .fullscreen-modal {
@@ -317,6 +341,7 @@ export default defineComponent({
   overflow-y: auto;
   z-index: 10000;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  cursor: default; /* Reset cursor for modal content */
 }
 
 /* Confirmation Modal Styles */

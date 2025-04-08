@@ -108,6 +108,18 @@
             </div>
           </div>
           
+          <!-- Show Completed Toggle -->
+          <div class="mt-4">
+            <label class="flex items-center space-x-2">
+              <input 
+                type="checkbox" 
+                v-model="showCompleted" 
+                class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+              />
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Show Completed Goals</span>
+            </label>
+          </div>
+          
           <!-- PDF Export Options -->
           <div class="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
             <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Export Options</h3>
@@ -163,6 +175,13 @@
             :key="goal.id" 
             @click="openGoalModal(goal)"
             class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer border border-gray-100 dark:border-gray-700"
+            :class="{
+              'opacity-75': goal.done,
+              'border-l-4': goal.done,
+              'border-l-red-500': goal.done && goal.priority === 'high',
+              'border-l-yellow-500': goal.done && (goal.priority === 'medium' || !goal.priority),
+              'border-l-green-500': goal.done && goal.priority === 'low'
+            }"
           >
             <div class="flex justify-between items-start">
               <h4 class="text-lg font-medium text-gray-900 dark:text-white mb-2">{{ goal.title }}</h4>
@@ -431,6 +450,7 @@ export default {
       personalGoals: [], // Separate array to store personal goals
       teamsGoals: [], // Separate array to store team goals
       priorityFilter: 'all',
+      showCompleted: true,
     };
   },
 
@@ -446,6 +466,11 @@ export default {
           const goalPriority = goal.priority || 'medium';
           return goalPriority === this.priorityFilter;
         });
+      }
+
+      // Apply completed filter
+      if (!this.showCompleted) {
+        filtered = filtered.filter(goal => !goal.done);
       }
       
       // If search query is empty, just return the priority-filtered goals with sorting

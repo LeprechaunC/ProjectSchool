@@ -85,7 +85,7 @@
     </div>
 
     <!-- Modal for Adding New Goal -->
-    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+    <div v-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" @click.self="showModal = false">
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 relative">
         <button
           @click="showModal = false"
@@ -238,69 +238,7 @@ export default {
           minute: '2-digit',
           meridiem: false
         },
-        eventDidMount: (info) => {
-          // Debug logging
-          console.log('Event mounted:', {
-            title: info.event.title,
-            priority: info.event.extendedProps.priority,
-            rawPriority: info.event.extendedProps
-          });
-          
-          // Add tooltip
-          const tooltip = document.createElement('div');
-          tooltip.className = 'fc-tooltip';
-          tooltip.innerHTML = `
-            <div class="p-2">
-              <div class="font-semibold">${info.event.title}</div>
-              <div class="text-sm">${info.event.extendedProps.description || ''}</div>
-            </div>
-          `;
-          info.el.appendChild(tooltip);
-          
-          // Apply priority-based styling
-          const priority = info.event.extendedProps.priority || 'medium';
-          console.log('Using priority:', priority); // Debug log
-          
-          const priorityColors = {
-            high: {
-              backgroundColor: '#ef4444', // red-500
-              borderColor: '#dc2626', // red-600
-              textColor: '#ffffff'
-            },
-            medium: {
-              backgroundColor: '#f59e0b', // amber-500
-              borderColor: '#d97706', // amber-600
-              textColor: '#ffffff'
-            },
-            low: {
-              backgroundColor: '#10b981', // emerald-500
-              borderColor: '#059669', // emerald-600
-              textColor: '#ffffff'
-            }
-          };
-          
-          const colors = priorityColors[priority] || priorityColors.medium;
-          console.log('Selected colors:', colors); // Debug log
-          
-          // Apply colors to the event element
-          info.el.style.backgroundColor = colors.backgroundColor;
-          info.el.style.borderColor = colors.borderColor;
-          info.el.style.color = colors.textColor;
-          
-          // Add priority indicator dot - with safety check
-          const titleElement = info.el.querySelector('.fc-event-title');
-          if (titleElement) {
-            const dot = document.createElement('div');
-            dot.className = 'priority-dot';
-            dot.style.width = '8px';
-            dot.style.height = '8px';
-            dot.style.borderRadius = '50%';
-            dot.style.marginRight = '4px';
-            dot.style.display = 'inline-block';
-            dot.style.backgroundColor = colors.backgroundColor;
-            titleElement.prepend(dot);
-          }
-        }
+        eventDidMount: this.handleEventDidMount
       },
       showModal: false,
       fullscreenModalVisible: false,
@@ -321,7 +259,8 @@ export default {
         labels: []
       },
       isDayView: false,
-      calendarApi: null
+      calendarApi: null,
+      resizeTimeout: null
     };
   },
   mounted() {
@@ -330,15 +269,84 @@ export default {
       this.fetchGoals();
     }
     
+    // Configure calendar for mobile if needed
+    this.configureCalendarForDevice();
+    
+    // Add window resize listener for orientation changes
+    window.addEventListener('resize', this.handleResize);
+    
     // Get the calendar API after the component is mounted
     this.$nextTick(() => {
       // Allow more time for the calendar to fully initialize
       setTimeout(() => {
         this.initializeCalendarApi();
+        // Configure calendar again with API
+        this.configureCalendarForDevice();
       }, 500);
     });
   },
+  beforeUnmount() {
+    // Clean up resize listener
+    window.removeEventListener('resize', this.handleResize);
+  },
   methods: {
+    handleResize() {
+      // Debounce resize events
+      if (this.resizeTimeout) {
+        clearTimeout(this.resizeTimeout);
+      }
+      
+      this.resizeTimeout = setTimeout(() => {
+        this.configureCalendarForDevice();
+        
+        // Update the calendar if the API is available
+        if (this.calendarApi) {
+          this.calendarApi.updateSize();
+        }
+      }, 250);
+    },
+    configureCalendarForDevice() {
+      // Check if we're on a mobile device
+      const isMobile = window.innerWidth < 768;
+      
+      if (isMobile) {
+        // Simplified header for mobile
+        this.calendarOptions.headerToolbar = {
+          left: 'prev,next',
+          center: 'title',
+          right: 'dayGridMonth,timeGridDay'
+        };
+        
+        // Shorter button text for mobile
+        this.calendarOptions.buttonText = {
+          today: 'Today',
+          month: 'Month',
+          day: 'Day'
+        };
+      } else {
+        // Restore full header for desktop
+        this.calendarOptions.headerToolbar = {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,dayGridWeek,timeGridDay'
+        };
+        
+        // Restore full button text
+        this.calendarOptions.buttonText = {
+          today: 'Today',
+          month: 'Month',
+          week: 'Week',
+          day: 'Day'
+        };
+      }
+      
+      // Apply changes to calendar if API is available
+      if (this.calendarApi) {
+        this.calendarApi.setOption('headerToolbar', this.calendarOptions.headerToolbar);
+        this.calendarApi.setOption('buttonText', this.calendarOptions.buttonText);
+      }
+    },
+    
     fetchTeams() {
       axios
         .post("/teams")
@@ -492,37 +500,8 @@ export default {
     },
 
     renderEventContent(arg) {
-      const goalId = arg.event.extendedProps.goalId;
-      const isDone = arg.event.extendedProps.done;
-
-      // Create container div
-      const container = document.createElement("div");
-      container.style.display = "flex";
-      container.style.alignItems = "center"; // Ensures vertical alignment
-      container.style.justifyContent = "space-between"; // Aligns items to the edges
-      container.style.width = "100%"; // Ensures full width
-
-      // Create text node for event title
-      const title = document.createElement("span");
-      title.innerText = arg.event.title;
-
-      // Create button element
-      const button = document.createElement("button");
-      button.innerText = isDone ? "✔" : "✖";
-      button.style.padding = "2px 6px";
-      button.style.border = "none";
-      button.style.cursor = "pointer";
-      button.style.color = isDone ? "green" : "red";
-      button.onclick = (e) => {
-        e.stopPropagation();
-        this.toggleGoalStatus(goalId, !isDone);
-      };
-
-      // Append elements to container
-      container.appendChild(title);
-      container.appendChild(button);
-
-      return { domNodes: [container] };
+      // Return empty content to let FullCalendar handle the title
+      return { domNodes: [] };
     },
 
     toggleGoalStatus(goalId, newStatus) {
@@ -546,17 +525,41 @@ export default {
         });
     },
     handleDateClick(info) {
-      // Extract clicked date and ensure correct time zone handling
-      const clickedDate = new Date(info.dateStr + "T00:00:00Z"); // Forces UTC interpretation
+      // Extract clicked date with better handling for different view types
+      let dateStr, timeStr;
+      
+      // Handle different date formats based on view type
+      if (info.view.type === 'timeGridDay' || info.view.type === 'timeGridWeek') {
+        // For day/week view, we have allDay and date (a Date object)
+        const clickedDate = info.date;
+        dateStr = clickedDate.toISOString().split('T')[0];
+        
+        // Extract time from the clicked slot
+        const hours = clickedDate.getHours().toString().padStart(2, '0');
+        const minutes = clickedDate.getMinutes().toString().padStart(2, '0');
+        timeStr = `${hours}:${minutes}`;
+        
+        // Calculate end time (1 hour later)
+        const endDate = new Date(clickedDate);
+        endDate.setHours(endDate.getHours() + 1);
+        const endHours = endDate.getHours().toString().padStart(2, '0');
+        const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+        const endTimeStr = `${endHours}:${endMinutes}`;
+        
+        // Set start and end times for the new goal
+        this.newGoal.start_time = `${dateStr}T${timeStr}`;
+        this.newGoal.end_time = `${dateStr}T${endTimeStr}`;
+      } else {
+        // For month view (dayGrid)
+        const clickedDate = new Date(info.dateStr + "T00:00:00Z"); // Forces UTC interpretation
+        dateStr = clickedDate.toISOString().split("T")[0];
+        
+        // Set start and end times explicitly
+        this.newGoal.start_time = `${dateStr}T00:00`;
+        this.newGoal.end_time = `${dateStr}T23:59`;
+      }
 
-      // Convert to local date string without shifting the day
-      const localDateStr = clickedDate.toISOString().split("T")[0];
-
-      // Set start and end times explicitly
-      this.newGoal.start_time = `${localDateStr}T00:00`;
-      this.newGoal.end_time = `${localDateStr}T23:59`;
-
-      this.selectedDate = localDateStr;
+      this.selectedDate = dateStr;
       this.showModal = true;
     },
 
@@ -587,17 +590,17 @@ export default {
 
       // Validation checks
       if (startDate > endDate) {
-        alert("Error: Start date cannot be after the end date.");
+        this.showNotification('Start date cannot be after the end date.', 'error');
         return;
       }
 
       if (startDate.getFullYear() > endDate.getFullYear()) {
-        alert("Error: The start year cannot be after the end year.");
+        this.showNotification('The start year cannot be after the end year.', 'error');
         return;
       }
 
       if (startDate.getFullYear() < currentDate.getFullYear() - 1) {
-        alert("Error: Start date is too far in the past.");
+        this.showNotification('Start date is too far in the past.', 'error');
         return;
       }
 
@@ -722,6 +725,104 @@ export default {
         }, 2000);
       }
     },
+
+    showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.className = `fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg z-50 ${
+        type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' : 'bg-green-100 border border-green-400 text-green-700'
+      }`;
+      notification.innerHTML = `
+        <div class="flex items-center">
+          <span class="mr-2">${type === 'error' ? '✕' : '✓'}</span>
+          <span>${message}</span>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    },
+
+    handleEventDidMount(info) {
+      // Debug logging
+      console.log('Event mounted:', {
+        title: info.event.title,
+        priority: info.event.extendedProps.priority,
+        rawPriority: info.event.extendedProps
+      });
+      
+      // Add tooltip
+      const tooltip = document.createElement('div');
+      tooltip.className = 'fc-tooltip';
+      tooltip.innerHTML = `
+        <div class="p-2">
+          <div class="font-semibold">${info.event.title}</div>
+          <div class="text-sm">${info.event.extendedProps.description || ''}</div>
+        </div>
+      `;
+      info.el.appendChild(tooltip);
+      
+      // Apply priority-based styling
+      const priorityColors = {
+        high: {
+          backgroundColor: '#ef4444', // red-500
+          borderColor: '#dc2626', // red-600
+          textColor: '#ffffff',
+          completed: {
+            backgroundColor: '#b91c1c', // red-700
+            borderColor: '#991b1b', // red-800
+            textColor: '#ffffff'
+          }
+        },
+        medium: {
+          backgroundColor: '#f59e0b', // amber-500
+          borderColor: '#d97706', // amber-600
+          textColor: '#ffffff',
+          completed: {
+            backgroundColor: '#b45309', // amber-700
+            borderColor: '#92400e', // amber-800
+            textColor: '#ffffff'
+          }
+        },
+        low: {
+          backgroundColor: '#10b981', // emerald-500
+          borderColor: '#059669', // emerald-600
+          textColor: '#ffffff',
+          completed: {
+            backgroundColor: '#047857', // emerald-700
+            borderColor: '#065f46', // emerald-800
+            textColor: '#ffffff'
+          }
+        }
+      };
+      
+      // If goal is completed, use darker tone of the priority color
+      const isCompleted = info.event.extendedProps.done;
+      const priority = info.event.extendedProps.priority || 'medium';
+      const baseColors = priorityColors[priority] || priorityColors.medium;
+      const colors = isCompleted ? baseColors.completed : baseColors;
+      
+      console.log('Selected colors:', colors); // Debug log
+      
+      // Apply colors to the event element
+      info.el.style.backgroundColor = colors.backgroundColor;
+      info.el.style.borderColor = colors.borderColor;
+      info.el.style.color = colors.textColor;
+      
+      // Add priority indicator dot - with safety check
+      const titleElement = info.el.querySelector('.fc-event-title');
+      if (titleElement) {
+        const dot = document.createElement('div');
+        dot.className = 'priority-dot';
+        dot.style.width = '8px';
+        dot.style.height = '8px';
+        dot.style.borderRadius = '50%';
+        dot.style.marginRight = '4px';
+        dot.style.display = 'inline-block';
+        dot.style.backgroundColor = colors.backgroundColor;
+        titleElement.prepend(dot);
+      }
+    }
   },
   watch: {
     selectedTeam(newTeam) {
@@ -746,8 +847,19 @@ export default {
 </script>
 
 <style scoped>
+.dark .fc-scrollgrid-sync-inner {
+  background-color: red;
+}
+.dark .p-4 {
+  background-color: #1f2937;
+}
+.dark thead {
+ 
+background-color: #1f2937;
+ 
+}
  .dark .fc {
-    background-color: #1f2937; /* Tailwind's gray-800 */
+    background-color: #1f2937 !important; /* Tailwind's gray-800 */
     color: white;
   }
 
@@ -758,232 +870,24 @@ export default {
   .dark .fc .fc-toolbar-title {
     color: white;
   }
-
+  
 .calendar-container {
   overflow: hidden;
   border-radius: 0.5rem;
   background: white;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  touch-action: pan-y pinch-zoom; /* Improve touch handling */
 }
 
-:deep(.fc) {
-  font-family: inherit;
-  --fc-border-color: #e5e7eb;
-  --fc-button-bg-color: #3b82f6;
-  --fc-button-border-color: #3b82f6;
-  --fc-button-hover-bg-color: #2563eb;
-  --fc-button-hover-border-color: #2563eb;
-  --fc-button-active-bg-color: #1d4ed8;
-  --fc-button-active-border-color: #1d4ed8;
-}
-
-:deep(.fc-toolbar-title) {
-  font-size: 1.25rem !important;
-  font-weight: 600 !important;
-  color: #111827;
-}
-
-:deep(.fc-button-primary) {
-  text-transform: capitalize !important;
-  font-weight: 500 !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 0.375rem !important;
-  transition: all 0.2s !important;
-}
-
-:deep(.fc-button-primary:not(:disabled):hover) {
-  background-color: var(--fc-button-hover-bg-color) !important;
-  border-color: var(--fc-button-hover-border-color) !important;
-}
-
-:deep(.fc-button-primary:not(:disabled):active) {
-  background-color: var(--fc-button-active-bg-color) !important;
-  border-color: var(--fc-button-active-border-color) !important;
-}
-
-:deep(.fc-daygrid-day) {
-  min-height: 120px;
-  transition: background-color 0.2s;
-}
-
-:deep(.fc-daygrid-day:hover) {
-  background-color: #f9fafb;
-}
-
-:deep(.fc-event) {
-  border-radius: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  margin: 0.125rem 0;
-  border: none;
-  background-color: #3b82f6;
-  color: white;
+/* Add Goal Modal Styles */
+.fixed.inset-0 {
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-:deep(.fc-event:hover) {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+.fixed.inset-0 > div {
+  cursor: default;
 }
 
-:deep(.fc-event-title) {
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-}
-
-:deep(.priority-dot) {
-  flex-shrink: 0;
-}
-
-:deep(.fc-daygrid-day-number) {
-  font-weight: 500;
-  color: #6b7280;
-  padding: 0.5rem;
-  transition: all 0.2s;
-}
-
-:deep(.fc-day-today) {
-  background-color: #eff6ff !important;
-}
-
-:deep(.fc-day-today .fc-daygrid-day-number) {
-  background-color: #3b82f6;
-  color: white;
-  border-radius: 9999px;
-  padding: 0.25rem 0.5rem;
-}
-
-:deep(.fc-tooltip) {
-  position: absolute;
-  z-index: 1000;
-  background: white;
-  border-radius: 0.375rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s, visibility 0.2s;
-  pointer-events: none;
-}
-
-:deep(.fc-event:hover .fc-tooltip) {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Time Grid Styles */
-:deep(.fc-timegrid-slot) {
-  height: 3em !important;
-}
-
-:deep(.fc-timegrid-slot-label) {
-  font-size: 0.875rem;
-  color: #6b7280;
-}
-
-:deep(.fc-timegrid-axis) {
-  padding: 0.5rem;
-  font-weight: 500;
-}
-
-:deep(.fc-timegrid-event) {
-  border-radius: 0.375rem;
-  padding: 0.25rem 0.5rem;
-  margin: 0.125rem 0;
-  border: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-:deep(.fc-timegrid-event:hover) {
-  transform: translateY(-1px);
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
-}
-
-:deep(.fc-timegrid-event-title) {
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-:deep(.fc-timegrid-now-indicator-line) {
-  border-color: #ef4444;
-}
-
-:deep(.fc-timegrid-now-indicator-arrow) {
-  border-color: #ef4444;
-}
-
-/* Dark mode styles */
-:deep(.dark .fc) {
-  background-color: #1f2937;
-  color: #f3f4f6;
-  --fc-border-color: #374151;
-}
-
-:deep(.dark .fc-theme-standard td),
-:deep(.dark .fc-theme-standard th) {
-  border-color: #374151;
-}
-
-:deep(.dark .fc-daygrid-day) {
-  background-color: #1f2937;
-}
-
-:deep(.dark .fc-daygrid-day:hover) {
-  background-color: #374151;
-}
-
-:deep(.dark .fc-day-today) {
-  background-color: #1e40af !important;
-}
-
-:deep(.dark .fc-daygrid-day-number) {
-  color: #9ca3af;
-}
-
-:deep(.dark .fc-toolbar-title) {
-  color: #f3f4f6;
-}
-
-:deep(.dark .fc-tooltip) {
-  background: #374151;
-  color: #f3f4f6;
-  border: 1px solid #4b5563;
-}
-
-:deep(.dark .fc-button-primary) {
-  background-color: #3b82f6 !important;
-  border-color: #3b82f6 !important;
-}
-
-:deep(.dark .fc-button-primary:hover) {
-  background-color: #2563eb !important;
-  border-color: #2563eb !important;
-}
-
-:deep(.dark .fc-button-primary:active) {
-  background-color: #1d4ed8 !important;
-  border-color: #1d4ed8 !important;
-}
-
-:deep(.dark .fc-timegrid-slot-label) {
-  color: #9ca3af;
-}
-
-:deep(.dark .fc-timegrid-axis) {
-  color: #f3f4f6;
-}
-
-:deep(.dark .fc-timegrid-now-indicator-line) {
-  border-color: #ef4444;
-}
-
-:deep(.dark .fc-timegrid-now-indicator-arrow) {
-  border-color: #ef4444;
-}
+ 
+ 
 </style>
