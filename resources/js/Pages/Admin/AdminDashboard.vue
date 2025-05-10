@@ -1,127 +1,134 @@
 <template>
+  <Head title="GoalWeb" />
+
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-        Admin Dashboard
-      </h2>
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Admin Dashboard</h2>
     </template>
 
-    <div class="py-12">
+    <div class="py-6">
       <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+        <!-- Navigation Tabs -->
+        <div class="bg-white dark:bg-gray-800 shadow-sm rounded-lg mb-6 sticky top-0 z-10">
+          <nav class="flex space-x-4 px-4 py-3" aria-label="Tabs">
+            <button
+              v-for="tab in tabs"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors duration-200"
+              :class="[
+                activeTab === tab.id
+                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-200'
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              ]"
+            >
+              {{ tab.name }}
+            </button>
+          </nav>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
           <div class="p-6">
-            <!-- Admin Navigation Tabs -->
-            <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
-              <nav class="flex -mb-px">
-                <button 
-                  v-for="tab in tabs" 
-                  :key="tab.id"
-                  @click="activeTab = tab.id"
-                  class="mr-8 py-4 px-1 border-b-2 font-medium text-sm"
-                  :class="activeTab === tab.id 
-                    ? 'border-blue-500 text-blue-600 dark:text-blue-400' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'"
-                >
-                  {{ tab.name }}
-                </button>
-              </nav>
-            </div>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h1>
             
             <!-- Statistics Tab -->
             <div v-if="activeTab === 'statistics'" class="space-y-6">
-              <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Statistics</h2>
-                
-                <!-- Export Buttons -->
-                <div class="flex gap-2">
-                  <a 
-                    href="/admin/export/system-report" 
-                    target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export System Report
-                  </a>
-                  <a 
-                    href="/admin/export/goal-stats" 
-                    target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export Goal Stats
-                  </a>
-                </div>
-              </div>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Statistics</h2>
               
-              <!-- Statistics Cards -->
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg shadow">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-800 mr-4">
-                      <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</p>
-                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.totalUsers }}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg shadow">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-green-100 dark:bg-green-800 mr-4">
-                      <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Teams</p>
-                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.totalTeams }}</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Users Stats -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                  <div class="p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <div class="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
+                          <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalUsers }}</div>
+                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.activeUsers }} active)</div>
+                          </dd>
+                        </dl>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg shadow">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-800 mr-4">
-                      <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Goals</p>
-                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.totalGoals }}</p>
+
+                <!-- Teams Stats -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                  <div class="p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                      </div>
+                      <div class="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Teams</dt>
+                          <dd class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalTeams }}</dd>
+                        </dl>
+                      </div>
                     </div>
                   </div>
                 </div>
-                
-                <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg shadow">
-                  <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-800 mr-4">
-                      <svg class="w-6 h-6 text-yellow-600 dark:text-yellow-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
+
+                <!-- Goals Stats -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                  <div class="p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div class="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Goals</dt>
+                          <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalGoals }}</div>
+                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.completedGoals }} completed)</div>
+                          </dd>
+                        </dl>
+                      </div>
                     </div>
-                    <div>
-                      <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed Goals</p>
-                      <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ statistics.completedGoals }}</p>
+                  </div>
+                </div>
+
+                <!-- Discussions Stats -->
+                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
+                  <div class="p-6">
+                    <div class="flex items-center">
+                      <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
+                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </div>
+                      <div class="ml-5 w-0 flex-1">
+                        <dl>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Discussions</dt>
+                          <dd class="flex items-baseline">
+                            <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalDiscussions }}</div>
+                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.totalReplies }} replies)</div>
+                          </dd>
+                        </dl>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
               
               <!-- Activity Charts -->
-              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
                   <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">User Activity</h3>
                   <div class="h-64">
-                    <UserActivityChart :activity-data="recentActivity" />
+                    <UserActivityChart :activity-data="statistics.recentActivity" />
                   </div>
                 </div>
                 
@@ -141,7 +148,7 @@
                 <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
                 <div class="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
                   <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                    <li v-for="(activity, index) in recentActivity" :key="index" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
+                    <li v-for="(activity, index) in statistics.recentActivity" :key="index" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                       <div class="flex items-center">
                         <div class="flex-shrink-0">
                           <span class="inline-flex items-center justify-center h-8 w-8 rounded-full" 
@@ -176,27 +183,12 @@
             <div v-if="activeTab === 'users'" class="space-y-6">
               <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">User Management</h2>
-                <div class="flex gap-2">
-                  <a 
-                    href="/admin/export/users" 
-                    target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export Users
-                  </a>
-                  <button 
-                    @click="openUserModal()"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Add User
-                  </button>
-                </div>
+                <button 
+                  @click="openUserModal()"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Add User
+                </button>
               </div>
               
               <!-- Users Table -->
@@ -241,27 +233,12 @@
             <div v-if="activeTab === 'teams'" class="space-y-6">
               <div class="flex justify-between items-center">
                 <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Team Management</h2>
-                <div class="flex gap-2">
-                  <a 
-                    href="/admin/export/teams" 
-                    target="_blank"
-                    class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Export Teams
-                  </a>
-                  <button 
-                    @click="openTeamModal()"
-                    class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                  >
-                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Add Team
-                  </button>
-                </div>
+                <button 
+                  @click="openTeamModal()"
+                  class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Add Team
+                </button>
               </div>
               
               <!-- Teams Table -->
@@ -490,249 +467,234 @@
   </AuthenticatedLayout>
 </template>
 
-<script>
-import axios from 'axios';
+<script setup>
+import { Head } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import UserActivityChart from '@/Components/Charts/UserActivityChart.vue';
 import GoalCompletionChart from '@/Components/Charts/GoalCompletionChart.vue';
+import axios from 'axios';
+import { ref, onMounted } from 'vue';
 
-export default {
-  components: {
-    AuthenticatedLayout,
-    UserActivityChart,
-    GoalCompletionChart
-  },
-  data() {
-    return {
-      activeTab: 'statistics',
-      tabs: [
-        { id: 'statistics', name: 'Statistics' },
-        { id: 'users', name: 'Users' },
-        { id: 'teams', name: 'Teams' },
-        { id: 'settings', name: 'Settings' }
-      ],
-      users: [],
-      teams: [],
-      settings: {
-        siteName: 'Goal Management System',
-        defaultRole: 'user',
-        emailNotifications: true
-      },
-      statistics: {
-        totalUsers: 0,
-        totalTeams: 0,
-        totalGoals: 0,
-        completedGoals: 0
-      },
-      recentActivity: [],
-      showUserModal: false,
-      showTeamModal: false,
-      editingUser: null,
-      editingTeam: null,
-      userForm: {
-        name: '',
-        email: '',
-        role: 'user',
-        status: 'active'
-      },
-      teamForm: {
-        name: '',
-        description: '',
-        members: []
-      },
-      availableUsers: []
-    };
-  },
-  
-  mounted() {
-    this.fetchUsers();
-    this.fetchTeams();
-    this.fetchSettings();
-    this.fetchStatistics();
-  },
-  
-  methods: {
-    async fetchUsers() {
-      try {
-        const response = await axios.get('/api/admin/users');
-        this.users = response.data;
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    },
-    
-    async fetchTeams() {
-      try {
-        const response = await axios.get('/api/admin/teams');
-        this.teams = response.data;
-      } catch (error) {
-        console.error('Error fetching teams:', error);
-      }
-    },
-    
-    async fetchSettings() {
-      try {
-        const response = await axios.get('/api/admin/settings');
-        this.settings = response.data;
-      } catch (error) {
-        console.error('Error fetching settings:', error);
-      }
-    },
-    
-    async fetchStatistics() {
-      try {
-        const response = await axios.get('/api/admin/statistics');
-        this.statistics = response.data;
-        this.recentActivity = response.data.recentActivity || [];
-      } catch (error) {
-        console.error('Error fetching statistics:', error);
-        // Fallback data if API is not available
-        this.statistics = {
-          totalUsers: this.users.length,
-          totalTeams: this.teams.length,
-          totalGoals: 0,
-          completedGoals: 0
-        };
-      }
-    },
-    
-    editUser(user) {
-      this.openUserModal(user);
-    },
-    
-    openUserModal(user = null) {
-      this.editingUser = user;
-      if (user) {
-        this.userForm = { ...user };
-      } else {
-        this.userForm = {
-          name: '',
-          email: '',
-          role: 'user',
-          status: 'active'
-        };
-      }
-      this.showUserModal = true;
-    },
-    
-    closeUserModal() {
-      this.showUserModal = false;
-      this.editingUser = null;
-      this.userForm = {
-        name: '',
-        email: '',
-        role: 'user',
-        status: 'active'
-      };
-    },
-    
-    async saveUser() {
-      try {
-        if (this.editingUser) {
-          await axios.put(`/api/admin/users/${this.editingUser.id}`, this.userForm);
-        } else {
-          await axios.post('/api/admin/users', this.userForm);
-        }
-        this.fetchUsers();
-        this.closeUserModal();
-      } catch (error) {
-        console.error('Error saving user:', error);
-      }
-    },
-    
-    async deleteUser(userId) {
-      if (!confirm('Are you sure you want to delete this user?')) return;
-      
-      try {
-        await axios.delete(`/api/admin/users/${userId}`);
-        this.fetchUsers();
-      } catch (error) {
-        console.error('Error deleting user:', error);
-      }
-    },
-    
-    editTeam(team) {
-      this.openTeamModal(team);
-    },
-    
-    openTeamModal(team = null) {
-      this.editingTeam = team;
-      if (team) {
-        this.teamForm = { 
-          name: team.name,
-          description: team.description || '',
-          members: team.members || []
-        };
-      } else {
-        this.teamForm = {
-          name: '',
-          description: '',
-          members: []
-        };
-      }
-      this.fetchAvailableUsers();
-      this.showTeamModal = true;
-    },
-    
-    closeTeamModal() {
-      this.showTeamModal = false;
-      this.editingTeam = null;
-      this.teamForm = {
-        name: '',
-        description: '',
-        members: []
-      };
-    },
-    
-    async fetchAvailableUsers() {
-      try {
-        const response = await axios.get('/api/users');
-        this.availableUsers = response.data;
-      } catch (error) {
-        console.error('Error fetching available users:', error);
-      }
-    },
-    
-    async saveTeam() {
-      try {
-        if (this.editingTeam) {
-          await axios.put(`/api/admin/teams/${this.editingTeam.id}`, this.teamForm);
-        } else {
-          await axios.post('/api/admin/teams', this.teamForm);
-        }
-        this.fetchTeams();
-        this.closeTeamModal();
-      } catch (error) {
-        console.error('Error saving team:', error);
-      }
-    },
-    
-    async deleteTeam(teamId) {
-      if (!confirm('Are you sure you want to delete this team?')) return;
-      
-      try {
-        await axios.delete(`/api/admin/teams/${teamId}`);
-        this.fetchTeams();
-      } catch (error) {
-        console.error('Error deleting team:', error);
-      }
-    },
-    
-    async saveSettings() {
-      try {
-        await axios.put('/api/admin/settings', this.settings);
-        alert('Settings saved successfully!');
-      } catch (error) {
-        console.error('Error saving settings:', error);
-      }
-    },
-    
-    formatDate(dateString) {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      return date.toLocaleDateString();
-    }
+const activeTab = ref('statistics');
+const tabs = ref([
+  { id: 'statistics', name: 'Statistics' },
+  { id: 'users', name: 'Users' },
+  { id: 'teams', name: 'Teams' },
+  { id: 'settings', name: 'Settings' }
+]);
+
+const users = ref([]);
+const teams = ref([]);
+const settings = ref({
+  siteName: 'Goal Management System',
+  defaultRole: 'user',
+  emailNotifications: true
+});
+
+const statistics = ref({
+  totalUsers: 0,
+  activeUsers: 0,
+  totalTeams: 0,
+  totalGoals: 0,
+  completedGoals: 0,
+  totalDiscussions: 0,
+  totalReplies: 0,
+  recentActivity: []
+});
+
+const showUserModal = ref(false);
+const showTeamModal = ref(false);
+const editingUser = ref(null);
+const editingTeam = ref(null);
+const userForm = ref({
+  name: '',
+  email: '',
+  role: 'user',
+  status: 'active'
+});
+const teamForm = ref({
+  name: '',
+  description: '',
+  members: []
+});
+const availableUsers = ref([]);
+
+onMounted(() => {
+  fetchStatistics();
+  fetchUsers();
+  fetchTeams();
+  fetchSettings();
+});
+
+const fetchStatistics = async () => {
+  try {
+    const response = await axios.get('/api/admin/statistics');
+    statistics.value = response.data;
+  } catch (error) {
+    console.error('Error fetching statistics:', error);
   }
+};
+
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get('/api/admin/users');
+    users.value = response.data;
+  } catch (error) {
+    console.error('Error fetching users:', error);
+  }
+};
+
+const fetchTeams = async () => {
+  try {
+    const response = await axios.get('/api/admin/teams');
+    teams.value = response.data;
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+  }
+};
+
+const fetchSettings = async () => {
+  try {
+    const response = await axios.get('/api/admin/settings');
+    settings.value = response.data;
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+  }
+};
+
+const openUserModal = (user = null) => {
+  editingUser.value = user;
+  if (user) {
+    userForm.value = { ...user };
+  } else {
+    userForm.value = {
+      name: '',
+      email: '',
+      role: 'user',
+      status: 'active'
+    };
+  }
+  showUserModal.value = true;
+};
+
+const closeUserModal = () => {
+  showUserModal.value = false;
+  editingUser.value = null;
+  userForm.value = {
+    name: '',
+    email: '',
+    role: 'user',
+    status: 'active'
+  };
+};
+
+const saveUser = async () => {
+  try {
+    if (editingUser.value) {
+      await axios.put(`/api/admin/users/${editingUser.value.id}`, userForm.value);
+    } else {
+      await axios.post('/api/admin/users', userForm.value);
+    }
+    fetchUsers();
+    closeUserModal();
+  } catch (error) {
+    console.error('Error saving user:', error);
+  }
+};
+
+const deleteUser = async (userId) => {
+  if (!confirm('Are you sure you want to delete this user?')) return;
+  
+  try {
+    await axios.delete(`/api/admin/users/${userId}`);
+    fetchUsers();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+  }
+};
+
+const openTeamModal = (team = null) => {
+  editingTeam.value = team;
+  if (team) {
+    teamForm.value = { 
+      name: team.name,
+      description: team.description || '',
+      members: team.members || []
+    };
+  } else {
+    teamForm.value = {
+      name: '',
+      description: '',
+      members: []
+    };
+  }
+  fetchAvailableUsers();
+  showTeamModal.value = true;
+};
+
+const closeTeamModal = () => {
+  showTeamModal.value = false;
+  editingTeam.value = null;
+  teamForm.value = {
+    name: '',
+    description: '',
+    members: []
+  };
+};
+
+const fetchAvailableUsers = async () => {
+  try {
+    const response = await axios.get('/api/admin/users');
+    availableUsers.value = response.data;
+  } catch (error) {
+    console.error('Error fetching available users:', error);
+  }
+};
+
+const saveTeam = async () => {
+  try {
+    if (editingTeam.value) {
+      await axios.put(`/api/admin/teams/${editingTeam.value.id}`, teamForm.value);
+    } else {
+      await axios.post('/api/admin/teams', teamForm.value);
+    }
+    fetchTeams();
+    closeTeamModal();
+  } catch (error) {
+    console.error('Error saving team:', error);
+  }
+};
+
+const deleteTeam = async (teamId) => {
+  if (!confirm('Are you sure you want to delete this team?')) return;
+  
+  try {
+    await axios.delete(`/api/teams/${teamId}`);
+    fetchTeams();
+  } catch (error) {
+    console.error('Error deleting team:', error);
+  }
+};
+
+const saveSettings = async () => {
+  try {
+    await axios.put('/api/admin/settings', settings.value);
+    alert('Settings saved successfully!');
+  } catch (error) {
+    console.error('Error saving settings:', error);
+  }
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 };
 </script>
 

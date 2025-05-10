@@ -19,6 +19,9 @@
             <NavLink :href="route('teams.index')" :active="route().current('teams.*')">
               Teams
             </NavLink>
+            <NavLink :href="route('discussions.index')" :active="route().current('discussions.*')">
+              Discussions
+            </NavLink>
             <NavLink v-if="$page.props.auth.user.role === 'admin'" :href="route('admin.dashboard')" :active="route().current('admin.dashboard')">
               Admin
             </NavLink>

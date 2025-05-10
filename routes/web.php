@@ -13,6 +13,7 @@ use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PdfExportController;
 use App\Http\Controllers\AdminPdfExportController;
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\DiscussionController;
 
 Route::middleware(['web'])->group(function () {
     // Default home page
@@ -117,6 +118,7 @@ Route::middleware(['web'])->group(function () {
             ->middleware('auth');
 
         Route::delete('/messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
+        Route::delete('/api/teams/{team}', [TeamController::class, 'deleteTeam']);
 
         // PDF Export Routes for Users
         Route::get('/export/personal-goals', [PdfExportController::class, 'exportPersonalGoals'])
@@ -130,6 +132,20 @@ Route::middleware(['web'])->group(function () {
         Route::delete('/api/teams/{team}/users/{user}', [TeamController::class, 'removeMember']);
         Route::post('/api/teams/{team}/members/{user}/make-admin', [TeamController::class, 'makeAdmin']);
         Route::post('/api/teams/{team}/members/{user}/remove-admin', [TeamController::class, 'removeAdmin']);
+
+        // Discussion routes
+        Route::get('/discussions', [DiscussionController::class, 'index'])->name('discussions.index');
+        Route::get('/discussions/genre/{slug}', [DiscussionController::class, 'genre'])->name('discussions.genre');
+        Route::get('/discussions/create', [DiscussionController::class, 'create'])->name('discussions.create');
+        Route::post('/discussions', [DiscussionController::class, 'store'])->name('discussions.store');
+        Route::get('/discussions/{discussion}', [DiscussionController::class, 'show'])->name('discussions.show');
+        Route::put('/discussions/{discussion}', [DiscussionController::class, 'update'])->name('discussions.update');
+        Route::delete('/discussions/{discussion}', [DiscussionController::class, 'destroy'])->name('discussions.destroy');
+        Route::post('/discussions/{discussion}/reply', [DiscussionController::class, 'reply'])->name('discussions.reply');
+        Route::post('/discussions/{discussion}/like', [DiscussionController::class, 'like'])->name('discussions.like');
+        Route::post('/discussions/{discussion}/unlike', [DiscussionController::class, 'unlike'])->name('discussions.unlike');
+        Route::post('/replies/{reply}/like', [DiscussionController::class, 'likeReply'])->name('replies.like');
+        Route::delete('/replies/{reply}/like', [DiscussionController::class, 'unlikeReply'])->name('replies.unlike');
     });
 
     // Admin Routes
@@ -152,6 +168,7 @@ Route::middleware(['web'])->group(function () {
 
             Route::get('/settings', [AdminController::class, 'getSettings']);
             Route::put('/settings', [AdminController::class, 'updateSettings']);
+            Route::get('/admin/statistics', [AdminController::class, 'statistics'])->name('admin.statistics');
         });
 
         // PDF Export Routes for Admin

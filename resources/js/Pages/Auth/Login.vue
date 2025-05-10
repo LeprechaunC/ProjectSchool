@@ -30,92 +30,92 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Log in" />
+        <Head title="Log in" />
 
     <AuthLayout>
         <div class="py-12">
             <div class="max-w-md mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <div class="mb-8 text-center">
-                            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
-                            <p class="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account to continue</p>
+                <div class="mb-8 text-center">
+                    <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back</h2>
+                    <p class="mt-2 text-gray-600 dark:text-gray-400">Sign in to your account to continue</p>
+                </div>
+                
+                <div v-if="status" class="mb-4 p-4 text-sm font-medium text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400 rounded-lg">
+                    {{ status }}
+                </div>
+                
+                <form @submit.prevent="submit" class="space-y-6">
+                    <div>
+                        <InputLabel for="email" value="Email" class="text-gray-700 dark:text-gray-300" />
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                                </svg>
+                            </div>
+                            <TextInput
+                                id="email"
+                                type="email"
+                                class="pl-10 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm"
+                                v-model="form.email"
+                                required
+                                autofocus
+                                autocomplete="username"
+                            />
                         </div>
-                        
-                        <div v-if="status" class="mb-4 p-4 text-sm font-medium text-green-600 bg-green-100 dark:bg-green-900/20 dark:text-green-400 rounded-lg">
-                            {{ status }}
+                        <InputError class="mt-2" :message="form.errors.email" />
+                    </div>
+                    
+                    <div>
+                        <InputLabel for="password" value="Password" class="text-gray-700 dark:text-gray-300" />
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                            <TextInput
+                                id="password"
+                                type="password"
+                                class="pl-10 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm"
+                                v-model="form.password"
+                                required
+                                autocomplete="current-password"
+                            />
                         </div>
+                        <InputError class="mt-2" :message="form.errors.password" />
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <label class="flex items-center">
+                            <Checkbox name="remember" v-model:checked="form.remember" class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500 dark:focus:ring-blue-600" />
+                            <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                        </label>
                         
-                        <form @submit.prevent="submit" class="space-y-6">
-                            <div>
-                                <InputLabel for="email" value="Email" class="text-gray-700 dark:text-gray-300" />
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                                        </svg>
-                                    </div>
-                                    <TextInput
-                                        id="email"
-                                        type="email"
-                                        class="pl-10 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm"
-                                        v-model="form.email"
-                                        required
-                                        autofocus
-                                        autocomplete="username"
-                                    />
-                                </div>
-                                <InputError class="mt-2" :message="form.errors.email" />
-                            </div>
-                            
-                            <div>
-                                <InputLabel for="password" value="Password" class="text-gray-700 dark:text-gray-300" />
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                                        </svg>
-                                    </div>
-                                    <TextInput
-                                        id="password"
-                                        type="password"
-                                        class="pl-10 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-blue-500 dark:focus:border-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 rounded-md shadow-sm"
-                                        v-model="form.password"
-                                        required
-                                        autocomplete="current-password"
-                                    />
-                                </div>
-                                <InputError class="mt-2" :message="form.errors.password" />
-                            </div>
-                            
-                            <div class="flex items-center justify-between">
-                                <label class="flex items-center">
-                                    <Checkbox name="remember" v-model:checked="form.remember" class="rounded border-gray-300 dark:border-gray-700 text-blue-600 shadow-sm focus:ring-blue-500 dark:focus:ring-blue-600" />
-                                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
-                                </label>
-                                
-                                <Link
-                                    v-if="canResetPassword"
-                                    :href="route('password.request')"
-                                    class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 focus:outline-none focus:underline"
-                                >
-                                    Forgot password?
-                                </Link>
-                            </div>
-                            
-                            <div>
-                                <PrimaryButton
-                                    class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-all duration-200"
-                                    :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
-                                    :disabled="form.processing"
-                                >
-                                    <svg v-if="form.processing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    {{ form.processing ? 'Signing in...' : 'Sign in' }}
-                                </PrimaryButton>
-                            </div>
+                        <Link
+                            v-if="canResetPassword"
+                            :href="route('password.request')"
+                            class="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 focus:outline-none focus:underline"
+                        >
+                            Forgot password?
+                        </Link>
+                    </div>
+                    
+                    <div>
+                        <PrimaryButton
+                            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-gray-800 transition-all duration-200"
+                            :class="{ 'opacity-75 cursor-not-allowed': form.processing }"
+                            :disabled="form.processing"
+                        >
+                            <svg v-if="form.processing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            {{ form.processing ? 'Signing in...' : 'Sign in' }}
+                        </PrimaryButton>
+                    </div>
 
                             <!-- Divider -->
                             <div class="relative">
@@ -142,18 +142,18 @@ const submit = () => {
                                     Sign in with Google
                                 </a>
                             </div>
-                        </form>
-                        
-                        <div class="mt-6 text-center">
-                            <p class="text-sm text-gray-600 dark:text-gray-400">
-                                Don't have an account?
-                                <Link :href="route('register')" class="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
-                                    Register now
-                                </Link>
-                            </p>
-                        </div>
-                    </div>
+                </form>
+                
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Don't have an account?
+                        <Link :href="route('register')" class="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                            Register now
+                        </Link>
+                    </p>
                 </div>
+            </div>
+        </div>
             </div>
         </div>
     </AuthLayout>

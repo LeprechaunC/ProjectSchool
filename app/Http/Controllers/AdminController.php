@@ -6,6 +6,8 @@ use App\Models\User;
 use App\Models\Team;
 use App\Models\Goal;
 use App\Models\Setting;
+use App\Models\Discussion;
+use App\Models\Reply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -182,6 +184,7 @@ class AdminController extends Controller
         $team = Team::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
+            'invite_code' => strtoupper(substr(md5(uniqid()), 0, 8)),
         ]);
 
         $team->users()->sync($validated['members']);
@@ -249,5 +252,64 @@ class AdminController extends Controller
         $settings->save();
 
         return response()->json($settings);
+    }
+
+    public function statistics()
+    {
+        $statistics = [
+            'totalUsers' => User::count(),
+            'activeUsers' => User::where('status', 'active')->count(),
+            'totalTeams' => Team::count(),
+            'totalGoals' => Goal::count(),
+            'completedGoals' => Goal::where('status', 'completed')->count(),
+            'totalDiscussions' => Discussion::count(),
+            'totalReplies' => Reply::count(),
+        ];
+
+        // Get recent activity data
+        $recentActivity = [];
+        
+        // Get recent user registrations
+        $recentUsers = User::orderBy('created_at', 'desc')->take(5)->get();
+        foreach ($recentUsers as $user) {
+            $recentActivity[] = [
+                'type' => 'user',
+                'description' => 'New user registered: ' . $user->name,
+                'timestamp' => $user->created_at
+            ];
+        }
+        
+        // Get recent team creations
+        $recentTeams = Team::orderBy('created_at', 'desc')->take(5)->get();
+        foreach ($recentTeams as $team) {
+            $recentActivity[] = [
+                'type' => 'team',
+                'description' => 'Team "' . $team->name . '" was created',
+                'timestamp' => $team->created_at
+            ];
+        }
+        
+        // Get recent goal updates
+        $recentGoals = Goal::orderBy('updated_at', 'desc')->take(5)->get();
+        foreach ($recentGoals as $goal) {
+            $status = $goal->status === 'completed' ? 'completed' : 'updated';
+            $recentActivity[] = [
+                'type' => 'goal',
+                'description' => 'Goal "' . $goal->title . '" was ' . $status,
+                'timestamp' => $goal->updated_at
+            ];
+        }
+        
+        // Sort activity by timestamp (newest first)
+        usort($recentActivity, function($a, $b) {
+            return strtotime($b['timestamp']) - strtotime($a['timestamp']);
+        });
+        
+        // Limit to 10 most recent activities
+        $recentActivity = array_slice($recentActivity, 0, 10);
+
+        $statistics['recentActivity'] = $recentActivity;
+
+        return response()->json($statistics);
     }
 } 

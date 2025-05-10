@@ -1,90 +1,105 @@
 <template>
-  <div class="chart-container">
-    <Line v-if="chartData" :data="chartData" :options="chartOptions" />
-    <div v-else class="flex items-center justify-center h-full">
-      <p class="text-gray-500 dark:text-gray-400">Loading chart data...</p>
-    </div>
+  <div class="relative w-full h-full">
+    <canvas ref="chartCanvas"></canvas>
   </div>
 </template>
 
 <script>
-import { Line } from 'vue-chartjs';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue';
+import Chart from 'chart.js/auto';
 
 export default {
-  name: 'UserActivityChart',
-  components: { Line },
   props: {
     activityData: {
       type: Array,
-      default: () => []
+      required: true
     }
   },
-  computed: {
-    chartData() {
-      if (!this.activityData || this.activityData.length === 0) {
-        return null;
+  setup(props) {
+    const chartCanvas = ref(null);
+    let chart = null;
+
+    const processData = (data) => {
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        return date.toISOString().split('T')[0];
+      }).reverse();
+
+      const activityCounts = last7Days.map(date => {
+        return data.filter(activity => 
+          activity.timestamp.split('T')[0] === date
+        ).length;
+      });
+
+      return {
+        labels: last7Days.map(date => new Date(date).toLocaleDateString('en-US', { weekday: 'short' })),
+        data: activityCounts
+      };
+    };
+
+    const createChart = (data) => {
+      if (chart) {
+        chart.destroy();
       }
 
-      // Process the activity data to get daily counts
-      const dailyCounts = {};
+      const processedData = processData(data);
       
-      this.activityData.forEach(activity => {
-        const date = new Date(activity.timestamp).toLocaleDateString();
-        if (!dailyCounts[date]) {
-          dailyCounts[date] = 0;
-        }
-        dailyCounts[date]++;
-      });
-
-      // Sort dates chronologically
-      const sortedDates = Object.keys(dailyCounts).sort((a, b) => {
-        return new Date(a) - new Date(b);
-      });
-
-      // Get the last 7 days of data
-      const last7Days = sortedDates.slice(-7);
-
-      return {
-        labels: last7Days,
-        datasets: [
-          {
-            label: 'User Activity',
-            backgroundColor: 'rgba(59, 130, 246, 0.2)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 2,
-            data: last7Days.map(date => dailyCounts[date]),
-            tension: 0.3,
+      const ctx = chartCanvas.value.getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: processedData.labels,
+          datasets: [{
+            label: 'Activities',
+            data: processedData.data,
+            borderColor: '#3B82F6',
+            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+            tension: 0.4,
             fill: true
-          }
-        ]
-      };
-    },
-    chartOptions() {
-      return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false
-          }
+          }]
         },
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                stepSize: 1
+              }
             }
           }
         }
-      };
-    }
+      });
+    };
+
+    onMounted(() => {
+      if (chartCanvas.value) {
+        createChart(props.activityData);
+      }
+    });
+
+    watch(() => props.activityData, (newData) => {
+      if (chartCanvas.value) {
+        createChart(newData);
+      }
+    });
+
+    onBeforeUnmount(() => {
+      if (chart) {
+        chart.destroy();
+      }
+    });
+
+    return {
+      chartCanvas
+    };
   }
 };
 </script>

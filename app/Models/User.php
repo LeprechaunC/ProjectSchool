@@ -65,4 +65,8 @@ class User extends Authenticatable
     {
         return $this->teams()->pluck('id');
     }
+    public function discussions()
+{
+    return $this->hasMany(\App\Models\Discussion::class);
+}
 }

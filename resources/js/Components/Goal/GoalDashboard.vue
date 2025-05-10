@@ -238,7 +238,69 @@ export default {
           minute: '2-digit',
           meridiem: false
         },
-        eventDidMount: this.handleEventDidMount
+        eventDidMount: (info) => {
+          // Debug logging
+          console.log('Event mounted:', {
+            title: info.event.title,
+            priority: info.event.extendedProps.priority,
+            rawPriority: info.event.extendedProps
+          });
+          
+          // Add tooltip
+          const tooltip = document.createElement('div');
+          tooltip.className = 'fc-tooltip';
+          tooltip.innerHTML = `
+            <div class="p-2">
+              <div class="font-semibold">${info.event.title}</div>
+              <div class="text-sm">${info.event.extendedProps.description || ''}</div>
+            </div>
+          `;
+          info.el.appendChild(tooltip);
+          
+          // Apply priority-based styling
+          const priority = info.event.extendedProps.priority || 'medium';
+          console.log('Using priority:', priority); // Debug log
+          
+          const priorityColors = {
+            high: {
+              backgroundColor: '#ef4444', // red-500
+              borderColor: '#dc2626', // red-600
+              textColor: '#ffffff'
+            },
+            medium: {
+              backgroundColor: '#f59e0b', // amber-500
+              borderColor: '#d97706', // amber-600
+              textColor: '#ffffff'
+            },
+            low: {
+              backgroundColor: '#10b981', // emerald-500
+              borderColor: '#059669', // emerald-600
+              textColor: '#ffffff'
+            }
+          };
+          
+          const colors = priorityColors[priority] || priorityColors.medium;
+          console.log('Selected colors:', colors); // Debug log
+          
+          // Apply colors to the event element
+          info.el.style.backgroundColor = colors.backgroundColor;
+          info.el.style.borderColor = colors.borderColor;
+          info.el.style.color = colors.textColor;
+          
+          // Add priority indicator dot - with safety check
+          const titleElement = info.el.querySelector('.fc-event-title');
+          if (titleElement) {
+            const dot = document.createElement('div');
+            dot.className = 'priority-dot';
+            dot.style.width = '8px';
+            dot.style.height = '8px';
+            dot.style.borderRadius = '50%';
+            dot.style.marginRight = '4px';
+            dot.style.display = 'inline-block';
+            dot.style.backgroundColor = colors.backgroundColor;
+            titleElement.prepend(dot);
+          }
+        }
       },
       showModal: false,
       fullscreenModalVisible: false,
@@ -500,8 +562,37 @@ export default {
     },
 
     renderEventContent(arg) {
-      // Return empty content to let FullCalendar handle the title
-      return { domNodes: [] };
+      const goalId = arg.event.extendedProps.goalId;
+      const isDone = arg.event.extendedProps.done;
+
+      // Create container div
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.alignItems = "center"; // Ensures vertical alignment
+      container.style.justifyContent = "space-between"; // Aligns items to the edges
+      container.style.width = "100%"; // Ensures full width
+
+      // Create text node for event title
+      const title = document.createElement("span");
+      title.innerText = arg.event.title;
+
+      // Create button element
+      const button = document.createElement("button");
+      button.innerText = isDone ? "✔" : "✖";
+      button.style.padding = "2px 6px";
+      button.style.border = "none";
+      button.style.cursor = "pointer";
+      button.style.color = isDone ? "green" : "red";
+      button.onclick = (e) => {
+        e.stopPropagation();
+        this.toggleGoalStatus(goalId, !isDone);
+      };
+
+      // Append elements to container
+      container.appendChild(title);
+      container.appendChild(button);
+
+      return { domNodes: [container] };
     },
 
     toggleGoalStatus(goalId, newStatus) {
@@ -742,87 +833,6 @@ export default {
         notification.remove();
       }, 3000);
     },
-
-    handleEventDidMount(info) {
-      // Debug logging
-      console.log('Event mounted:', {
-        title: info.event.title,
-        priority: info.event.extendedProps.priority,
-        rawPriority: info.event.extendedProps
-      });
-      
-      // Add tooltip
-      const tooltip = document.createElement('div');
-      tooltip.className = 'fc-tooltip';
-      tooltip.innerHTML = `
-        <div class="p-2">
-          <div class="font-semibold">${info.event.title}</div>
-          <div class="text-sm">${info.event.extendedProps.description || ''}</div>
-        </div>
-      `;
-      info.el.appendChild(tooltip);
-      
-      // Apply priority-based styling
-      const priorityColors = {
-        high: {
-          backgroundColor: '#ef4444', // red-500
-          borderColor: '#dc2626', // red-600
-          textColor: '#ffffff',
-          completed: {
-            backgroundColor: '#b91c1c', // red-700
-            borderColor: '#991b1b', // red-800
-            textColor: '#ffffff'
-          }
-        },
-        medium: {
-          backgroundColor: '#f59e0b', // amber-500
-          borderColor: '#d97706', // amber-600
-          textColor: '#ffffff',
-          completed: {
-            backgroundColor: '#b45309', // amber-700
-            borderColor: '#92400e', // amber-800
-            textColor: '#ffffff'
-          }
-        },
-        low: {
-          backgroundColor: '#10b981', // emerald-500
-          borderColor: '#059669', // emerald-600
-          textColor: '#ffffff',
-          completed: {
-            backgroundColor: '#047857', // emerald-700
-            borderColor: '#065f46', // emerald-800
-            textColor: '#ffffff'
-          }
-        }
-      };
-      
-      // If goal is completed, use darker tone of the priority color
-      const isCompleted = info.event.extendedProps.done;
-      const priority = info.event.extendedProps.priority || 'medium';
-      const baseColors = priorityColors[priority] || priorityColors.medium;
-      const colors = isCompleted ? baseColors.completed : baseColors;
-      
-      console.log('Selected colors:', colors); // Debug log
-      
-      // Apply colors to the event element
-      info.el.style.backgroundColor = colors.backgroundColor;
-      info.el.style.borderColor = colors.borderColor;
-      info.el.style.color = colors.textColor;
-      
-      // Add priority indicator dot - with safety check
-      const titleElement = info.el.querySelector('.fc-event-title');
-      if (titleElement) {
-        const dot = document.createElement('div');
-        dot.className = 'priority-dot';
-        dot.style.width = '8px';
-        dot.style.height = '8px';
-        dot.style.borderRadius = '50%';
-        dot.style.marginRight = '4px';
-        dot.style.display = 'inline-block';
-        dot.style.backgroundColor = colors.backgroundColor;
-        titleElement.prepend(dot);
-      }
-    }
   },
   watch: {
     selectedTeam(newTeam) {
@@ -853,7 +863,7 @@ export default {
 .dark .p-4 {
   background-color: #1f2937;
 }
-.dark thead {
+.dark  thead {
  
 background-color: #1f2937;
  

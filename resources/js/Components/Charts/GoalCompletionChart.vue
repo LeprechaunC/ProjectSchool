@@ -1,97 +1,110 @@
 <template>
-  <div class="chart-container">
-    <Doughnut v-if="chartData" :data="chartData" :options="chartOptions" />
-    <div v-else class="flex items-center justify-center h-full">
-      <p class="text-gray-500 dark:text-gray-400">Loading chart data...</p>
+  <div class="relative w-full h-full">
+    <canvas ref="chartCanvas"></canvas>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
+      <div class="text-2xl font-bold text-gray-900 dark:text-white">{{ completionRate }}%</div>
+      <div class="text-sm text-gray-500 dark:text-gray-400">Completion Rate</div>
     </div>
   </div>
 </template>
 
 <script>
-import { Doughnut } from 'vue-chartjs';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
-ChartJS.register(ArcElement, Tooltip, Legend);
+import { ref, onMounted, watch, onBeforeUnmount, computed } from 'vue';
+import Chart from 'chart.js/auto';
 
 export default {
-  name: 'GoalCompletionChart',
-  components: { Doughnut },
   props: {
     totalGoals: {
       type: Number,
-      default: 0
+      required: true
     },
     completedGoals: {
       type: Number,
-      default: 0
+      required: true
     }
   },
-  computed: {
-    chartData() {
-      if (this.totalGoals === 0) {
-        return null;
+  setup(props) {
+    const chartCanvas = ref(null);
+    let chart = null;
+
+    const completionRate = computed(() => {
+      return props.totalGoals > 0 
+        ? Math.round((props.completedGoals / props.totalGoals) * 100) 
+        : 0;
+    });
+
+    const createChart = () => {
+      if (chart) {
+        chart.destroy();
       }
 
-      const remainingGoals = this.totalGoals - this.completedGoals;
-      const completionPercentage = (this.completedGoals / this.totalGoals) * 100;
-
-      return {
-        labels: ['Completed', 'In Progress'],
-        datasets: [
-          {
-            data: [this.completedGoals, remainingGoals],
-            backgroundColor: [
-              'rgba(34, 197, 94, 0.8)', // Green for completed
-              'rgba(209, 213, 219, 0.8)' // Gray for in progress
-            ],
-            borderColor: [
-              'rgba(34, 197, 94, 1)',
-              'rgba(209, 213, 219, 1)'
-            ],
-            borderWidth: 1
-          }
-        ]
-      };
-    },
-    chartOptions() {
-      return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: this.isDarkMode ? '#e5e7eb' : '#374151',
-              font: {
-                size: 12
+      const remainingGoals = props.totalGoals - props.completedGoals;
+      
+      const ctx = chartCanvas.value.getContext('2d');
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Remaining'],
+          datasets: [{
+            data: [props.completedGoals, remainingGoals],
+            backgroundColor: ['#10B981', '#E5E7EB'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                padding: 20,
+                usePointStyle: true
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  const label = context.label || '';
+                  const value = context.raw || 0;
+                  return `${label}: ${value} goals`;
+                }
               }
             }
           },
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                const label = context.label || '';
-                const value = context.raw || 0;
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const percentage = Math.round((value / total) * 100);
-                return `${label}: ${value} (${percentage}%)`;
-              }
-            }
-          }
-        },
-        cutout: '70%'
-      };
-    },
-    isDarkMode() {
-      return document.documentElement.classList.contains('dark');
-    }
+          cutout: '70%'
+        }
+      });
+    };
+
+    onMounted(() => {
+      if (chartCanvas.value) {
+        createChart();
+      }
+    });
+
+    watch([() => props.totalGoals, () => props.completedGoals], () => {
+      if (chartCanvas.value) {
+        createChart();
+      }
+    });
+
+    onBeforeUnmount(() => {
+      if (chart) {
+        chart.destroy();
+      }
+    });
+
+    return {
+      chartCanvas,
+      completionRate
+    };
   }
 };
 </script>
 
 <style scoped>
 .chart-container {
-  height: 100%;
-  width: 100%;
+  position: relative;
 }
 </style> 

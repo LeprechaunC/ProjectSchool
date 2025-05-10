@@ -269,31 +269,29 @@
                           {{ user.name }} 
                           <span v-if="user.id === currentUser.id" class="text-xs text-blue-600 dark:text-blue-400">(You)</span>
                         </span>
-                        <span class="block text-xs text-gray-500 dark:text-gray-400">{{ user.pivot.role }}</span>
+                        <span 
+                          class="block text-xs px-2 py-0.5 rounded-full inline-block mt-1"
+                          :class="{
+                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200': getUserRole(user, team) === 'admin',
+                            'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200': getUserRole(user, team) === 'owner',
+                            'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': getUserRole(user, team) === 'member'
+                          }"
+                        >
+                          {{ getUserRole(user, team) === 'owner' ? 'Owner' : (getUserRole(user, team) === 'admin' ? 'Admin' : 'Member') }}
+                        </span>
                       </div>
                     </div>
                     
                     <!-- Admin Actions -->
-                    <div class="flex items-center space-x-2" v-if="isTeamAdmin(team) && user.id !== currentUser.id">
-                      <!-- Make/Remove Admin Button -->
+                    <div class="flex items-center space-x-2" v-if="isTeamAdmin(team) && user.id !== currentUser.id && getUserRole(user, team) !== 'admin'">
+                      <!-- Make Admin Button -->
                       <button 
-                        v-if="user.pivot.role !== 'admin'"
                         @click="makeAdmin(team.id, user.id)" 
                         class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                         title="Make admin"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                      </button>
-                      <button 
-                        v-else
-                        @click="removeAdmin(team.id, user.id)" 
-                        class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-colors"
-                        title="Remove admin"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       </button>
                       
@@ -358,6 +356,7 @@
                   <div v-if="isTeamAdmin(team)" class="flex space-x-1">
                     <!-- Leave Team (Admin) -->
                     <button 
+                      v-if="!isTeamOwner(team)"
                       @click="exitTeam(team.id)" 
                       class="px-2 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-10 flex items-center justify-center"
                       title="Leave Team"
@@ -367,8 +366,9 @@
                       </svg>
                     </button>
                     
-                    <!-- Delete Team (Admin) -->
+                    <!-- Delete Team (Owner only) -->
                     <button 
+                      v-if="isTeamOwner(team)"
                       @click="deleteTeam(team.id)" 
                       class="px-2 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-10 flex items-center justify-center"
                       title="Delete Team"
@@ -504,6 +504,15 @@ export default {
       try {
         const response = await axios.get('/api/teams');
         this.teams = response.data;
+        // Log the team data structure for debugging
+        console.log('Teams data:', this.teams);
+        if (this.teams.length > 0) {
+          console.log('First team structure:', this.teams[0]);
+          if (this.teams[0].users && this.teams[0].users.length > 0) {
+            console.log('First user in team:', this.teams[0].users[0]);
+            console.log('User pivot data:', this.teams[0].users[0].pivot);
+          }
+        }
       } catch (err) {
         this.error = 'Failed to load teams';
       } finally {
@@ -514,7 +523,7 @@ export default {
     async createTeam() {
       try {
         const response = await axios.post('/api/teamsMake', { name: this.newTeamName });
-        this.teams.push(response.data.team);
+        await this.fetchTeams();
         this.newTeamName = '';
         this.showNotification('Team created successfully!');
       } catch (err) {
@@ -710,9 +719,25 @@ export default {
       }
     },
 
+    isTeamOwner(team) {
+      if (!this.currentUser) return false;
+      return this.currentUser.id === team.owner_id;
+    },
+
     isTeamAdmin(team) {
-      return team.pivot && team.pivot.role === 'admin' || 
-            (team.users && team.users.find(user => user.id === this.currentUser?.id)?.pivot?.role === 'admin');
+      if (!this.currentUser) return false;
+      
+      // First check if user is the owner
+      if (this.currentUser.id === team.owner_id) {
+        return true;
+      }
+      
+      // Then check if user is an admin in the team's pivot data
+      if (team.pivot && team.pivot.role === 'admin') {
+        return true;
+      }
+      
+      return false;
     },
 
     showNotification(message, type = 'success') {
@@ -752,6 +777,21 @@ export default {
       if (team && this.currentPages[teamId] < Math.ceil(team.users.length / 5)) {
         this.currentPages[teamId]++;
       }
+    },
+
+    getUserRole(user, team) {
+      // Check if this is the team owner
+      if (user.id === team.owner_id) {
+        return 'owner';
+      }
+      
+      // For other users, check their role directly on the user object
+      if (user.role) {
+        return user.role;
+      }
+      
+      // If no role found, default to member
+      return 'member';
     },
   }
 };
