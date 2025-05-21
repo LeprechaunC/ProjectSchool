@@ -3,7 +3,7 @@
 
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Admin Dashboard</h2>
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Administratora Panelis</h2>
     </template>
 
     <div class="py-6">
@@ -30,11 +30,11 @@
         <!-- Tab Content -->
         <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm rounded-lg">
           <div class="p-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Admin Dashboard</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Administratora Panelis</h1>
             
             <!-- Statistics Tab -->
             <div v-if="activeTab === 'statistics'" class="space-y-6">
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Statistics</h2>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Sistēmas Statistika</h2>
               
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Users Stats -->
@@ -48,10 +48,10 @@
                       </div>
                       <div class="ml-5 w-0 flex-1">
                         <dl>
-                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Users</dt>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Kopējais Lietotāju Skaits</dt>
                           <dd class="flex items-baseline">
                             <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalUsers }}</div>
-                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.activeUsers }} active)</div>
+                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.activeUsers }} aktīvi)</div>
                           </dd>
                         </dl>
                       </div>
@@ -70,7 +70,7 @@
                       </div>
                       <div class="ml-5 w-0 flex-1">
                         <dl>
-                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Teams</dt>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Kopējais Komandas Skaits</dt>
                           <dd class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalTeams }}</dd>
                         </dl>
                       </div>
@@ -89,10 +89,10 @@
                       </div>
                       <div class="ml-5 w-0 flex-1">
                         <dl>
-                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Goals</dt>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Mērķu skaits</dt>
                           <dd class="flex items-baseline">
                             <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalGoals }}</div>
-                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.completedGoals }} completed)</div>
+                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.completedGoals }} pabeigti)</div>
                           </dd>
                         </dl>
                       </div>
@@ -111,10 +111,10 @@
                       </div>
                       <div class="ml-5 w-0 flex-1">
                         <dl>
-                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Discussions</dt>
+                          <dt class="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Diskusijas</dt>
                           <dd class="flex items-baseline">
                             <div class="text-2xl font-semibold text-gray-900 dark:text-white">{{ statistics.totalDiscussions }}</div>
-                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.totalReplies }} replies)</div>
+                            <div class="ml-2 text-sm text-gray-500 dark:text-gray-400">({{ statistics.totalReplies }} atbildes)</div>
                           </dd>
                         </dl>
                       </div>
@@ -126,14 +126,14 @@
               <!-- Activity Charts -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">User Activity</h3>
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Aktivitāte</h3>
                   <div class="h-64">
                     <UserActivityChart :activity-data="statistics.recentActivity" />
                   </div>
                 </div>
                 
                 <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
-                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Goal Completion Rate</h3>
+                  <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Mērķu izpildīšanas procenti</h3>
                   <div class="h-64">
                     <GoalCompletionChart 
                       :total-goals="statistics.totalGoals" 
@@ -145,7 +145,7 @@
               
               <!-- Recent Activity -->
               <div class="mt-6">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Jaunākā aktivitāte</h3>
                 <div class="bg-white dark:bg-gray-800 shadow overflow-hidden rounded-lg">
                   <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                     <li v-for="(activity, index) in statistics.recentActivity" :key="index" class="p-4 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -182,12 +182,12 @@
             <!-- Users Management Tab -->
             <div v-if="activeTab === 'users'" class="space-y-6">
               <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">User Management</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Lietotāju Pārvaldība</h2>
                 <button 
                   @click="openUserModal()"
                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  Add User
+                  Pievienot Lietotāju
                 </button>
               </div>
               
@@ -196,11 +196,11 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Name</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Role</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Vārds</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">E-pasts</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Loma</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Statuss</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Darbības</th>
                     </tr>
                   </thead>
                   <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -210,18 +210,18 @@
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
                           :class="user.role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'">
-                          {{ user.role }}
+                          {{ user.role === 'admin' ? 'Administrators' : 'Lietotājs' }}
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full" 
                           :class="user.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'">
-                          {{ user.status }}
+                          {{ user.status === 'active' ? 'Aktīvs' : 'Neaktīvs' }}
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button @click="editUser(user)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Edit</button>
-                        <button @click="deleteUser(user.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                        <button @click="editUser(user)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Rediģēt</button>
+                        <button @click="deleteUser(user.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Dzēst</button>
                       </td>
                     </tr>
                   </tbody>
@@ -232,12 +232,12 @@
             <!-- Teams Management Tab -->
             <div v-if="activeTab === 'teams'" class="space-y-6">
               <div class="flex justify-between items-center">
-                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Team Management</h2>
+                <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Komandu Pārvaldība</h2>
                 <button 
                   @click="openTeamModal()"
                   class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  Add Team
+                  Pievienot Komandu
                 </button>
               </div>
               
@@ -246,20 +246,20 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Team Name</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Members</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Created</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Komandas Nosaukums</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Locekļi</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Izveidots</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Darbības</th>
                     </tr>
                   </thead>
                   <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <tr v-for="team in teams" :key="team.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{{ team.name }}</td>
-                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ team.member_count }} members</td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ team.member_count }} locekļi</td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{{ formatDate(team.created_at) }}</td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button @click="editTeam(team)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Edit</button>
-                        <button @click="deleteTeam(team.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Delete</button>
+                        <button @click="editTeam(team)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mr-3">Rediģēt</button>
+                        <button @click="deleteTeam(team.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">Dzēst</button>
                       </td>
                     </tr>
                   </tbody>
@@ -269,14 +269,14 @@
             
             <!-- Settings Tab -->
             <div v-if="activeTab === 'settings'" class="space-y-6">
-              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">System Settings</h2>
+              <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Sistēmas Iestatījumi</h2>
               
               <div class="bg-gray-50 dark:bg-gray-700 p-6 rounded-lg">
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">General Settings</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-4">Vispārīgie Iestatījumi</h3>
                 
                 <div class="space-y-4">
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Site Name</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Vietnes Nosaukums</label>
                     <input 
                       v-model="settings.siteName" 
                       type="text" 
@@ -285,13 +285,13 @@
                   </div>
                   
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Default User Role</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Noklusējuma Lietotāja Loma</label>
                     <select 
                       v-model="settings.defaultRole" 
                       class="w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
+                      <option value="user">Lietotājs</option>
+                      <option value="admin">Administrators</option>
                     </select>
                   </div>
                   
@@ -401,7 +401,7 @@
       <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
         <div class="p-6">
           <div class="flex justify-between items-start mb-4">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ editingTeam ? 'Edit Team' : 'Add Team' }}</h2>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ editingTeam ? 'Rediģēt Komandu' : 'Pievienot Komandu' }}</h2>
             <button @click="closeTeamModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -411,7 +411,7 @@
           
           <div class="space-y-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team Name</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Komandas Nosaukums</label>
               <input 
                 v-model="teamForm.name" 
                 type="text" 
@@ -420,7 +420,7 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Apraksts</label>
               <textarea 
                 v-model="teamForm.description" 
                 rows="3"
@@ -429,7 +429,7 @@
             </div>
             
             <div>
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team Members</label>
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Komandas Locekļi</label>
               <div class="border border-gray-300 dark:border-gray-600 rounded-md p-3 max-h-40 overflow-y-auto">
                 <div v-for="user in availableUsers" :key="user.id" class="flex items-center mb-2">
                   <input 
@@ -452,13 +452,13 @@
               @click="closeTeamModal" 
               class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
-              Cancel
+              Atcelt
             </button>
             <button 
               @click="saveTeam" 
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {{ editingTeam ? 'Update' : 'Create' }}
+              {{ editingTeam ? 'Atjaunināt' : 'Izveidot' }}
             </button>
           </div>
         </div>
@@ -477,10 +477,10 @@ import { ref, onMounted } from 'vue';
 
 const activeTab = ref('statistics');
 const tabs = ref([
-  { id: 'statistics', name: 'Statistics' },
-  { id: 'users', name: 'Users' },
-  { id: 'teams', name: 'Teams' },
-  { id: 'settings', name: 'Settings' }
+  { id: 'statistics', name: 'Statistika' },
+  { id: 'users', name: 'Lietotāji' },
+  { id: 'teams', name: 'Komandas' },
+  { id: 'settings', name: 'Iestatījumi' }
 ]);
 
 const users = ref([]);

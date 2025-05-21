@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>All Teams Report</title>
+    <title>Visu Komandu Pārskats</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -82,12 +82,12 @@
 </head>
 <body>
     <div class="header">
-        <h1>All Teams Report</h1>
-        <div class="subtitle">Generated on {{ $date }}</div>
+        <h1>Visu Komandu Pārskats</h1>
+        <div class="subtitle">Izveidots {{ $date }}</div>
     </div>
     
     <div class="info">
-        <p><strong>Total Teams:</strong> {{ $totalTeams }}</p>
+        <p><strong>Kopējais Komandu Skaits:</strong> {{ $totalTeams }}</p>
     </div>
     
     @if(count($teams) > 0)
@@ -95,20 +95,20 @@
             <div class="team-card">
                 <div class="team-header">
                     <div class="team-name">{{ $team->name }}</div>
-                    <div><strong>Owner:</strong> {{ $team->owner }}</div>
-                    <div><strong>Created:</strong> {{ date('F d, Y', strtotime($team->created_at)) }}</div>
-                    <div><strong>Invite Code:</strong> {{ $team->invite_code }}</div>
+                    <div><strong>Vadītājs:</strong> {{ $team->owner }}</div>
+                    <div><strong>Izveidots:</strong> {{ date('F d, Y', strtotime($team->created_at)) }}</div>
+                    <div><strong>Ielūguma Kods:</strong> {{ $team->invite_code }}</div>
                 </div>
                 
                 <div class="team-members">
-                    <strong>Team Members ({{ $team->users->count() }}):</strong>
+                    <strong>Komandas Dalībnieki ({{ $team->users->count() }}):</strong>
                     <table class="member-list">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Joined</th>
+                                <th>Vārds</th>
+                                <th>E-pasts</th>
+                                <th>Pievienojās</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -117,7 +117,7 @@
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $member->name }}</td>
                                     <td>{{ $member->email }}</td>
-                                    <td>{{ $member->pivot->created_at ? date('M d, Y', strtotime($member->pivot->created_at)) : 'Unknown' }}</td>
+                                    <td>{{ $member->pivot->created_at ? date('M d, Y', strtotime($member->pivot->created_at)) : 'Nezināms' }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -126,12 +126,12 @@
             </div>
         @endforeach
     @else
-        <p style="text-align: center;">No teams found.</p>
+        <p style="text-align: center;">Nav atrasta neviena komanda.</p>
     @endif
     
     <div class="footer">
-        <p>This document was automatically generated from the Goal Management System.</p>
-        <p>CONFIDENTIAL - For administrative use only</p>
+        <p>Šis dokuments tika automātiski ģenerēts no Mērķu Vadības Sistēmas.</p>
+        <p>KONFIDENCIĀLS - Tikai administratīvai lietošanai</p>
     </div>
 </body>
 </html> 

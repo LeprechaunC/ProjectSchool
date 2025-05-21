@@ -5,8 +5,8 @@
       <div class="mb-8">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Messages</h2>
-            <p class="text-gray-600 dark:text-gray-400">Chat with your team members</p>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Vēstules</h2>
+            <p class="text-gray-600 dark:text-gray-400">Saraksties ar cilvēkiem</p>
           </div>
           <button 
             @click="showNewChatModal = true"
@@ -15,7 +15,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
             </svg>
-            New Chat
+            Jauns Čats
           </button>
         </div>
       </div>
@@ -28,7 +28,7 @@
             <input
               type="text"
               v-model="searchQuery"
-              placeholder="Search conversations..."
+              placeholder="Meklēt sarunas..."
               class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
@@ -76,7 +76,7 @@
           <!-- No Conversations -->
           <div v-if="!loading && !error && conversations.length === 0" 
             class="p-8 text-center text-gray-500 dark:text-gray-400">
-            No conversations yet
+            Vēl nav sarunu
           </div>
         </div>
 
@@ -101,7 +101,7 @@
                   {{ selectedUser.name }}
                 </div>
                 <div class="text-sm text-gray-500 dark:text-gray-400">
-                  {{ messages.length }} messages
+                  {{ messages.length }} ziņojumi
                 </div>
               </div>
             </div>
@@ -123,7 +123,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
                   d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
-              <p class="text-lg font-medium">Select a conversation to start chatting</p>
+              <p class="text-lg font-medium">Izvēlieties sarunu, lai sāktu tērzēt</p>
             </div>
           </div>
           
@@ -248,7 +248,7 @@
     <Modal :show="showNewChatModal" @close="closeNewChatModal">
       <div class="p-6">
         <div class="flex justify-between items-start mb-4">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">New Chat</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Jauns Čats</h2>
           <button @click="closeNewChatModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

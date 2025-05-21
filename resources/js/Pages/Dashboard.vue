@@ -13,7 +13,7 @@ import DarkModeToggle from '@/Components/DarkModeToggle.vue'; // Import DarkMode
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800 dark:text-white">
-                Dashboard
+                Vadības panelis
             </h2>
         </template>
 

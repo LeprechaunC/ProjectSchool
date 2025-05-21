@@ -7,10 +7,10 @@
                     <div class="mb-8">
                         <h1 class="text-3xl font-bold text-gray-900">{{ $discussion->title }}</h1>
                         <div class="mt-2 flex items-center text-sm text-gray-500">
-                            <span>Posted by {{ $discussion->user->name }}</span>
+                            <span>Ievietoja {{ $discussion->user->name }}</span>
                             @if($discussion->team)
                                 <span class="mx-2">•</span>
-                                <span>in {{ $discussion->team->name }}</span>
+                                <span>komandā {{ $discussion->team->name }}</span>
                             @endif
                             <span class="mx-2">•</span>
                             <span>{{ $discussion->created_at->diffForHumans() }}</span>
@@ -30,28 +30,28 @@
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
                                 </svg>
-                                <span>{{ $discussion->likes_count }} Likes</span>
+                                <span>{{ $discussion->likes_count }} Patīk</span>
                             </button>
                         </form>
                     </div>
 
                     <!-- Reply Form -->
                     <div class="mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Add a Reply</h3>
+                        <h3 class="text-lg font-semibold mb-4">Pievienot Atbildi</h3>
                         <form action="{{ route('discussions.reply', $discussion) }}" method="POST">
                             @csrf
                             <div class="mb-4">
                                 <textarea name="content" rows="4" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" required></textarea>
                             </div>
                             <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Post Reply
+                                Ievietot Atbildi
                             </button>
                         </form>
                     </div>
 
                     <!-- Replies -->
                     <div class="space-y-6">
-                        <h3 class="text-lg font-semibold">{{ $discussion->replies->count() }} Replies</h3>
+                        <h3 class="text-lg font-semibold">{{ $discussion->replies->count() }} Atbildes</h3>
                         @foreach($discussion->replies->whereNull('parent_id') as $reply)
                             <div class="border rounded-lg p-4">
                                 <div class="flex justify-between items-start">
@@ -107,10 +107,10 @@
                                         @csrf
                                         <input type="hidden" name="parent_id" value="{{ $reply->id }}">
                                         <div class="mb-2">
-                                            <textarea name="content" rows="2" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" placeholder="Reply to this comment..." required></textarea>
+                                            <textarea name="content" rows="2" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50" placeholder="Atbildēt uz šo komentāru..." required></textarea>
                                         </div>
                                         <button type="submit" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-1 px-3 rounded">
-                                            Reply
+                                            Atbildēt
                                         </button>
                                     </form>
                                 </div>

@@ -7,17 +7,17 @@
       
       <div v-if="isEditing">
         <div class="form-group mb-4">
-          <label class="form-label">Title</label>
-          <input v-model="goal.title" class="form-input" placeholder="Goal Title" />
+          <label class="form-label">Nosaukums</label>
+          <input v-model="goal.title" class="form-input" placeholder="Mērķa Nosaukums" />
         </div>
         
         <div class="form-group mb-4">
-          <label class="form-label">Description</label>
-          <textarea v-model="goal.description" class="form-textarea" placeholder="Goal Description"></textarea>
+          <label class="form-label">Apraksts</label>
+          <textarea v-model="goal.description" class="form-textarea" placeholder="Mērķa Apraksts"></textarea>
         </div>
         
         <div class="form-group mb-4">
-          <label class="form-label">Priority</label>
+          <label class="form-label">Prioritāte</label>
           <div class="priority-selector">
             <button 
               v-for="priority in priorities" 
@@ -33,50 +33,50 @@
         </div>
         
         <div class="form-group mb-4">
-          <label class="form-label">Start Time</label>
+          <label class="form-label">Sākuma Laiks</label>
           <input v-model="goal.start_time" type="datetime-local" class="form-input" />
         </div>
         
         <div class="form-group mb-4">
-          <label class="form-label">End Time</label>
+          <label class="form-label">Beigu Laiks</label>
           <input v-model="goal.end_time" type="datetime-local" class="form-input" />
         </div>
         
         <div class="mt-6 flex justify-end space-x-3">
-          <button @click="cancelEdit" class="btn btn-secondary">Cancel</button>
-          <button @click="saveGoal" class="btn btn-primary">Save</button>
+          <button @click="cancelEdit" class="btn btn-secondary">Atcelt</button>
+          <button @click="saveGoal" class="btn btn-primary">Saglabāt</button>
         </div>
       </div>
       
       <div v-else>
         <div class="goal-details">
           <div class="goal-detail-item">
-            <span class="goal-detail-label">Description:</span>
-            <p class="goal-detail-value">{{ goal.description || 'No description provided' }}</p>
+            <span class="goal-detail-label">Apraksts:</span>
+            <p class="goal-detail-value">{{ goal.description || 'Nav norādīts apraksts' }}</p>
           </div>
           
           <div class="goal-detail-item">
-            <span class="goal-detail-label">Priority:</span>
+            <span class="goal-detail-label">Prioritāte:</span>
             <div class="priority-badge" :class="getPriorityClass(goal.priority)">
               {{ getPriorityLabel(goal.priority) }}
             </div>
           </div>
           
           <div class="goal-detail-item">
-            <span class="goal-detail-label">Start Time:</span>
+            <span class="goal-detail-label">Sākuma Laiks:</span>
             <p class="goal-detail-value">{{ formatDate(goal.start_time) }}</p>
           </div>
           
           <div class="goal-detail-item">
-            <span class="goal-detail-label">End Time:</span>
+            <span class="goal-detail-label">Beigu Laiks:</span>
             <p class="goal-detail-value">{{ formatDate(goal.end_time) }}</p>
           </div>
           
           <div class="goal-detail-item">
-            <span class="goal-detail-label">Status:</span>
+            <span class="goal-detail-label">Statuss:</span>
             <div class="flex items-center space-x-2">
               <div class="status-badge" :class="goal.done ? 'status-completed' : 'status-pending'">
-                {{ goal.done ? 'Completed' : 'Pending' }}
+                {{ goal.done ? 'Pabeigts' : 'Gaida' }}
               </div>
               <button 
                 @click="toggleGoalStatus" 
@@ -90,9 +90,9 @@
         </div>
         
         <div class="mt-6 flex justify-end space-x-3">
-          <button @click="confirmDelete" class="btn btn-danger">Delete</button>
-          <button @click="startEdit" class="btn btn-primary">Edit</button>
-          <button @click="closeModal" class="btn btn-secondary">Back</button>
+          <button @click="confirmDelete" class="btn btn-danger">Dzēst</button>
+          <button @click="startEdit" class="btn btn-primary">Rediģēt</button>
+          <button @click="closeModal" class="btn btn-secondary">Atpakaļ</button>
         </div>
       </div>
     </div>
@@ -101,11 +101,11 @@
   <!-- Confirmation Modal -->
   <div v-if="showConfirmModal" class="confirmation-modal-overlay" @click.self="closeConfirmModal">
     <div class="confirmation-modal">
-      <h3 class="text-lg font-semibold mb-4">Confirm Delete</h3>
-      <p class="mb-6">Are you sure you want to delete this goal? This action cannot be undone.</p>
+      <h3 class="text-lg font-semibold mb-4">Apstiprināt Dzēšanu</h3>
+      <p class="mb-6">Vai tiešām vēlaties dzēst šo mērķi? Šo darbību nevar atsaukt.</p>
       <div class="flex justify-end space-x-3">
-        <button @click="closeConfirmModal" class="btn btn-secondary">Cancel</button>
-        <button @click="deleteGoal" class="btn btn-danger">Delete</button>
+        <button @click="closeConfirmModal" class="btn btn-secondary">Atcelt</button>
+        <button @click="deleteGoal" class="btn btn-danger">Dzēst</button>
       </div>
     </div>
   </div>
@@ -144,9 +144,9 @@ export default defineComponent({
     });
     
     const priorities = [
-      { value: "high", label: "High", icon: "🔴" },
-      { value: "medium", label: "Medium", icon: "🟡" },
-      { value: "low", label: "Low", icon: "🟢" }
+      { value: "high", label: "Augsta", icon: "🔴" },
+      { value: "medium", label: "Vidēja", icon: "🟡" },
+      { value: "low", label: "Zema", icon: "🟢" }
     ];
 
     // Watch for changes in selectedGoal prop
@@ -156,7 +156,7 @@ export default defineComponent({
 
     // Format the date for display
     const formatDate = (date) => {
-      if (!date) return 'Not set';
+      if (!date) return 'Nav norādīts';
       const d = new Date(date);
       return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()} ${d.getHours()}:${d.getMinutes().toString().padStart(2, '0')}`;
     };

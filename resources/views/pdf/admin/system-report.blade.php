@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>System Report</title>
+    <title>Sistēmas Pārskats</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,37 +90,37 @@
 </head>
 <body>
     <div class="header">
-        <h1>System Report</h1>
-        <div class="subtitle">Generated on {{ $date }}</div>
+        <h1>Sistēmas Pārskats</h1>
+        <div class="subtitle">Izveidots {{ $date }}</div>
     </div>
     
-    <h2>System Overview</h2>
+    <h2>Sistēmas Pārskats</h2>
     <div class="overview-container">
         <div class="overview-box">
             <div class="overview-value">{{ $userCount }}</div>
-            <div class="overview-label">Registered Users</div>
+            <div class="overview-label">Reģistrētie Lietotāji</div>
         </div>
         <div class="overview-box">
             <div class="overview-value">{{ $teamCount }}</div>
-            <div class="overview-label">Teams</div>
+            <div class="overview-label">Komandas</div>
         </div>
         <div class="overview-box">
             <div class="overview-value">{{ $goalCount }}</div>
-            <div class="overview-label">Total Goals</div>
+            <div class="overview-label">Kopējais Mērķu Skaits</div>
         </div>
     </div>
     
-    <h2>Recent Activity</h2>
+    <h2>Nesenie Notikumi</h2>
     
-    <h3>Recent Users (Last 10)</h3>
+    <h3>Nesenie Lietotāji (Pēdējie 10)</h3>
     <table>
         <thead>
             <tr>
                 <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Registered</th>
-                <th>Status</th>
+                <th>Vārds</th>
+                <th>E-pasts</th>
+                <th>Reģistrēts</th>
+                <th>Statuss</th>
             </tr>
         </thead>
         <tbody>
@@ -131,26 +131,26 @@
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
                         <td>{{ date('M d, Y H:i', strtotime($user->created_at)) }}</td>
-                        <td>{{ $user->email_verified_at ? 'Verified' : 'Unverified' }}</td>
+                        <td>{{ $user->email_verified_at ? 'Verificēts' : 'Neverificēts' }}</td>
                     </tr>
                 @endforeach
             @else
                 <tr>
-                    <td colspan="5" style="text-align: center;">No recent users</td>
+                    <td colspan="5" style="text-align: center;">Nav neseno lietotāju</td>
                 </tr>
             @endif
         </tbody>
     </table>
     
-    <h3>Recent Teams (Last 10)</h3>
+    <h3>Nesenas Komandas (Pēdējās 10)</h3>
     <table>
         <thead>
             <tr>
                 <th>#</th>
-                <th>Team Name</th>
-                <th>Owner</th>
-                <th>Members</th>
-                <th>Created</th>
+                <th>Komandas Nosaukums</th>
+                <th>Vadītājs</th>
+                <th>Dalībnieki</th>
+                <th>Izveidots</th>
             </tr>
         </thead>
         <tbody>
@@ -166,7 +166,7 @@
                 @endforeach
             @else
                 <tr>
-                    <td colspan="5" style="text-align: center;">No recent teams</td>
+                    <td colspan="5" style="text-align: center;">Nav nesenu komandu</td>
                 </tr>
             @endif
         </tbody>
@@ -174,16 +174,16 @@
     
     <div class="page-break"></div>
     
-    <h3>Recent Goals (Last 10)</h3>
+    <h3>Nesenie Mērķi (Pēdējie 10)</h3>
     <table>
         <thead>
             <tr>
                 <th>#</th>
-                <th>Title</th>
-                <th>Type</th>
-                <th>Priority</th>
-                <th>Status</th>
-                <th>Created</th>
+                <th>Nosaukums</th>
+                <th>Tips</th>
+                <th>Prioritāte</th>
+                <th>Statuss</th>
+                <th>Izveidots</th>
             </tr>
         </thead>
         <tbody>
@@ -192,27 +192,27 @@
                     <tr>
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $goal->title }}</td>
-                        <td>{{ $goal->team_id ? 'Team' : 'Personal' }}</td>
+                        <td>{{ $goal->team_id ? 'Komandas' : 'Personīgais' }}</td>
                         <td>{{ ucfirst($goal->priority) }}</td>
-                        <td>{{ $goal->done ? 'Completed' : 'Pending' }}</td>
+                        <td>{{ $goal->done ? 'Pabeigts' : 'Gaida' }}</td>
                         <td>{{ date('M d, Y H:i', strtotime($goal->created_at)) }}</td>
                     </tr>
                 @endforeach
             @else
                 <tr>
-                    <td colspan="6" style="text-align: center;">No recent goals</td>
+                    <td colspan="6" style="text-align: center;">Nav nesenu mērķu</td>
                 </tr>
             @endif
         </tbody>
     </table>
     
-    <h2>System Health Summary</h2>
-    <p>This report provides an overview of the system's current state and recent activity. It includes counts of all users, teams, and goals in the system, as well as details about the most recent registrations and content creations.</p>
+    <h2>Sistēmas Veselības Kopsavilkums</h2>
+    <p>Šis pārskats sniedz pārskatu par sistēmas pašreizējo stāvokli un neseno aktivitāti. Tajā iekļauts visu lietotāju, komandu un mērķu skaits sistēmā, kā arī informācija par jaunākajām reģistrācijām un satura izveidēm.</p>
     
     <div class="footer">
-        <p>This document was automatically generated from the Goal Management System.</p>
-        <p>CONFIDENTIAL - For administrative use only</p>
-        <p>Report Date: {{ $date }}</p>
+        <p>Šis dokuments tika automātiski ģenerēts no Mērķu Vadības Sistēmas.</p>
+        <p>KONFIDENCIĀLS - Tikai administratīvai lietošanai</p>
+        <p>Pārskata Datums: {{ $date }}</p>
     </div>
 </body>
 </html> 

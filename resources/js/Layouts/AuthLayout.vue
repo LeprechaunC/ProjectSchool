@@ -24,7 +24,7 @@ const showingNavigationDropdown = ref(false);
                                     <ApplicationLogo
                                         class="block h-9 w-auto fill-current text-gray-800 dark:text-white"
                                     />
-                                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white hidden sm:block">GoalWeb</span>
+                                    <span class="ml-2 text-xl font-bold text-gray-900 dark:text-white hidden sm:block">Mērķu Tīmeklis</span>
                                 </Link>
                             </div>
                         </div>
@@ -43,20 +43,20 @@ const showingNavigationDropdown = ref(false);
                                     :href="route('login')" 
                                     class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium text-sm transition-colors"
                                 >
-                                    Log In
+                                    Ienākt
                                 </Link>
                                 <Link 
                                     v-if="!route().current('register')" 
                                     :href="route('register')" 
                                     class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm transition-colors"
                                 >
-                                    Register
+                                    Reģistrēties
                                 </Link>
                                 <Link 
                                     href="/" 
                                     class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white font-medium text-sm transition-colors"
                                 >
-                                    Back to Home
+                                    Atpakaļ uz Sākumu
                                 </Link>
                             </div>
                         </div>
@@ -101,13 +101,13 @@ const showingNavigationDropdown = ref(false);
                 >
                     <div class="border-t border-gray-200 dark:border-gray-700 pt-4 pb-1 space-y-1">
                         <ResponsiveNavLink v-if="!route().current('login')" :href="route('login')">
-                            Log In
+                            Ienākt
                         </ResponsiveNavLink>
                         <ResponsiveNavLink v-if="!route().current('register')" :href="route('register')">
-                            Register
+                            Reģistrēties
                         </ResponsiveNavLink>
                         <ResponsiveNavLink href="/">
-                            Back to Home
+                            Atpakaļ uz Sākumu
                         </ResponsiveNavLink>
                     </div>
                 </div>

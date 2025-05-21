@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>My Teams</title>
+    <title>Manas Komandas</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -83,14 +83,14 @@
 </head>
 <body>
     <div class="header">
-        <h1>My Teams Report</h1>
-        <div class="subtitle">Generated on {{ date('F d, Y H:i:s') }}</div>
+        <h1>Manu Komandu Pārskats</h1>
+        <div class="subtitle">Izveidots {{ date('F d, Y H:i:s') }}</div>
     </div>
     
     <div class="user-info">
-        <p><strong>Name:</strong> {{ $user->name }}</p>
-        <p><strong>Email:</strong> {{ $user->email }}</p>
-        <p><strong>Total Teams:</strong> {{ count($teams) }}</p>
+        <p><strong>Vārds:</strong> {{ $user->name }}</p>
+        <p><strong>E-pasts:</strong> {{ $user->email }}</p>
+        <p><strong>Kopējais Komandu Skaits:</strong> {{ count($teams) }}</p>
     </div>
     
     @if(count($teams) > 0)
@@ -98,27 +98,27 @@
             <div class="team-card">
                 <div class="team-header">
                     <div class="team-name">{{ $team->name }}</div>
-                    <div><strong>Owner:</strong> {{ $team->owner }}</div>
-                    <div><strong>Created:</strong> {{ date('F d, Y', strtotime($team->created_at)) }}</div>
-                    <div><strong>Invite Code:</strong> {{ $team->invite_code }}</div>
+                    <div><strong>Vadītājs:</strong> {{ $team->owner }}</div>
+                    <div><strong>Izveidots:</strong> {{ date('F d, Y', strtotime($team->created_at)) }}</div>
+                    <div><strong>Ielūguma Kods:</strong> {{ $team->invite_code }}</div>
                 </div>
                 
                 <div class="team-members">
-                    <strong>Team Members ({{ $team->users->count() }}):</strong>
+                    <strong>Komandas Dalībnieki ({{ $team->users->count() }}):</strong>
                     <div class="member-list">
                         @foreach($team->users as $member)
-                            <div>{{ $member->name }} {{ $member->email == $user->email ? '(You)' : '' }}</div>
+                            <div>{{ $member->name }} {{ $member->email == $user->email ? '(Jūs)' : '' }}</div>
                         @endforeach
                     </div>
                 </div>
             </div>
         @endforeach
     @else
-        <p style="text-align: center;">You are not a member of any teams.</p>
+        <p style="text-align: center;">Jūs neesat nevienas komandas dalībnieks.</p>
     @endif
     
     <div class="footer">
-        <p>This document was automatically generated from your Goal Management System.</p>
+        <p>Šis dokuments tika automātiski ģenerēts no jūsu Mērķu Vadības Sistēmas.</p>
     </div>
 </body>
 </html> 

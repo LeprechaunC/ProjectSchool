@@ -15,20 +15,20 @@
       >
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
       </svg>
-      <span class="ml-2">{{ isOpen ? 'Close Filters' : 'Open Filters' }}</span>
+      <span class="ml-2">{{ isOpen ? 'Aizvērt Filtru' : 'Atvērt Filtru' }}</span>
     </button>
 
     <!-- Sidebar Content -->
     <div class="sidebar-content">
       <div class="p-5">
         <div class="flex items-center justify-between mb-6">
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Filters</h3>
-          <span class="text-sm text-gray-500 dark:text-gray-400">{{ filtersCount }} active</span>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white">Filtri</h3>
+          <span class="text-sm text-gray-500 dark:text-gray-400">{{ filtersCount }} aktīvs</span>
         </div>
 
         <!-- Priority Filter -->
         <div class="filter-section">
-          <label class="filter-label">Priority Level</label>
+          <label class="filter-label">Prioritātes Līmenis</label>
           <div class="priority-options">
             <button 
               v-for="priority in priorities" 
@@ -45,10 +45,10 @@
 
         <!-- Date Range Filter -->
         <div class="filter-section">
-          <label class="filter-label">Date Range</label>
+          <label class="filter-label">Datuma Diapazons</label>
           <div class="date-range">
             <div class="date-input-group">
-              <label class="date-label">From</label>
+              <label class="date-label">No</label>
               <input 
                 type="date" 
                 v-model="filters.dateRange.start" 
@@ -56,7 +56,7 @@
               />
             </div>
             <div class="date-input-group">
-              <label class="date-label">To</label>
+              <label class="date-label">Līdz</label>
               <input 
                 type="date" 
                 v-model="filters.dateRange.end" 
@@ -76,7 +76,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
             </svg>
-            Apply Filters
+            Apstripināt Filtrus
           </button>
           
           <button 
@@ -87,7 +87,7 @@
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            Reset Filters
+            Atiestatīt Filtru
           </button>
         </div>
       </div>
@@ -114,9 +114,9 @@ export default {
       },
       newLabel: "",
       priorities: [
-        { value: "high", label: "High", icon: "🔴" },
-        { value: "medium", label: "Medium", icon: "🟡" },
-        { value: "low", label: "Low", icon: "🟢" }
+        { value: "high", label: "Augsta", icon: "🔴" },
+        { value: "medium", label: "Vidēja", icon: "🟡" },
+        { value: "low", label: "Zema", icon: "🟢" }
       ]
     };
   },

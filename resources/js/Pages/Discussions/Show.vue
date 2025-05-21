@@ -3,7 +3,7 @@
 
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Discussion</h2>
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Diskusija</h2>
     </template>
 
     <div class="py-12">
@@ -22,9 +22,9 @@
                     class="w-full text-3xl font-bold bg-transparent border-b border-gray-300 dark:border-gray-700 focus:border-blue-500 focus:ring-0"
                   />
                   <div class="mt-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <span>Posted by {{ discussion.user.name }}</span>
+                    <span>Ievietoja {{ discussion.user.name }}</span>
                     <span v-if="discussion.team" class="mx-2">•</span>
-                    <span v-if="discussion.team">in {{ discussion.team.name }}</span>
+                    <span v-if="discussion.team">komandā {{ discussion.team.name }}</span>
                     <span class="mx-2">•</span>
                     <span>{{ formatDate(discussion.created_at) }}</span>
                   </div>
@@ -87,14 +87,14 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
                   </svg>
-                  <span>{{ discussion.likes_count }} Likes</span>
+                  <span>{{ discussion.likes_count }} Patīk</span>
                 </button>
               </form>
             </div>
 
             <!-- Reply Form -->
             <div class="mb-8">
-              <h3 class="text-lg font-semibold mb-4">Add a Reply</h3>
+              <h3 class="text-lg font-semibold mb-4">Pievienot atbildi</h3>
               <form @submit.prevent="submitReply">
                 <div class="mb-4">
                   <textarea
@@ -105,14 +105,14 @@
                   ></textarea>
                 </div>
                 <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                  Post Reply
+                  Publicēt atbildi
                 </button>
               </form>
             </div>
 
             <!-- Replies -->
             <div class="space-y-6">
-              <h3 class="text-lg font-semibold">{{ discussion.replies_count }} Replies</h3>
+              <h3 class="text-lg font-semibold">{{ discussion.replies_count }} Atbildes</h3>
               <div v-for="reply in discussion.replies.filter(r => !r.parent_id)" :key="reply.id" class="border rounded-lg p-4">
                 <Reply
                   :reply="reply"

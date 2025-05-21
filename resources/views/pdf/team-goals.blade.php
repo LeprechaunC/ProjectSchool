@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>{{ $team->name }} Goals</title>
+    <title>{{ $team->name }} Mērķi</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -73,15 +73,15 @@
 </head>
 <body>
     <div class="header">
-        <h1>{{ $team->name }} - Team Goals Report</h1>
-        <div class="subtitle">Generated on {{ date('F d, Y H:i:s') }}</div>
+        <h1>{{ $team->name }} - Komandas Mērķu Pārskats</h1>
+        <div class="subtitle">Izveidots {{ date('F d, Y H:i:s') }}</div>
     </div>
     
     <div class="team-info">
-        <p><strong>Team Name:</strong> {{ $team->name }}</p>
-        <p><strong>Team Owner:</strong> {{ $team->owner }}</p>
-        <p><strong>Members:</strong> {{ $team->users->count() }}</p>
-        <p><strong>Total Goals:</strong> {{ count($goals) }}</p>
+        <p><strong>Komandas Nosaukums:</strong> {{ $team->name }}</p>
+        <p><strong>Komandas Vadītājs:</strong> {{ $team->owner }}</p>
+        <p><strong>Dalībnieki:</strong> {{ $team->users->count() }}</p>
+        <p><strong>Kopējais Mērķu Skaits:</strong> {{ count($goals) }}</p>
     </div>
     
     @if(count($goals) > 0)
@@ -89,13 +89,13 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">#</th>
-                    <th style="width: 15%;">Title</th>
-                    <th style="width: 25%;">Description</th>
-                    <th style="width: 15%;">Start Time</th>
-                    <th style="width: 15%;">End Time</th>
-                    <th style="width: 10%;">Assigned To</th>
-                    <th style="width: 7.5%;">Priority</th>
-                    <th style="width: 7.5%;">Status</th>
+                    <th style="width: 15%;">Nosaukums</th>
+                    <th style="width: 25%;">Apraksts</th>
+                    <th style="width: 15%;">Sākuma Laiks</th>
+                    <th style="width: 15%;">Beigu Laiks</th>
+                    <th style="width: 10%;">Piešķirts</th>
+                    <th style="width: 7.5%;">Prioritāte</th>
+                    <th style="width: 7.5%;">Statuss</th>
                 </tr>
             </thead>
             <tbody>
@@ -106,19 +106,19 @@
                         <td>{{ $goal->description }}</td>
                         <td>{{ date('M d, Y H:i', strtotime($goal->start_time)) }}</td>
                         <td>{{ date('M d, Y H:i', strtotime($goal->end_time)) }}</td>
-                        <td>{{ $goal->user->name ?? 'Unassigned' }}</td>
+                        <td>{{ $goal->user->name ?? 'Nepiešķirts' }}</td>
                         <td class="priority-{{ strtolower($goal->priority) }}">{{ ucfirst($goal->priority) }}</td>
-                        <td class="status-{{ $goal->done ? 'done' : 'pending' }}">{{ $goal->done ? 'Completed' : 'Pending' }}</td>
+                        <td class="status-{{ $goal->done ? 'done' : 'pending' }}">{{ $goal->done ? 'Pabeigts' : 'Gaida' }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     @else
-        <p style="text-align: center;">No team goals found.</p>
+        <p style="text-align: center;">Nav atrasts neviens komandas mērķis.</p>
     @endif
     
     <div class="footer">
-        <p>This document was automatically generated from your Goal Management System.</p>
+        <p>Šis dokuments tika automātiski ģenerēts no jūsu Mērķu Vadības Sistēmas.</p>
     </div>
 </body>
 </html> 

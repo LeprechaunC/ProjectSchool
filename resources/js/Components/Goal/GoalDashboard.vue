@@ -11,25 +11,25 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
           <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Goal Calendar</h3>
-              <p class="text-gray-600 dark:text-gray-400">Manage and track your goals efficiently</p>
+              <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">Mērķu Kalendārs</h3>
+              <p class="text-gray-600 dark:text-gray-400">Efektīvi pārvaldiet un izsekojiet savus mērķus</p>
               <div v-if="upcomingGoalsCount > 0" class="mt-2">
                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
                   <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
-                  {{ upcomingGoalsCount }} goal{{ upcomingGoalsCount === 1 ? '' : 's' }} due within 24 hours
+                  {{ upcomingGoalsCount }} mērķ{{ upcomingGoalsCount === 1 ? 'is' : 'i' }} jāizpilda nākamo 24 stundu laikā
                 </span>
               </div>
             </div>
             <div class="mt-4 md:mt-0 w-full md:w-auto">
-              <label for="team-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Team</label>
+              <label for="team-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Izvēlieties Komandu</label>
               <select
                 id="team-select"
                 v-model="selectedTeam"
                 class="w-full md:w-64 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               >
-                <option value="none">Personal</option>
+                <option value="none">Personīgi</option>
                 <option v-for="team in teams" :key="team.id" :value="team">
                   {{ team.name }}
                 </option>
@@ -43,15 +43,15 @@
             <div class="p-4 flex flex-wrap gap-4 border-b border-gray-200 dark:border-gray-700">
               <div class="flex items-center">
                 <div class="w-4 h-4 rounded-full bg-red-500 mr-2"></div>
-                <span class="text-sm font-medium">High Priority</span>
+                <span class="text-sm font-medium">Augsta Prioritāte</span>
               </div>
               <div class="flex items-center">
                 <div class="w-4 h-4 rounded-full bg-amber-500 mr-2"></div>
-                <span class="text-sm font-medium">Medium Priority</span>
+                <span class="text-sm font-medium">Vidēja Prioritāte</span>
               </div>
               <div class="flex items-center">
                 <div class="w-4 h-4 rounded-full bg-emerald-500 mr-2"></div>
-                <span class="text-sm font-medium">Low Priority</span>
+                <span class="text-sm font-medium">Zema Prioritāte</span>
               </div>
               
             </div>
@@ -61,7 +61,7 @@
           <!-- Add this after the calendar container div -->
           <div class="mt-6">
             <div class="flex justify-between items-center mb-4">
-              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Team Chat</h3>
+              <h3 class="text-xl font-bold text-gray-900 dark:text-white">Komandas Čats</h3>
               <button 
                 @click="showChat = !showChat" 
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center"
@@ -69,7 +69,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                {{ showChat ? 'Hide Chat' : 'Show Chat' }}
+                {{ showChat ? 'Slēpt Čatu' : 'Rādīt Čatu' }}
               </button>
             </div>
             
@@ -77,7 +77,7 @@
               <TeamChat :team="selectedTeam" />
             </div>
             <div v-else-if="showChat && selectedTeam === 'none'" class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
-              <p class="text-gray-600 dark:text-gray-400">Select a team to view the chat.</p>
+              <p class="text-gray-600 dark:text-gray-400">Izvēlieties komandu, lai skatītu čatu.</p>
             </div>
           </div>
         </div>
@@ -96,11 +96,11 @@
           </svg>
         </button>
 
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Add New Goal</h2>
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Pievienot Jaunu Mērķi</h2>
         <form @submit.prevent="submitGoal" class="space-y-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label for="goal-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Title</label>
+              <label for="goal-title" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Nosaukums</label>
               <input
                 id="goal-title"
                 v-model="newGoal.title"
@@ -110,21 +110,21 @@
               />
             </div>
             <div>
-              <label for="goal-priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Priority</label>
+              <label for="goal-priority" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Prioritāte</label>
               <select 
                 id="goal-priority" 
                 v-model="newGoal.priority" 
                 class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               >
-                <option value="high">🔴 High</option>
-                <option value="medium">🟡 Medium</option>
-                <option value="low">🟢 Low</option>
+                <option value="high">🔴 Augsta</option>
+                <option value="medium">🟡 Vidēja</option>
+                <option value="low">🟢 Zema</option>
               </select>
             </div>
           </div>
 
           <div>
-            <label for="goal-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+            <label for="goal-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Apraksts</label>
             <textarea
               id="goal-description"
               v-model="newGoal.description"
@@ -135,7 +135,7 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label for="goal-start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Start Time</label>
+              <label for="goal-start-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sākuma Laiks</label>
               <input
                 id="goal-start-time"
                 v-model="newGoal.start_time"
@@ -145,7 +145,7 @@
               />
             </div>
             <div>
-              <label for="goal-end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">End Time</label>
+              <label for="goal-end-time" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Beigu Laiks</label>
               <input
                 id="goal-end-time"
                 v-model="newGoal.end_time"
@@ -161,7 +161,7 @@
               type="submit"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
             >
-              Add Goal
+              Pievienot Mērķi
             </button>
           </div>
         </form>
@@ -208,10 +208,10 @@ export default {
           right: 'dayGridMonth,dayGridWeek,timeGridDay'
         },
         buttonText: {
-          today: 'Today',
-          month: 'Month',
-          week: 'Week',
-          day: 'Day'
+          today: 'Šodien',
+          month: 'Mēnesis',
+          week: 'Nedēļa',
+          day: 'Diena'
         },
         firstDay: 1, // Start week on Monday
         height: 'auto',
@@ -381,9 +381,9 @@ export default {
         
         // Shorter button text for mobile
         this.calendarOptions.buttonText = {
-          today: 'Today',
-          month: 'Month',
-          day: 'Day'
+          today: 'Šodien',
+          month: 'Mēnesis',
+          day: 'Diena'
         };
       } else {
         // Restore full header for desktop
@@ -395,10 +395,10 @@ export default {
         
         // Restore full button text
         this.calendarOptions.buttonText = {
-          today: 'Today',
-          month: 'Month',
-          week: 'Week',
-          day: 'Day'
+          today: 'Šodien',
+          month: 'Mēnesis',
+          week: 'Nedēļa',
+          day: 'Diena'
         };
       }
       

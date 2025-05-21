@@ -27,13 +27,13 @@ class TeamController extends Controller
         $isAdmin = $team->users->where('id', $authUser->id)->where('role', 'admin')->count() > 0;
     
         if (!$isAdmin) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Nav autorizācijas'], 403);
         }
     
         // Remove user from team
         DB::table('team_user')->where('team_id', $teamId)->where('user_id', $userId)->delete();
     
-        return response()->json(['message' => 'User removed successfully']);
+        return response()->json(['message' => 'Lietotājs veiksmīgi noņemts']);
     }
     public function createTeam(Request $request)
     {
@@ -56,7 +56,7 @@ class TeamController extends Controller
         $team = Team::with('users')->find($team->id);
 
         return response()->json([
-            'message' => 'Team created successfully',
+            'message' => 'Komanda veiksmīgi izveidota',
             'team' => $team,
         ]);
     }
@@ -71,14 +71,14 @@ class TeamController extends Controller
 
         // Check if the user is already a member
         if ($team->users()->where('user_id', $user->id)->exists()) {
-            return response()->json(['error' => 'You are already a member of this team.'], 400);
+            return response()->json(['error' => 'Jūs jau esat šīs komandas dalībnieks.'], 400);
         }
 
         // Add user to the team
         $team->users()->attach($user->id, ['role' => 'member']);
 
         return response()->json([
-            'message' => 'Successfully joined the team!',
+            'message' => 'Veiksmīgi pievienojāties komandai!',
             'team' => $team->load('users'), // Load team with members
         ]);
     }
@@ -88,23 +88,20 @@ class TeamController extends Controller
         $team = Team::findOrFail($teamId);  // Find the team by ID
         
         if (!$team->users->contains($user)) {
-            return response()->json(['error' => 'User is not part of this team.'], 403);
+            return response()->json(['error' => 'Lietotājs nav šīs komandas dalībnieks.'], 403);
         }
-
-     
 
         $userId = $request->input('userId');
         $userToKick = User::findOrFail($userId);  
 
-   
         if (!$team->users->contains($userToKick)) {
-            return response()->json(['error' => 'User is not part of the team.'], 404);
+            return response()->json(['error' => 'Lietotājs nav komandas dalībnieks.'], 404);
         }
 
         // Remove the user from the team
         $team->users()->detach($userToKick->id);
 
-        return response()->json(['message' => 'User has been successfully votekicked.']);
+        return response()->json(['message' => 'Lietotājs veiksmīgi izslēgts no komandas.']);
     }
     public function generateInviteCode($teamId)
     {
@@ -118,7 +115,7 @@ class TeamController extends Controller
             ->exists();
     
         if (!$isAdmin) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Nav autorizācijas'], 403);
         }
     
         // Generate and update the invite code
@@ -153,7 +150,7 @@ class TeamController extends Controller
         // Remove user from team
         $team->users()->detach($user->id);
 
-        return response()->json(['message' => 'Successfully left the team']);
+        return response()->json(['message' => 'Veiksmīgi pameta komandu']);
     }
 
     public function updateTeamName(Request $request, $teamId)
@@ -163,7 +160,7 @@ class TeamController extends Controller
 
         // Check if user is admin
         if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Nav autorizācijas'], 403);
         }
 
         $request->validate([
@@ -182,13 +179,13 @@ class TeamController extends Controller
 
         // Check if current user is admin
         if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Nav autorizācijas'], 403);
         }
 
         // Update user role to admin
         $team->users()->updateExistingPivot($userId, ['role' => 'admin']);
 
-        return response()->json(['message' => 'User is now an admin']);
+        return response()->json(['message' => 'Lietotājs tagad ir administrators']);
     }
 
     public function removeAdmin($teamId, $userId)
@@ -198,19 +195,19 @@ class TeamController extends Controller
 
         // Check if current user is admin
         if (!$team->users()->wherePivot('user_id', $user->id)->wherePivot('role', 'admin')->exists()) {
-            return response()->json(['error' => 'Unauthorized'], 403);
+            return response()->json(['error' => 'Nav autorizācijas'], 403);
         }
 
         // Check if this is the last admin
         $adminCount = $team->users()->wherePivot('role', 'admin')->count();
         if ($adminCount <= 1) {
-            return response()->json(['error' => 'Cannot remove the last admin'], 400);
+            return response()->json(['error' => 'Nevar noņemt pēdējo administratoru'], 400);
         }
 
         // Update user role to member
         $team->users()->updateExistingPivot($userId, ['role' => 'member']);
 
-        return response()->json(['message' => 'User is no longer an admin']);
+        return response()->json(['message' => 'Lietotājs vairs nav administrators']);
     }
 
     public function deleteTeam($teamId)

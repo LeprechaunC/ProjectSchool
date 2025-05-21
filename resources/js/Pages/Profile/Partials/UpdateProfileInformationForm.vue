@@ -34,11 +34,11 @@ const errorMessage = ref('');
     <section class="profile-section">
         <header>
             <h2 class="profile-section-title">
-                Profile Information
+                Profila Informācija
             </h2>
 
             <p class="profile-section-description">
-                Update your account's profile information and email address.
+                Atjauniniet sava konta profila informāciju un e-pasta adresi.
             </p>
         </header>
 
@@ -47,7 +47,7 @@ const errorMessage = ref('');
             class="form-section"
         >
             <div>
-                <InputLabel for="name" value="Name" class="text-gray-700 dark:text-gray-300" />
+                <InputLabel for="name" value="Vārds" class="text-gray-700 dark:text-gray-300" />
 
                 <TextInput
                     id="name"
@@ -63,7 +63,7 @@ const errorMessage = ref('');
             </div>
 
             <div class="mt-4">
-                <InputLabel for="email" value="Email" class="text-gray-700 dark:text-gray-300" />
+                <InputLabel for="email" value="E-pasts" class="text-gray-700 dark:text-gray-300" />
 
                 <TextInput
                     id="email"
@@ -103,7 +103,7 @@ const errorMessage = ref('');
                     :disabled="form.processing"
                     class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600"
                 >
-                    Save Changes
+                    Saglabāt Izmaiņas
                 </PrimaryButton>
 
                 <Transition
@@ -116,7 +116,7 @@ const errorMessage = ref('');
                         v-if="form.recentlySuccessful"
                         class="text-sm text-green-600 dark:text-green-400"
                     >
-                        Profile information saved.
+                        Profila informācija saglabāta.
                     </p>
                 </Transition>
             </div>

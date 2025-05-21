@@ -1,9 +1,9 @@
 <template>
-  <Head title="Create Discussion" />
+  <Head title="Izveidot diskusiju" />
 
   <AuthenticatedLayout>
     <template #header>
-      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Create Discussion</h2>
+      <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Izveidot diskusiju</h2>
     </template>
 
     <div class="py-12">
@@ -12,7 +12,7 @@
           <div class="p-6 text-gray-900 dark:text-gray-100">
             <form @submit.prevent="submit">
               <div class="mb-4">
-                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nosaukums</label>
                 <input
                   type="text"
                   id="title"
@@ -23,7 +23,7 @@
               </div>
 
               <div class="mb-4">
-                <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Content</label>
+                <label for="content" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Saturs</label>
                 <textarea
                   id="content"
                   v-model="form.content"

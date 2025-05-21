@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Goal Statistics Report</title>
+    <title>Mērķu Statistika</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,37 +90,37 @@
 </head>
 <body>
     <div class="header">
-        <h1>Goal Statistics Report</h1>
-        <div class="subtitle">Generated on {{ $date }}</div>
+        <h1>Mērķu Statistika</h1>
+        <div class="subtitle">Izveidots {{ $date }}</div>
     </div>
     
-    <h2>Overview</h2>
+    <h2>Pārskats</h2>
     <div class="stats-container">
         <div class="stat-box">
             <div class="stat-value">{{ $totalGoals }}</div>
-            <div class="stat-label">Total Goals</div>
+            <div class="stat-label">Kopējais Mērķu Skaits</div>
         </div>
         <div class="stat-box">
             <div class="stat-value">{{ $completedGoals }}</div>
-            <div class="stat-label">Completed Goals</div>
+            <div class="stat-label">Pabeigtie Mērķi</div>
         </div>
         <div class="stat-box">
             <div class="stat-value">{{ $pendingGoals }}</div>
-            <div class="stat-label">Pending Goals</div>
+            <div class="stat-label">Gaidošie Mērķi</div>
         </div>
         <div class="stat-box">
             <div class="stat-value">{{ $teamGoals }}</div>
-            <div class="stat-label">Team Goals</div>
+            <div class="stat-label">Komandas Mērķi</div>
         </div>
         <div class="stat-box">
             <div class="stat-value">{{ $personalGoals }}</div>
-            <div class="stat-label">Personal Goals</div>
+            <div class="stat-label">Personīgie Mērķi</div>
         </div>
     </div>
     
-    <h2>Goal Status</h2>
+    <h2>Mērķu Statuss</h2>
     <div style="margin-bottom: 20px;">
-        <p><strong>Completion Rate:</strong> {{ $totalGoals > 0 ? round(($completedGoals / $totalGoals) * 100, 1) : 0 }}%</p>
+        <p><strong>Pabeigšanas Līmenis:</strong> {{ $totalGoals > 0 ? round(($completedGoals / $totalGoals) * 100, 1) : 0 }}%</p>
         <div class="progress-container">
             <div class="progress-bar" style="width: {{ $totalGoals > 0 ? round(($completedGoals / $totalGoals) * 100, 1) : 0 }}%">
                 {{ $totalGoals > 0 ? round(($completedGoals / $totalGoals) * 100, 1) : 0 }}%
@@ -128,19 +128,19 @@
         </div>
     </div>
     
-    <h2>Goals by Priority</h2>
+    <h2>Mērķi pēc Prioritātes</h2>
     <table>
         <thead>
             <tr>
-                <th>Priority</th>
-                <th>Count</th>
-                <th>Percentage</th>
-                <th>Distribution</th>
+                <th>Prioritāte</th>
+                <th>Skaits</th>
+                <th>Procenti</th>
+                <th>Sadalījums</th>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td>High</td>
+                <td>Augsta</td>
                 <td>{{ $highPriorityGoals }}</td>
                 <td>{{ $totalGoals > 0 ? round(($highPriorityGoals / $totalGoals) * 100, 1) : 0 }}%</td>
                 <td>
@@ -152,7 +152,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Medium</td>
+                <td>Vidēja</td>
                 <td>{{ $mediumPriorityGoals }}</td>
                 <td>{{ $totalGoals > 0 ? round(($mediumPriorityGoals / $totalGoals) * 100, 1) : 0 }}%</td>
                 <td>
@@ -164,7 +164,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Low</td>
+                <td>Zema</td>
                 <td>{{ $lowPriorityGoals }}</td>
                 <td>{{ $totalGoals > 0 ? round(($lowPriorityGoals / $totalGoals) * 100, 1) : 0 }}%</td>
                 <td>
@@ -178,20 +178,20 @@
         </tbody>
     </table>
     
-    <h2>Team vs Personal Goals</h2>
+    <h2>Komandas vs Personīgie Mērķi</h2>
     <div style="margin-bottom: 20px;">
         <table>
             <thead>
                 <tr>
-                    <th>Type</th>
-                    <th>Count</th>
-                    <th>Percentage</th>
-                    <th>Distribution</th>
+                    <th>Tips</th>
+                    <th>Skaits</th>
+                    <th>Procenti</th>
+                    <th>Sadalījums</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Team Goals</td>
+                    <td>Komandas Mērķi</td>
                     <td>{{ $teamGoals }}</td>
                     <td>{{ $totalGoals > 0 ? round(($teamGoals / $totalGoals) * 100, 1) : 0 }}%</td>
                     <td>
@@ -203,7 +203,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td>Personal Goals</td>
+                    <td>Personīgie Mērķi</td>
                     <td>{{ $personalGoals }}</td>
                     <td>{{ $totalGoals > 0 ? round(($personalGoals / $totalGoals) * 100, 1) : 0 }}%</td>
                     <td>
@@ -219,8 +219,8 @@
     </div>
     
     <div class="footer">
-        <p>This document was automatically generated from the Goal Management System.</p>
-        <p>CONFIDENTIAL - For administrative use only</p>
+        <p>Šis dokuments tika automātiski ģenerēts no Mērķu Vadības Sistēmas.</p>
+        <p>KONFIDENCIĀLS - Tikai administratīvai lietošanai</p>
     </div>
 </body>
 </html> 

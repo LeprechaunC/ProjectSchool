@@ -4,9 +4,9 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-bold">Discussions</h2>
+                        <h2 class="text-2xl font-bold">Diskusijas</h2>
                         <a href="{{ route('discussions.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                            New Discussion
+                            Jauna Diskusija
                         </a>
                     </div>
 
@@ -19,19 +19,19 @@
                                             {{ $discussion->title }}
                                         </a>
                                         <p class="text-sm text-gray-600 mt-1">
-                                            Posted by {{ $discussion->user->name }} 
+                                            Ievietoja {{ $discussion->user->name }} 
                                             @if($discussion->team)
-                                                in {{ $discussion->team->name }}
+                                                komandā {{ $discussion->team->name }}
                                             @endif
                                             {{ $discussion->created_at->diffForHumans() }}
                                         </p>
                                     </div>
                                     <div class="flex items-center space-x-2">
                                         <span class="text-gray-600">
-                                            {{ $discussion->replies_count }} replies
+                                            {{ $discussion->replies_count }} atbildes
                                         </span>
                                         <span class="text-gray-600">
-                                            {{ $discussion->likes_count }} likes
+                                            {{ $discussion->likes_count }} patīk
                                         </span>
                                     </div>
                                 </div>

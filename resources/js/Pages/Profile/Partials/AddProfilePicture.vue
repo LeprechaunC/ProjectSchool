@@ -1,9 +1,9 @@
 <template>
     <section class="profile-section">
         <header>
-            <h2 class="profile-section-title">Profile Picture</h2>
+            <h2 class="profile-section-title">Profila Attēls</h2>
             <p class="profile-section-description">
-                Update your profile photo to help others recognize you
+                Atjauniniet savu profila foto, lai palīdzētu citiem jūs atpazīt
             </p>
         </header>
 
@@ -92,7 +92,7 @@
                 leave-to-class="opacity-0 transform translate-y-2"
             >
                 <p v-if="form.recentlySuccessful" class="text-sm text-green-600 dark:text-green-400 text-center mt-4">
-                    Profile picture updated successfully.
+                    Profila attēls veiksmīgi atjaunināts.
                 </p>
             </Transition>
         </form>

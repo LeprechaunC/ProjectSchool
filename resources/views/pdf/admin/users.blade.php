@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>All Users Report</title>
+    <title>Visu Lietotāju Pārskats</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -63,12 +63,12 @@
 </head>
 <body>
     <div class="header">
-        <h1>All Users Report</h1>
-        <div class="subtitle">Generated on {{ $date }}</div>
+        <h1>Visu Lietotāju Pārskats</h1>
+        <div class="subtitle">Izveidots {{ $date }}</div>
     </div>
     
     <div class="info">
-        <p><strong>Total Users:</strong> {{ $totalUsers }}</p>
+        <p><strong>Kopējais Lietotāju Skaits:</strong> {{ $totalUsers }}</p>
     </div>
     
     @if(count($users) > 0)
@@ -76,13 +76,13 @@
             <thead>
                 <tr>
                     <th style="width: 5%;">#</th>
-                    <th style="width: 15%;">Name</th>
-                    <th style="width: 20%;">Email</th>
-                    <th style="width: 10%;">Role</th>
-                    <th style="width: 15%;">Teams</th>
-                    <th style="width: 15%;">Registered</th>
-                    <th style="width: 10%;">Last Login</th>
-                    <th style="width: 10%;">Status</th>
+                    <th style="width: 15%;">Vārds</th>
+                    <th style="width: 20%;">E-pasts</th>
+                    <th style="width: 10%;">Loma</th>
+                    <th style="width: 15%;">Komandas</th>
+                    <th style="width: 15%;">Reģistrēts</th>
+                    <th style="width: 10%;">Pēdējā Pieslēgšanās</th>
+                    <th style="width: 10%;">Statuss</th>
                 </tr>
             </thead>
             <tbody>
@@ -91,22 +91,22 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->email }}</td>
-                        <td class="{{ $user->is_admin ? 'admin' : '' }}">{{ $user->is_admin ? 'Admin' : 'User' }}</td>
+                        <td class="{{ $user->is_admin ? 'admin' : '' }}">{{ $user->is_admin ? 'Administrators' : 'Lietotājs' }}</td>
                         <td>{{ $user->teams->count() }} ({{ $user->teams->pluck('name')->join(', ') }})</td>
                         <td>{{ date('M d, Y H:i', strtotime($user->created_at)) }}</td>
-                        <td>{{ $user->last_login_at ? date('M d, Y H:i', strtotime($user->last_login_at)) : 'Never' }}</td>
-                        <td>{{ $user->email_verified_at ? 'Verified' : 'Unverified' }}</td>
+                        <td>{{ $user->last_login_at ? date('M d, Y H:i', strtotime($user->last_login_at)) : 'Nekad' }}</td>
+                        <td>{{ $user->email_verified_at ? 'Verificēts' : 'Neverificēts' }}</td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     @else
-        <p style="text-align: center;">No users found.</p>
+        <p style="text-align: center;">Nav atrasts neviens lietotājs.</p>
     @endif
     
     <div class="footer">
-        <p>This document was automatically generated from the Goal Management System.</p>
-        <p>CONFIDENTIAL - For administrative use only</p>
+        <p>Šis dokuments tika automātiski ģenerēts no Mērķu Vadības Sistēmas.</p>
+        <p>KONFIDENCIĀLS - Tikai administratīvai lietošanai</p>
     </div>
 </body>
 </html> 

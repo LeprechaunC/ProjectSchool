@@ -33,8 +33,8 @@
 
       <!-- Header Section -->
       <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Teams Dashboard</h2>
-        <p class="text-gray-600 dark:text-gray-400">Manage your teams and collaborate with others</p>
+        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Komandu Vadības Panelis</h2>
+        <p class="text-gray-600 dark:text-gray-400">Pārvaldiet savas komandas un sadarbojieties ar citiem</p>
       </div>
 
       <!-- Forms Section -->
@@ -47,16 +47,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Create a New Team</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Izveidot Jaunu Komandu</h3>
           </div>
           <form @submit.prevent="createTeam" class="space-y-4">
             <div>
-              <label for="team-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team Name</label>
+              <label for="team-name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Komandas Nosaukums</label>
               <input 
                 id="team-name"
                 type="text" 
                 v-model="newTeamName" 
-                placeholder="Enter team name" 
+                placeholder="Ievadiet komandas nosaukumu" 
                 required 
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500 transition-colors"
               />
@@ -68,7 +68,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Create Team
+              Izveidot Komandu
             </button>
         </form>
       </div>
@@ -81,16 +81,16 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
             </div>
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Join a Team</h3>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pievienoties Komandai</h3>
           </div>
           <form @submit.prevent="joinTeam" class="space-y-4">
             <div>
-              <label for="invite-code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Invite Code</label>
+              <label for="invite-code" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ielūguma Kods</label>
               <input 
                 id="invite-code"
                 type="text" 
                 v-model="enteredInviteCode" 
-                placeholder="Enter invite code" 
+                placeholder="Ievadiet ielūguma kodu" 
                 required 
                 class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-green-500 focus:border-green-500 transition-colors"
               />
@@ -102,7 +102,7 @@
               <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
-              Join Team
+              Pievienoties Komandai
             </button>
         </form>
       </div>
@@ -112,11 +112,11 @@
       <div class="mb-6">
         <div class="flex items-center justify-between mb-6">
           <div>
-            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Your Teams</h3>
-            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Manage your teams and team members</p>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Jūsu Komandas</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">Pārvaldiet savas komandas un komandas locekļus</p>
           </div>
           <div class="text-sm text-gray-500 dark:text-gray-400">
-            {{ teams.length }} {{ teams.length === 1 ? 'team' : 'teams' }}
+            {{ teams.length }} {{ teams.length === 1 ? 'komanda' : 'komandas' }}
           </div>
         </div>
         
@@ -140,8 +140,8 @@
           <svg class="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">No teams found</h3>
-          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Create a new team or join an existing one to get started.</p>
+          <h3 class="mt-4 text-lg font-medium text-gray-900 dark:text-white">Nav atrastas komandas</h3>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Izveidojiet jaunu komandu vai pievienojieties esošai, lai sāktu.</p>
           <div class="mt-6 flex justify-center space-x-3">
             <button 
               @click="scrollToCreateForm" 
@@ -150,7 +150,7 @@
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              Create Team
+              Izveidot Komandu
               </button>
             <button 
               @click="scrollToJoinForm" 
@@ -159,7 +159,7 @@
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
               </svg>
-              Join Team
+              Pievienoties Komandai
             </button>
           </div>
         </div>
@@ -193,12 +193,12 @@
                     <button 
                       @click="toggleInviteCodeVisible(team.id)"
                       class="text-white bg-blue-700/50 hover:bg-blue-700/80 transition-colors flex items-center px-2 py-1 rounded"
-                      title="Show invite code"
+                      title="Rādīt ielūguma kodu"
                     >
                       <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                       </svg>
-                      Invite
+                      Ielūgt
                     </button>
                     
                     <!-- Invite Code Dropdown -->
@@ -208,12 +208,12 @@
                       :ref="`invite-dropdown-${team.id}`"
                     >
                       <div class="flex justify-between items-center mb-2">
-                        <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Invite Code</h5>
+                        <h5 class="text-sm font-medium text-gray-700 dark:text-gray-300">Ielūguma Kods</h5>
                         <button 
                           @click="generateNewInviteCode(team.id)"
                           class="text-xs text-blue-600 dark:text-blue-400 hover:underline"
                         >
-                          Generate New
+                          Ģenerēt Jaunu
                         </button>
                       </div>
                       <div class="flex items-center mb-2">
@@ -223,7 +223,7 @@
                         <button 
                           @click="copyInviteCode(team.invite_code)"
                           class="ml-2 p-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
-                          title="Copy invite code"
+                          title="Kopēt ielūguma kodu"
                         >
                           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
@@ -231,7 +231,7 @@
                         </button>
                       </div>
                       <div class="text-xs text-gray-500 dark:text-gray-400">
-                        Share this code with others to let them join your team
+                        Dalieties ar šo kodu, lai ļautu citiem pievienoties jūsu komandai
                       </div>
                     </div>
                   </div>
@@ -277,7 +277,7 @@
                             'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200': getUserRole(user, team) === 'member'
                           }"
                         >
-                          {{ getUserRole(user, team) === 'owner' ? 'Owner' : (getUserRole(user, team) === 'admin' ? 'Admin' : 'Member') }}
+                          {{ getUserRole(user, team) === 'owner' ? 'Īpašnieks' : (getUserRole(user, team) === 'admin' ? 'Administrators' : 'Dalībnieks') }}
                         </span>
                       </div>
                     </div>
@@ -288,7 +288,7 @@
                       <button 
                         @click="makeAdmin(team.id, user.id)" 
                         class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
-                        title="Make admin"
+                        title="Padarīt par administratoru"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
@@ -299,7 +299,7 @@
                       <button 
                         @click="removeMember(team.id, user.id)" 
                         class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors"
-                        title="Remove member"
+                        title="Noņemt dalībnieku"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -350,7 +350,7 @@
                     <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                     </svg>
-                    Chat
+                    Tērzēšana
                   </button>
                   
                   <div v-if="isTeamAdmin(team)" class="flex space-x-1">
@@ -359,7 +359,7 @@
                       v-if="!isTeamOwner(team)"
                       @click="exitTeam(team.id)" 
                       class="px-2 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-10 flex items-center justify-center"
-                      title="Leave Team"
+                      title="Pamest Komandu"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -371,7 +371,7 @@
                       v-if="isTeamOwner(team)"
                       @click="deleteTeam(team.id)" 
                       class="px-2 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200 h-10 w-10 flex items-center justify-center"
-                      title="Delete Team"
+                      title="Dzēst Komandu"
                     >
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -413,7 +413,7 @@
     <Modal :show="showEditNameModal" @close="closeEditNameModal">
       <div class="p-6">
         <div class="flex justify-between items-start mb-4">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Edit Team Name</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white">Rediģēt Komandas Nosaukumu</h2>
           <button @click="closeEditNameModal" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -423,12 +423,12 @@
         
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team Name</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Komandas Nosaukums</label>
             <input 
               v-model="editingTeamName" 
               type="text" 
               class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter team name"
+              placeholder="Ievadiet komandas nosaukumu"
             />
           </div>
           
@@ -437,13 +437,13 @@
               @click="closeEditNameModal" 
               class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
             >
-              Cancel
+              Atcelt
             </button>
             <button 
               @click="updateTeamName" 
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              Update
+              Atjaunināt
             </button>
           </div>
         </div>
@@ -496,7 +496,7 @@ export default {
         const response = await axios.get('/api/user');
         this.currentUser = response.data;
       } catch (err) {
-        this.error = 'Failed to load user data';
+        this.error = 'Neizdevās ielādēt lietotāja datus';
       }
     },
 
@@ -514,7 +514,7 @@ export default {
           }
         }
       } catch (err) {
-        this.error = 'Failed to load teams';
+        this.error = 'Neizdevās ielādēt komandas';
       } finally {
         this.loading = false;
       }
@@ -525,10 +525,10 @@ export default {
         const response = await axios.post('/api/teamsMake', { name: this.newTeamName });
         await this.fetchTeams();
         this.newTeamName = '';
-        this.showNotification('Team created successfully!');
+        this.showNotification('Komanda veiksmīgi izveidota!');
       } catch (err) {
-        this.error = 'Failed to create team';
-        this.showNotification('Failed to create team', 'error');
+        this.error = 'Neizdevās izveidot komandu';
+        this.showNotification('Neizdevās izveidot komandu', 'error');
       }
     },
 
@@ -537,24 +537,24 @@ export default {
         const response = await axios.post('/api/teams/join', { invite_code: this.enteredInviteCode });
         this.teams.push(response.data.team);
         this.enteredInviteCode = '';
-        this.showNotification('Successfully joined the team!');
+        this.showNotification('Veiksmīgi pievienojāties komandai!');
       } catch (err) {
-        this.error = 'Failed to join team';
-        this.showNotification('Failed to join team', 'error');
+        this.error = 'Neizdevās pievienoties komandai';
+        this.showNotification('Neizdevās pievienoties komandai', 'error');
       }
     },
 
     async removeMember(teamId, userId) {
-      if (!confirm('Are you sure you want to remove this member from the team?')) return;
+      if (!confirm('Vai tiešām vēlaties noņemt šo dalībnieku no komandas?')) return;
       
       try {
         await axios.delete(`/api/teams/${teamId}/users/${userId}`);
         const team = this.teams.find(t => t.id === teamId);
         team.users = team.users.filter(u => u.id !== userId);
-        this.showNotification('Member removed successfully');
+        this.showNotification('Dalībnieks veiksmīgi noņemts');
       } catch (err) {
-        this.error = 'Failed to remove the member';
-        this.showNotification('Failed to remove member', 'error');
+        this.error = 'Neizdevās noņemt dalībnieku';
+        this.showNotification('Neizdevās noņemt dalībnieku', 'error');
       }
     },
 
@@ -569,7 +569,7 @@ export default {
           const handleClickOutside = (event) => {
             // Get both the dropdown and the button
             const dropdownRef = this.$refs[`invite-dropdown-${teamId}`];
-            const buttons = document.querySelectorAll(`button[title="Show invite code"]`);
+            const buttons = document.querySelectorAll(`button[title="Rādīt ielūguma kodu"]`);
             let clickedOnButton = false;
             
             // Check if the click was on the invite button
@@ -598,22 +598,22 @@ export default {
         const team = this.teams.find(t => t.id === teamId);
         if (team) {
           team.invite_code = response.data.invite_code;
-          this.showNotification('New invite code generated');
+          this.showNotification('Jauns ielūguma kods ģenerēts');
         }
       } catch (err) {
-        this.error = 'Failed to generate new invite code';
-        this.showNotification('Failed to generate new invite code', 'error');
+        this.error = 'Neizdevās ģenerēt jaunu ielūguma kodu';
+        this.showNotification('Neizdevās ģenerēt jaunu ielūguma kodu', 'error');
       }
     },
     
     copyInviteCode(code) {
       navigator.clipboard.writeText(code)
         .then(() => {
-          this.showNotification('Invite code copied to clipboard');
+          this.showNotification('Ielūguma kods kopēts starpliktuvē');
         })
         .catch(err => {
-          console.error('Failed to copy invite code', err);
-          this.showNotification('Failed to copy invite code', 'error');
+          console.error('Neizdevās kopēt ielūguma kodu', err);
+          this.showNotification('Neizdevās kopēt ielūguma kodu', 'error');
         });
     },
     
@@ -647,10 +647,10 @@ export default {
       try {
         await axios.post(`/api/teams/${teamId}/members/${userId}/make-admin`);
         await this.fetchTeams();
-        this.showNotification('User promoted to admin successfully');
+        this.showNotification('Lietotājs veiksmīgi paaugstināts līdz administratoram');
       } catch (err) {
-        this.error = 'Failed to make user admin';
-        this.showNotification('Failed to promote user to admin', 'error');
+        this.error = 'Neizdevās padarīt lietotāju par administratoru';
+        this.showNotification('Neizdevās paaugstināt lietotāju līdz administratoram', 'error');
       }
     },
     
@@ -658,10 +658,10 @@ export default {
       try {
         await axios.post(`/api/teams/${teamId}/members/${userId}/remove-admin`);
         await this.fetchTeams();
-        this.showNotification('Admin privileges removed successfully');
+        this.showNotification('Administratora privilēģijas veiksmīgi noņemtas');
       } catch (err) {
-        this.error = 'Failed to remove admin privileges';
-        this.showNotification('Failed to remove admin privileges', 'error');
+        this.error = 'Neizdevās noņemt administratora privilēģijas';
+        this.showNotification('Neizdevās noņemt administratora privilēģijas', 'error');
       }
     },
     
@@ -686,36 +686,36 @@ export default {
         });
         await this.fetchTeams();
         this.closeEditNameModal();
-        this.showNotification('Team name updated successfully');
+        this.showNotification('Komandas nosaukums veiksmīgi atjaunināts');
       } catch (err) {
-        this.error = 'Failed to update team name';
-        this.showNotification('Failed to update team name', 'error');
+        this.error = 'Neizdevās atjaunināt komandas nosaukumu';
+        this.showNotification('Neizdevās atjaunināt komandas nosaukumu', 'error');
       }
     },
     
     async deleteTeam(teamId) {
-      if (!confirm('Are you sure you want to delete this team? This action cannot be undone.')) return;
+      if (!confirm('Vai tiešām vēlaties dzēst šo komandu? Šo darbību nevar atsaukt.')) return;
       
       try {
         await axios.delete(`/api/teams/${teamId}`);
         await this.fetchTeams();
-        this.showNotification('Team deleted successfully');
+        this.showNotification('Komanda veiksmīgi dzēsta');
       } catch (err) {
-        this.error = 'Failed to delete team';
-        this.showNotification('Failed to delete team', 'error');
+        this.error = 'Neizdevās dzēst komandu';
+        this.showNotification('Neizdevās dzēst komandu', 'error');
       }
     },
     
     async exitTeam(teamId) {
-      if (!confirm('Are you sure you want to leave this team?')) return;
+      if (!confirm('Vai tiešām vēlaties pamest šo komandu?')) return;
       
       try {
         await axios.post(`/api/teams/${teamId}/exit`);
         await this.fetchTeams();
-        this.showNotification('Successfully left the team');
+        this.showNotification('Veiksmīgi pameta komandu');
       } catch (err) {
-        this.error = 'Failed to leave team';
-        this.showNotification('Failed to leave team', 'error');
+        this.error = 'Neizdevās pamest komandu';
+        this.showNotification('Neizdevās pamest komandu', 'error');
       }
     },
 
