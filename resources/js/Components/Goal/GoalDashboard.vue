@@ -171,7 +171,9 @@
     <FullscreenGoalModal
       :isVisible="fullscreenModalVisible"
       :selectedGoal="selectedGoal"
-      @closeModal="closeFullscreenModal"        
+      @closeModal="closeFullscreenModal"
+      @updateGoal="handleGoalUpdate"
+      @delete="handleGoalDelete"
     />
   </div>
 </template>
@@ -239,66 +241,38 @@ export default {
           meridiem: false
         },
         eventDidMount: (info) => {
-          // Debug logging
-          console.log('Event mounted:', {
-            title: info.event.title,
-            priority: info.event.extendedProps.priority,
-            rawPriority: info.event.extendedProps
-          });
-          
-          // Add tooltip
-          const tooltip = document.createElement('div');
-          tooltip.className = 'fc-tooltip';
-          tooltip.innerHTML = `
-            <div class="p-2">
-              <div class="font-semibold">${info.event.title}</div>
-              <div class="text-sm">${info.event.extendedProps.description || ''}</div>
-            </div>
-          `;
-          info.el.appendChild(tooltip);
-          
           // Apply priority-based styling
           const priority = info.event.extendedProps.priority || 'medium';
-          console.log('Using priority:', priority); // Debug log
           
           const priorityColors = {
             high: {
-              backgroundColor: '#ef4444', // red-500
-              borderColor: '#dc2626', // red-600
+              backgroundColor: '#ef4444',
+              borderColor: '#dc2626',
               textColor: '#ffffff'
             },
             medium: {
-              backgroundColor: '#f59e0b', // amber-500
-              borderColor: '#d97706', // amber-600
+              backgroundColor: '#f59e0b',
+              borderColor: '#d97706',
               textColor: '#ffffff'
             },
             low: {
-              backgroundColor: '#10b981', // emerald-500
-              borderColor: '#059669', // emerald-600
+              backgroundColor: '#10b981',
+              borderColor: '#059669',
               textColor: '#ffffff'
             }
           };
           
           const colors = priorityColors[priority] || priorityColors.medium;
-          console.log('Selected colors:', colors); // Debug log
           
           // Apply colors to the event element
           info.el.style.backgroundColor = colors.backgroundColor;
           info.el.style.borderColor = colors.borderColor;
           info.el.style.color = colors.textColor;
           
-          // Add priority indicator dot - with safety check
+          // Remove any existing content
           const titleElement = info.el.querySelector('.fc-event-title');
           if (titleElement) {
-            const dot = document.createElement('div');
-            dot.className = 'priority-dot';
-            dot.style.width = '8px';
-            dot.style.height = '8px';
-            dot.style.borderRadius = '50%';
-            dot.style.marginRight = '4px';
-            dot.style.display = 'inline-block';
-            dot.style.backgroundColor = colors.backgroundColor;
-            titleElement.prepend(dot);
+            titleElement.innerHTML = '';
           }
         }
       },
@@ -568,13 +542,18 @@ export default {
       // Create container div
       const container = document.createElement("div");
       container.style.display = "flex";
-      container.style.alignItems = "center"; // Ensures vertical alignment
-      container.style.justifyContent = "space-between"; // Aligns items to the edges
-      container.style.width = "100%"; // Ensures full width
+      container.style.alignItems = "center";
+      container.style.justifyContent = "space-between";
+      container.style.width = "100%";
+      container.style.padding = "2px 4px";
 
       // Create text node for event title
       const title = document.createElement("span");
       title.innerText = arg.event.title;
+      title.style.flex = "1";
+      title.style.overflow = "hidden";
+      title.style.textOverflow = "ellipsis";
+      title.style.whiteSpace = "nowrap";
 
       // Create button element
       const button = document.createElement("button");
@@ -583,6 +562,8 @@ export default {
       button.style.border = "none";
       button.style.cursor = "pointer";
       button.style.color = isDone ? "green" : "red";
+      button.style.marginLeft = "4px";
+      button.style.flexShrink = "0";
       button.onclick = (e) => {
         e.stopPropagation();
         this.toggleGoalStatus(goalId, !isDone);
@@ -833,6 +814,23 @@ export default {
         notification.remove();
       }, 3000);
     },
+
+    // Add refresh method
+    refreshGoals() {
+      this.fetchGoals();
+      if (this.calendarApi) {
+        this.calendarApi.refetchEvents();
+      }
+    },
+
+    // Update the event handlers to use refreshGoals
+    handleGoalUpdate(updatedGoal) {
+      this.refreshGoals();
+    },
+
+    handleGoalDelete(deletedGoalId) {
+      this.refreshGoals();
+    },
   },
   watch: {
     selectedTeam(newTeam) {
@@ -857,47 +855,10 @@ export default {
 </script>
 
 <style scoped>
-.dark .fc-scrollgrid-sync-inner {
-  background-color: red;
-}
-.dark .p-4 {
-  background-color: #1f2937;
-}
-.dark  thead {
  
-background-color: #1f2937;
+ * {
  
-}
- .dark .fc {
-    background-color: #1f2937 !important; /* Tailwind's gray-800 */
-    color: white;
-  }
+  color: black;
+ }
 
-  .dark .fc .fc-daygrid-day-number {
-    color: white;
-  }
-
-  .dark .fc .fc-toolbar-title {
-    color: white;
-  }
-  
-.calendar-container {
-  overflow: hidden;
-  border-radius: 0.5rem;
-  background: white;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  touch-action: pan-y pinch-zoom; /* Improve touch handling */
-}
-
-/* Add Goal Modal Styles */
-.fixed.inset-0 {
-  cursor: pointer;
-}
-
-.fixed.inset-0 > div {
-  cursor: default;
-}
-
- 
- 
 </style>

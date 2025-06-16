@@ -37,18 +37,17 @@ const updatePassword = () => {
     <section class="profile-section">
         <header>
             <h2 class="profile-section-title">
-                Update Password
+                Atjaunināt Paroli
             </h2>
 
             <p class="profile-section-description">
-                Ensure your account is using a long, random password to stay
-                secure.
+              Pārliecinieties, vai jūsu konts izmanto garu, nejauši izvēlētu paroli, lai saglabātu drošību.
             </p>
         </header>
 
         <form @submit.prevent="updatePassword" class="form-section">
             <div>
-                <InputLabel for="current_password" value="Current Password" class="text-gray-700 dark:text-gray-300" />
+                <InputLabel for="current_password" value="Pašreizējā Parole" class="text-gray-700 dark:text-gray-300" />
 
                 <TextInput
                     id="current_password"
@@ -66,7 +65,7 @@ const updatePassword = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="New Password" class="text-gray-700 dark:text-gray-300" />
+                <InputLabel for="password" value="Jaunā Parole" class="text-gray-700 dark:text-gray-300" />
 
                 <TextInput
                     id="password"
@@ -83,7 +82,7 @@ const updatePassword = () => {
             <div class="mt-4">
                 <InputLabel
                     for="password_confirmation"
-                    value="Confirm Password"
+                    value="Apstripiniet Paroli"
                     class="text-gray-700 dark:text-gray-300"
                 />
 
@@ -106,7 +105,7 @@ const updatePassword = () => {
                     :disabled="form.processing"
                     class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600"
                 >
-                    Update Password
+                    Atjaunot paroli
                 </PrimaryButton>
 
                 <Transition

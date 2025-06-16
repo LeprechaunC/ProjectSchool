@@ -22,7 +22,7 @@
             <button 
               v-for="priority in priorities" 
               :key="priority.value"
-              @click="goal.priority = priority.value"
+              @click="handlePriorityChange(priority.value)"
               class="priority-button"
               :class="{ 'priority-selected': goal.priority === priority.value }"
             >
@@ -215,6 +215,7 @@ export default defineComponent({
           console.log('Update response:', response.data);
           
           showNotification('Goal updated successfully!');
+          emit("updateGoal", goal.value);
         } else {
           // Create new goal
           await axios.post("/api/goals", goal.value);
@@ -291,6 +292,12 @@ export default defineComponent({
       }
     };
 
+    // Add method to handle priority changes
+    const handlePriorityChange = (newPriority) => {
+      goal.value.priority = newPriority;
+      emit("updateGoal", goal.value);
+    };
+
     return { 
       goal, 
       isEditing, 
@@ -309,7 +316,8 @@ export default defineComponent({
       getPriorityClass,
       showNotification,
       closeNotification,
-      toggleGoalStatus
+      toggleGoalStatus,
+      handlePriorityChange
     };
   },
 });

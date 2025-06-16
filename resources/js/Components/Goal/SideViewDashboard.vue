@@ -397,6 +397,12 @@ export default {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
   outline: none;
 }
+.dark .p-5 {
+background-color: #111827;
+}
+.dark .sidebar-content {
+  background-color: #111827;
+}
 
 .add-label-button {
   padding: 0.625rem;
@@ -506,6 +512,11 @@ export default {
 }
 
 /* Dark mode styles */
+:deep(.dark) .sidebar-container {
+  background: #1f2937;
+  border-right-color: #374151;
+}
+
 :deep(.dark) .sidebar-content {
   background: #1f2937;
   border-right-color: #374151;
@@ -584,6 +595,18 @@ export default {
 :deep(.dark) .reset-filters-button:hover:not(:disabled) {
   background: #4b5563;
   border-color: #6b7280;
+}
+
+:deep(.dark) .toggle-button {
+  background: #2563eb;
+}
+
+:deep(.dark) .toggle-button:hover {
+  background: #1d4ed8;
+}
+
+:deep(.dark) .toggle-open {
+  background: #1d4ed8;
 }
 
 /* Responsive adjustments */
